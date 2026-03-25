@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -27,14 +28,15 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 flex w-[280px] flex-col bg-slate-900 text-white">
       {/* Logo */}
-      <div className="flex h-16 items-center px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-            C
-          </div>
-          <span className="font-heading text-xl font-bold tracking-tight text-white">
-            CaseFlow
-          </span>
+      <div className="flex h-20 items-center px-6 border-b border-slate-800">
+        <Link href="/" className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="Asterio Strategy Partners"
+            width={160}
+            height={40}
+            className="brightness-0 invert"
+          />
         </Link>
       </div>
 
