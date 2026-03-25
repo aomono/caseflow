@@ -142,9 +142,9 @@ export default function DashboardPage() {
                     }
                   />
                   <Tooltip
-                    formatter={(value: number) => [formatJPY(value), "売上"]}
-                    labelFormatter={(label: string) => {
-                      const parts = label.split("-");
+                    formatter={(value: unknown) => [formatJPY(Number(value)), "売上"]}
+                    labelFormatter={(label: unknown) => {
+                      const parts = String(label).split("-");
                       return `${parts[0]}年${parts[1]}月`;
                     }}
                   />
@@ -171,9 +171,9 @@ export default function DashboardPage() {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label={({ name, percent }: { name: string; percent: number }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
+                    label={((props: { name: string; percent: number }) =>
+                      `${props.name} ${(props.percent * 100).toFixed(0)}%`
+                    ) as unknown as boolean}
                   >
                     {mockClientRevenue.map((_, index) => (
                       <Cell
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [formatJPY(value), "売上"]}
+                    formatter={(value: unknown) => [formatJPY(Number(value)), "売上"]}
                   />
                 </PieChart>
               </ResponsiveContainer>
