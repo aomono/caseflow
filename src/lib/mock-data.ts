@@ -9,9 +9,9 @@ export const mockClients = [
 export const mockDeals = [
   { id: "d1", clientId: "c1", clientName: "株式会社テクノロジーパートナーズ", title: "DX推進コンサルティング", status: "active", monthlyAmount: 800000, contractStartDate: "2025-07-01", contractEndDate: "2026-06-30", renewalReminderDays: 30, description: "全社DX推進の戦略策定・実行支援", contractSummary: "DX推進に関するコンサルティング業務" },
   { id: "d2", clientId: "c1", clientName: "株式会社テクノロジーパートナーズ", title: "PMO支援", status: "active", monthlyAmount: 600000, contractStartDate: "2025-10-01", contractEndDate: "2026-03-31", renewalReminderDays: 30, description: "基幹システム刷新プロジェクトのPMO", contractSummary: "PMO支援業務" },
-  { id: "d3", clientId: "c2", clientName: "グローバルコンサルティング合同会社", title: "事業戦略策定支援", status: "meeting", monthlyAmount: 1000000, contractStartDate: null, contractEndDate: null, renewalReminderDays: 30, description: "新規事業の戦略策定", contractSummary: null },
+  { id: "d3", clientId: "c2", clientName: "グローバルコンサルティング合同会社", title: "事業戦略策定支援", status: "discussion", monthlyAmount: 1000000, contractStartDate: null, contractEndDate: null, renewalReminderDays: 30, description: "新規事業の戦略策定", contractSummary: null },
   { id: "d4", clientId: "c2", clientName: "グローバルコンサルティング合同会社", title: "組織改革コンサルティング", status: "active", monthlyAmount: 500000, contractStartDate: "2026-01-01", contractEndDate: "2026-12-31", renewalReminderDays: 30, description: "組織設計・人材育成の支援", contractSummary: "組織改革に関するコンサルティング業務" },
-  { id: "d5", clientId: "c3", clientName: "ABC商事株式会社", title: "業務効率化コンサルティング", status: "referred", monthlyAmount: null, contractStartDate: null, contractEndDate: null, renewalReminderDays: 30, description: "バックオフィス業務の効率化提案", contractSummary: null },
+  { id: "d5", clientId: "c3", clientName: "ABC商事株式会社", title: "業務効率化コンサルティング", status: "lead", monthlyAmount: null, contractStartDate: null, contractEndDate: null, renewalReminderDays: 30, description: "バックオフィス業務の効率化提案", contractSummary: null },
   { id: "d6", clientId: "c1", clientName: "株式会社テクノロジーパートナーズ", title: "セキュリティ監査支援", status: "lost", monthlyAmount: 400000, contractStartDate: null, contractEndDate: null, renewalReminderDays: 30, description: "情報セキュリティ監査", contractSummary: null },
 ];
 
@@ -56,20 +56,23 @@ export const mockReminders = [
   { id: "r5", dealId: null, dealTitle: null, type: "payment", title: "業務委託料支払い", dueDate: "2026-03-31", status: "pending" },
 ];
 
-// Monthly revenue data for charts (last 12 months)
+// Monthly revenue data for charts (actual / contracted / prospect)
 export const mockMonthlyRevenue = [
-  { month: "2025-04", revenue: 800000 },
-  { month: "2025-05", revenue: 800000 },
-  { month: "2025-06", revenue: 800000 },
-  { month: "2025-07", revenue: 1400000 },
-  { month: "2025-08", revenue: 1400000 },
-  { month: "2025-09", revenue: 1400000 },
-  { month: "2025-10", revenue: 1900000 },
-  { month: "2025-11", revenue: 1900000 },
-  { month: "2025-12", revenue: 1900000 },
-  { month: "2026-01", revenue: 1900000 },
-  { month: "2026-02", revenue: 1900000 },
-  { month: "2026-03", revenue: 1900000 },
+  { month: "2025-04", actual: 800000, contracted: 0, prospect: 0 },
+  { month: "2025-05", actual: 800000, contracted: 0, prospect: 0 },
+  { month: "2025-06", actual: 800000, contracted: 0, prospect: 0 },
+  { month: "2025-07", actual: 1400000, contracted: 0, prospect: 0 },
+  { month: "2025-08", actual: 1400000, contracted: 0, prospect: 0 },
+  { month: "2025-09", actual: 1400000, contracted: 0, prospect: 0 },
+  { month: "2025-10", actual: 1900000, contracted: 0, prospect: 0 },
+  { month: "2025-11", actual: 1900000, contracted: 0, prospect: 0 },
+  { month: "2025-12", actual: 1900000, contracted: 0, prospect: 0 },
+  { month: "2026-01", actual: 1900000, contracted: 0, prospect: 0 },
+  { month: "2026-02", actual: 1900000, contracted: 0, prospect: 0 },
+  { month: "2026-03", actual: 0, contracted: 1900000, prospect: 0 },
+  { month: "2026-04", actual: 0, contracted: 1400000, prospect: 1000000 },
+  { month: "2026-05", actual: 0, contracted: 1400000, prospect: 1000000 },
+  { month: "2026-06", actual: 0, contracted: 1400000, prospect: 1000000 },
 ];
 
 // Client revenue data for pie chart
@@ -80,8 +83,9 @@ export const mockClientRevenue = [
 
 // Pipeline summary
 export const mockPipeline = [
-  { status: "referred", label: "紹介", count: 1, amount: 0 },
-  { status: "meeting", label: "打ち合わせ", count: 1, amount: 1000000 },
+  { status: "lead", label: "リード", count: 1, amount: 0 },
+  { status: "discussion", label: "協議中", count: 1, amount: 1000000 },
+  { status: "expected", label: "受注見込み", count: 0, amount: 0 },
   { status: "active", label: "稼働中", count: 3, amount: 1900000 },
   { status: "lost", label: "失注", count: 1, amount: 400000 },
 ];

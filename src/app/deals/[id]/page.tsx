@@ -33,23 +33,21 @@ import {
 } from "@/components/ui/tabs";
 
 const statusLabels: Record<string, string> = {
-  referred: "紹介",
-  meeting: "打ち合わせ",
-  won: "受注",
+  lead: "リード",
+  discussion: "協議中",
+  expected: "受注見込み",
   active: "稼働中",
-  renewal: "更新待ち",
-  renewed: "更新済",
+  renewal: "更新交渉",
   closed: "終了",
   lost: "失注",
 };
 
 const statusColors: Record<string, string> = {
-  referred: "bg-gray-100 text-gray-700",
-  meeting: "bg-blue-100 text-blue-700",
-  won: "bg-green-100 text-green-700",
+  lead: "bg-gray-100 text-gray-700",
+  discussion: "bg-blue-100 text-blue-700",
+  expected: "bg-amber-100 text-amber-700",
   active: "bg-emerald-100 text-emerald-700",
   renewal: "bg-yellow-100 text-yellow-700",
-  renewed: "bg-green-100 text-green-700",
   closed: "bg-gray-100 text-gray-700",
   lost: "bg-red-100 text-red-700",
 };

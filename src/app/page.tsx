@@ -8,6 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -45,9 +46,12 @@ const PERIOD_OPTIONS = [
 const PIE_COLORS = ["#2563eb", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
 
 const PIPELINE_BORDER_COLORS: Record<string, string> = {
-  referred: "border-l-gray-400",
-  meeting: "border-l-blue-500",
+  lead: "border-l-gray-400",
+  discussion: "border-l-blue-500",
+  expected: "border-l-amber-500",
   active: "border-l-green-500",
+  renewal: "border-l-yellow-500",
+  closed: "border-l-gray-400",
   lost: "border-l-red-500",
 };
 
@@ -142,13 +146,32 @@ export default function DashboardPage() {
                     }
                   />
                   <Tooltip
-                    formatter={(value: unknown) => [formatJPY(Number(value)), "売上"]}
+                    formatter={(value: unknown, name: unknown) => {
+                      const labels: Record<string, string> = {
+                        actual: "実績",
+                        contracted: "契約済み",
+                        prospect: "見込み",
+                      };
+                      return [formatJPY(Number(value)), labels[String(name)] ?? String(name)];
+                    }}
                     labelFormatter={(label: unknown) => {
                       const parts = String(label).split("-");
                       return `${parts[0]}年${parts[1]}月`;
                     }}
                   />
-                  <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Legend
+                    formatter={(value: string) => {
+                      const labels: Record<string, string> = {
+                        actual: "実績",
+                        contracted: "契約済み",
+                        prospect: "見込み",
+                      };
+                      return labels[value] ?? value;
+                    }}
+                  />
+                  <Bar dataKey="actual" stackId="revenue" fill="#2563eb" />
+                  <Bar dataKey="contracted" stackId="revenue" fill="#93c5fd" />
+                  <Bar dataKey="prospect" stackId="revenue" fill="#d1d5db" fillOpacity={0.7} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

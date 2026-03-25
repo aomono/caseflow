@@ -15,36 +15,34 @@ import {
 } from "@/components/ui/table";
 
 const statusLabels: Record<string, string> = {
-  referred: "紹介",
-  meeting: "打ち合わせ",
-  won: "受注",
+  lead: "リード",
+  discussion: "協議中",
+  expected: "受注見込み",
   active: "稼働中",
-  renewal: "更新待ち",
-  renewed: "更新済",
+  renewal: "更新交渉",
   closed: "終了",
   lost: "失注",
 };
 
 const statusColors: Record<string, string> = {
-  referred: "bg-gray-100 text-gray-700",
-  meeting: "bg-blue-100 text-blue-700",
-  won: "bg-green-100 text-green-700",
+  lead: "bg-gray-100 text-gray-700",
+  discussion: "bg-blue-100 text-blue-700",
+  expected: "bg-amber-100 text-amber-700",
   active: "bg-emerald-100 text-emerald-700",
   renewal: "bg-yellow-100 text-yellow-700",
-  renewed: "bg-green-100 text-green-700",
   closed: "bg-gray-100 text-gray-700",
   lost: "bg-red-100 text-red-700",
 };
 
 const filterOptions = [
   { value: "all", label: "全て" },
-  { value: "referred", label: "紹介" },
-  { value: "meeting", label: "打ち合わせ" },
+  { value: "lead", label: "リード" },
+  { value: "discussion", label: "協議中" },
+  { value: "expected", label: "受注見込み" },
   { value: "active", label: "稼働中" },
-  { value: "renewal", label: "更新待ち" },
-  { value: "won", label: "受注" },
-  { value: "lost", label: "失注" },
+  { value: "renewal", label: "更新交渉" },
   { value: "closed", label: "終了" },
+  { value: "lost", label: "失注" },
 ];
 
 export default function DealsPage() {
