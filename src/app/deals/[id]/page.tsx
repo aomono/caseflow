@@ -1,16 +1,6 @@
-"use client";
-
-export const dynamic = "force-dynamic";
-
-import { use } from "react";
 import Link from "next/link";
-import {
-  mockDeals,
-  mockContacts,
-  mockActivities,
-  mockInvoices,
-  mockReminders,
-} from "@/lib/mock-data";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,6 +23,10 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
+import ContactForm from "@/components/deals/contact-form";
+import ActivityForm from "@/components/deals/activity-form";
+
+export const dynamic = "force-dynamic";
 
 const statusLabels: Record<string, string> = {
   lead: "リード",
@@ -97,13 +91,13 @@ const invoiceStatusColors: Record<string, string> = {
 const reminderStatusLabels: Record<string, string> = {
   pending: "未対応",
   reminded: "通知済",
-  done: "完了",
+  completed: "完了",
 };
 
 const reminderStatusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   reminded: "bg-blue-100 text-blue-700",
-  done: "bg-green-100 text-green-700",
+  completed: "bg-green-100 text-green-700",
 };
 
 const reminderTypeLabels: Record<string, string> = {
@@ -111,26 +105,49 @@ const reminderTypeLabels: Record<string, string> = {
   report: "報告書",
   invoice: "請求",
   payment: "支払い",
+  custom: "カスタム",
 };
 
-export default function DealDetailPage({
+const reportStatusLabels: Record<string, string> = {
+  draft: "下書き",
+  finalized: "確定",
+};
+
+const reportStatusColors: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-700",
+  finalized: "bg-green-100 text-green-700",
+};
+
+export default async function DealDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const deal = mockDeals.find((d) => d.id === id);
+  const { id } = await params;
+
+  const deal = await prisma.deal.findUnique({
+    where: { id },
+    include: {
+      client: true,
+      contacts: true,
+      activities: {
+        orderBy: { date: "desc" },
+      },
+      invoices: {
+        orderBy: [{ year: "desc" }, { month: "desc" }],
+      },
+      reports: {
+        orderBy: [{ year: "desc" }, { month: "desc" }],
+      },
+      reminders: {
+        orderBy: { dueDate: "asc" },
+      },
+    },
+  });
 
   if (!deal) {
-    return <div className="text-muted-foreground">案件が見つかりません。</div>;
+    notFound();
   }
-
-  const contacts = mockContacts.filter((c) => c.dealId === id);
-  const activities = mockActivities
-    .filter((a) => a.dealId === id)
-    .sort((a, b) => b.date.localeCompare(a.date));
-  const invoices = mockInvoices.filter((inv) => inv.dealId === id);
-  const reminders = mockReminders.filter((r) => r.dealId === id);
 
   return (
     <div className="space-y-6">
@@ -143,7 +160,7 @@ export default function DealDetailPage({
               href={`/clients/${deal.clientId}`}
               className="text-primary hover:underline"
             >
-              {deal.clientName}
+              {deal.client.name}
             </Link>
             <Badge className={statusColors[deal.status]}>
               {statusLabels[deal.status] || deal.status}
@@ -155,6 +172,9 @@ export default function DealDetailPage({
             )}
           </div>
         </div>
+        <Link href={`/deals/${id}/edit`}>
+          <Button variant="outline">編集</Button>
+        </Link>
       </div>
 
       {/* Tabs */}
@@ -183,13 +203,17 @@ export default function DealDetailPage({
                 <div>
                   <dt className="text-muted-foreground">契約開始日</dt>
                   <dd className="font-medium">
-                    {deal.contractStartDate || "-"}
+                    {deal.contractStartDate
+                      ? deal.contractStartDate.toLocaleDateString("ja-JP")
+                      : "-"}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">契約終了日</dt>
                   <dd className="font-medium">
-                    {deal.contractEndDate || "-"}
+                    {deal.contractEndDate
+                      ? deal.contractEndDate.toLocaleDateString("ja-JP")
+                      : "-"}
                   </dd>
                 </div>
                 <div>
@@ -198,6 +222,12 @@ export default function DealDetailPage({
                     {deal.renewalReminderDays}日前
                   </dd>
                 </div>
+                {deal.contractSummary && (
+                  <div className="col-span-2">
+                    <dt className="text-muted-foreground">契約概要</dt>
+                    <dd className="font-medium">{deal.contractSummary}</dd>
+                  </div>
+                )}
               </dl>
             </CardContent>
           </Card>
@@ -207,7 +237,7 @@ export default function DealDetailPage({
         <TabsContent value="contacts">
           <div className="space-y-4">
             <div className="flex justify-end">
-              <Button>追加</Button>
+              <ContactForm dealId={id} />
             </div>
             <Table>
               <TableHeader>
@@ -220,7 +250,7 @@ export default function DealDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {contacts.map((contact) => (
+                {deal.contacts.map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell className="font-medium">
                       {contact.name}
@@ -230,12 +260,12 @@ export default function DealDetailPage({
                         {roleLabels[contact.role] || contact.role}
                       </Badge>
                     </TableCell>
-                    <TableCell>{contact.title}</TableCell>
-                    <TableCell>{contact.email}</TableCell>
-                    <TableCell>{contact.phone || "-"}</TableCell>
+                    <TableCell>{contact.title ?? "-"}</TableCell>
+                    <TableCell>{contact.email ?? "-"}</TableCell>
+                    <TableCell>{contact.phone ?? "-"}</TableCell>
                   </TableRow>
                 ))}
-                {contacts.length === 0 && (
+                {deal.contacts.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={5}
@@ -254,17 +284,17 @@ export default function DealDetailPage({
         <TabsContent value="activities">
           <div className="space-y-4">
             <div className="flex justify-end">
-              <Button>追加</Button>
+              <ActivityForm dealId={id} />
             </div>
             <div className="space-y-4">
-              {activities.map((activity) => (
+              {deal.activities.map((activity) => (
                 <div
                   key={activity.id}
                   className="flex gap-4 rounded-lg border p-4"
                 >
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-sm text-muted-foreground">
-                      {activity.date}
+                      {activity.date.toLocaleDateString("ja-JP")}
                     </span>
                     <Badge className={activityTypeColors[activity.type]}>
                       {activityTypeLabels[activity.type] || activity.type}
@@ -273,7 +303,7 @@ export default function DealDetailPage({
                   <p className="flex-1">{activity.summary}</p>
                 </div>
               ))}
-              {activities.length === 0 && (
+              {deal.activities.length === 0 && (
                 <p className="text-center text-muted-foreground">
                   やりとりがありません
                 </p>
@@ -285,9 +315,6 @@ export default function DealDetailPage({
         {/* 請求・入金 */}
         <TabsContent value="invoices">
           <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button>新規請求</Button>
-            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -299,7 +326,7 @@ export default function DealDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoices.map((invoice) => (
+                {deal.invoices.map((invoice) => (
                   <TableRow key={invoice.id}>
                     <TableCell>
                       {invoice.year}年{invoice.month}月
@@ -307,16 +334,22 @@ export default function DealDetailPage({
                     <TableCell>
                       {`\u00a5${invoice.amount.toLocaleString()}`}
                     </TableCell>
-                    <TableCell>{invoice.dueDate}</TableCell>
+                    <TableCell>
+                      {invoice.dueDate.toLocaleDateString("ja-JP")}
+                    </TableCell>
                     <TableCell>
                       <Badge className={invoiceStatusColors[invoice.status]}>
                         {invoiceStatusLabels[invoice.status] || invoice.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{invoice.paidAt || "-"}</TableCell>
+                    <TableCell>
+                      {invoice.paidAt
+                        ? invoice.paidAt.toLocaleDateString("ja-JP")
+                        : "-"}
+                    </TableCell>
                   </TableRow>
                 ))}
-                {invoices.length === 0 && (
+                {deal.invoices.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={5}
@@ -334,21 +367,46 @@ export default function DealDetailPage({
         {/* 報告書 */}
         <TabsContent value="reports">
           <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button>新規作成</Button>
-            </div>
-            <p className="text-center text-muted-foreground py-8">
-              報告書はまだありません
-            </p>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>期間</TableHead>
+                  <TableHead>金額</TableHead>
+                  <TableHead>ステータス</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {deal.reports.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell>{report.period}</TableCell>
+                    <TableCell>
+                      {`\u00a5${report.amount.toLocaleString()}`}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={reportStatusColors[report.status]}>
+                        {reportStatusLabels[report.status] || report.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {deal.reports.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-muted-foreground"
+                    >
+                      報告書はまだありません
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </TabsContent>
 
         {/* リマインド */}
         <TabsContent value="reminders">
           <div className="space-y-4">
-            <div className="flex justify-end">
-              <Button>追加</Button>
-            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -359,7 +417,7 @@ export default function DealDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reminders.map((reminder) => (
+                {deal.reminders.map((reminder) => (
                   <TableRow key={reminder.id}>
                     <TableCell className="font-medium">
                       {reminder.title}
@@ -367,7 +425,9 @@ export default function DealDetailPage({
                     <TableCell>
                       {reminderTypeLabels[reminder.type] || reminder.type}
                     </TableCell>
-                    <TableCell>{reminder.dueDate}</TableCell>
+                    <TableCell>
+                      {reminder.dueDate.toLocaleDateString("ja-JP")}
+                    </TableCell>
                     <TableCell>
                       <Badge className={reminderStatusColors[reminder.status]}>
                         {reminderStatusLabels[reminder.status] ||
@@ -376,7 +436,7 @@ export default function DealDetailPage({
                     </TableCell>
                   </TableRow>
                 ))}
-                {reminders.length === 0 && (
+                {deal.reminders.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={4}
