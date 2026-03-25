@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { mockInvoices } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
