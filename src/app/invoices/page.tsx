@@ -1,9 +1,6 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useState } from "react";
-import { mockInvoices } from "@/lib/mock-data";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,6 +15,23 @@ import {
 
 type Filter = "all" | "unpaid" | "paid";
 
+interface Invoice {
+  id: string;
+  dealId: string;
+  year: number;
+  month: number;
+  amount: number;
+  dueDate: string;
+  status: string;
+  paidAt: string | null;
+  deal: {
+    title: string;
+    client: {
+      name: string;
+    };
+  };
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "下書き", className: "bg-gray-100 text-gray-700" },
   sent: { label: "送付済", className: "bg-blue-100 text-blue-700" },
@@ -29,28 +43,123 @@ function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString()}`;
 }
 
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("ja-JP");
+}
+
 export default function InvoicesPage() {
   const [filter, setFilter] = useState<Filter>("all");
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
 
-  const filteredInvoices = mockInvoices.filter((inv) => {
-    if (filter === "all") return true;
-    if (filter === "unpaid") return inv.status === "sent" || inv.status === "overdue";
-    if (filter === "paid") return inv.status === "paid";
-    return true;
-  });
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filter === "unpaid") {
+        // Fetch sent and overdue separately, then combine
+      } else if (filter === "paid") {
+        params.set("status", "paid");
+      }
 
-  // Summary for 2026-03
-  const marchInvoices = mockInvoices.filter(
-    (inv) => inv.year === 2026 && inv.month === 3
-  );
-  const totalAmount = marchInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidAmount = marchInvoices
+      if (filter === "unpaid") {
+        const [sentRes, overdueRes] = await Promise.all([
+          fetch(`/api/invoices?status=sent`),
+          fetch(`/api/invoices?status=overdue`),
+        ]);
+        const sent: Invoice[] = await sentRes.json();
+        const overdue: Invoice[] = await overdueRes.json();
+        setInvoices([...sent, ...overdue].sort((a, b) => {
+          if (a.year !== b.year) return b.year - a.year;
+          return b.month - a.month;
+        }));
+      } else {
+        const url = filter === "paid"
+          ? `/api/invoices?status=paid`
+          : `/api/invoices`;
+        const res = await fetch(url);
+        const data: Invoice[] = await res.json();
+        setInvoices(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch invoices:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
+
+  const handleMarkPaid = async (id: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "paid", paidAt: new Date().toISOString() }),
+      });
+      if (res.ok) {
+        await fetchInvoices();
+      }
+    } catch (err) {
+      console.error("Failed to mark invoice as paid:", err);
+    }
+  };
+
+  const handleGenerateMonthly = async () => {
+    setGenerating(true);
+    try {
+      const now = new Date();
+      const res = await fetch("/api/invoices/generate-monthly", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year: now.getFullYear(), month: now.getMonth() + 1 }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`${data.createdCount}件の請求書を生成しました`);
+        await fetchInvoices();
+      }
+    } catch (err) {
+      console.error("Failed to generate monthly invoices:", err);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // Summary for current month
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  // We need all invoices (not filtered) for the summary, so fetch all and filter client-side
+  const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const res = await fetch(`/api/invoices?year=${currentYear}&month=${currentMonth}`);
+        const data: Invoice[] = await res.json();
+        setAllInvoices(data);
+      } catch (err) {
+        console.error("Failed to fetch summary invoices:", err);
+      }
+    };
+    fetchAll();
+  }, [currentYear, currentMonth]);
+
+  const totalAmount = allInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  const paidAmount = allInvoices
     .filter((inv) => inv.status === "paid")
     .reduce((sum, inv) => sum + inv.amount, 0);
-  const unpaidAmount = marchInvoices
+  const unpaidAmount = allInvoices
     .filter((inv) => inv.status === "sent")
     .reduce((sum, inv) => sum + inv.amount, 0);
-  const overdueAmount = marchInvoices
+  const overdueAmount = allInvoices
     .filter((inv) => inv.status === "overdue")
     .reduce((sum, inv) => sum + inv.amount, 0);
 
@@ -58,7 +167,9 @@ export default function InvoicesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">請求書一覧</h1>
-        <Button>月次一括生成</Button>
+        <Button onClick={handleGenerateMonthly} disabled={generating}>
+          {generating ? "生成中..." : "月次一括生成"}
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -134,43 +245,62 @@ export default function InvoicesPage() {
       </div>
 
       {/* Invoices Table */}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>クライアント</TableHead>
-            <TableHead>案件</TableHead>
-            <TableHead>年月</TableHead>
-            <TableHead>金額</TableHead>
-            <TableHead>支払期限</TableHead>
-            <TableHead>ステータス</TableHead>
-            <TableHead>入金日</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredInvoices.map((invoice) => {
-            const config = statusConfig[invoice.status];
-            return (
-              <TableRow key={invoice.id}>
-                <TableCell className="font-medium">
-                  {invoice.clientName}
-                </TableCell>
-                <TableCell>{invoice.dealTitle}</TableCell>
-                <TableCell>
-                  {invoice.year}年{invoice.month}月
-                </TableCell>
-                <TableCell>{formatAmount(invoice.amount)}</TableCell>
-                <TableCell>{invoice.dueDate}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className={config.className}>
-                    {config.label}
-                  </Badge>
-                </TableCell>
-                <TableCell>{invoice.paidAt || "-"}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      {loading ? (
+        <p className="text-muted-foreground">読み込み中...</p>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>クライアント</TableHead>
+              <TableHead>案件</TableHead>
+              <TableHead>年月</TableHead>
+              <TableHead>金額</TableHead>
+              <TableHead>支払期限</TableHead>
+              <TableHead>ステータス</TableHead>
+              <TableHead>入金日</TableHead>
+              <TableHead>操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invoices.map((invoice) => {
+              const config = statusConfig[invoice.status] ?? {
+                label: invoice.status,
+                className: "bg-gray-100 text-gray-700",
+              };
+              return (
+                <TableRow key={invoice.id}>
+                  <TableCell className="font-medium">
+                    {invoice.deal.client.name}
+                  </TableCell>
+                  <TableCell>{invoice.deal.title}</TableCell>
+                  <TableCell>
+                    {invoice.year}年{invoice.month}月
+                  </TableCell>
+                  <TableCell>{formatAmount(invoice.amount)}</TableCell>
+                  <TableCell>{formatDate(invoice.dueDate)}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className={config.className}>
+                      {config.label}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(invoice.paidAt)}</TableCell>
+                  <TableCell>
+                    {(invoice.status === "sent" || invoice.status === "overdue") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMarkPaid(invoice.id)}
+                      >
+                        入金登録
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 }

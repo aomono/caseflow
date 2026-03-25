@@ -1,98 +1,25 @@
-"use client";
+import { prisma } from "@/lib/prisma";
+import { SettingsClient } from "./settings-client";
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+export default async function SettingsPage() {
+  const settings = await prisma.appSettings.findFirst();
 
-const allowedEmails = [
-  "sakurai@asterio.co.jp",
-  "yamamoto@asterio.co.jp",
-  "tanaka@asterio.co.jp",
-  "suzuki@asterio.co.jp",
-  "watanabe@asterio.co.jp",
-];
-
-export default function SettingsPage() {
-  const [companyName, setCompanyName] = useState("株式会社Asterio");
+  const slackConfigured = !!process.env.SLACK_BOT_TOKEN;
+  const emailConfigured = !!process.env.RESEND_API_KEY;
+  const allowedEmails = process.env.ALLOWED_EMAILS
+    ? process.env.ALLOWED_EMAILS.split(",").map((e) => e.trim())
+    : [];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">設定</h1>
-
-      <div className="grid grid-cols-2 gap-6">
-        {/* Slack Integration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Slack連携</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">ステータス:</span>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                未設定
-              </Badge>
-            </div>
-            <Button variant="outline">Slackテスト送信</Button>
-          </CardContent>
-        </Card>
-
-        {/* Email Notification */}
-        <Card>
-          <CardHeader>
-            <CardTitle>メール通知</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">ステータス:</span>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                未設定
-              </Badge>
-            </div>
-            <Button variant="outline">メールテスト送信</Button>
-          </CardContent>
-        </Card>
-
-        {/* Company Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>会社情報</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">会社名</label>
-              <Input
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Allowed Users */}
-        <Card>
-          <CardHeader>
-            <CardTitle>許可ユーザー</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {allowedEmails.map((email) => (
-                <li
-                  key={email}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-                  {email}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <SettingsClient
+      initialCompanyName={settings?.companyName ?? ""}
+      initialSlackChannel={settings?.defaultSlackChannel ?? ""}
+      initialEmailTo={settings?.defaultEmailTo ?? ""}
+      slackConfigured={slackConfigured}
+      emailConfigured={emailConfigured}
+      allowedEmails={allowedEmails}
+    />
   );
 }
