@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum DealStatus {
+  lead
+  discussion
+  expected
+  active
+  renewal
+  closed
+  lost
+}
+
+enum ContactRole {
+  admin
+  buyer
+  other
+}
+
+enum ActivityType {
+  meeting
+  email
+  phone
+  note
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+}
+
+enum ReportStatus {
+  draft
+  finalized
+}
+
+enum ReminderType {
+  payment
+  invoice
+  report
+  renewal
+  custom
+}
+
+enum ReminderStatus {
+  pending
+  reminded
+  completed
+}
+
+enum NotificationChannel {
+  slack
+  email
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model Client {
+  id         String   @id @default(cuid())
+  name       String
+  industry   String?
+  referredBy String?
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  deals Deal[]
+}
+
+model Deal {
+  id                  String     @id @default(cuid())
+  clientId            String
+  client              Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title               String
+  status              DealStatus @default(lead)
+  monthlyAmount       Int?
+  contractStartDate   DateTime?
+  contractEndDate     DateTime?
+  renewalReminderDays Int        @default(30)
+  description         String?    @db.Text
+  contractSummary     String?    @db.Text
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  contacts  DealContact[]
+  activities Activity[]
+  invoices  Invoice[]
+  reports   Report[]
+  reminders Reminder[]
+}
+
+model DealContact {
+  id        String      @id @default(cuid())
+  dealId    String
+  deal      Deal        @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  name      String
+  role      ContactRole @default(other)
+  title     String?
+  email     String?
+  phone     String?
+  notes     String?     @db.Text
+  createdAt DateTime    @default(now())
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  dealId    String
+  deal      Deal         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  type      ActivityType
+  date      DateTime
+  summary   String       @db.Text
+  createdAt DateTime     @default(now())
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  dealId      String
+  deal        Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  year        Int
+  month       Int
+  amount      Int
+  invoiceDate DateTime?
+  dueDate     DateTime
+  status      InvoiceStatus @default(draft)
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([dealId, year, month])
+}
+
+model Report {
+  id              String       @id @default(cuid())
+  dealId          String
+  deal            Deal         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  year            Int
+  month           Int
+  period          String
+  workDescription String       @db.Text
+  amount          Int
+  pdfUrl          String?
+  status          ReportStatus @default(draft)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([dealId, year, month])
+}
+
+model Reminder {
+  id                 String         @id @default(cuid())
+  dealId             String?
+  deal               Deal?          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title              String
+  type               ReminderType
+  dueDate            DateTime
+  reminderDaysBefore Int            @default(3)
+  slackChannel       String?
+  emailTo            String?
+  status             ReminderStatus @default(pending)
+  createdAt          DateTime       @default(now())
+
+  notifications NotificationLog[]
+
+  @@unique([dealId, type, dueDate])
+}
+
+model NotificationLog {
+  id         String              @id @default(cuid())
+  reminderId String
+  reminder   Reminder            @relation(fields: [reminderId], references: [id])
+  channel    NotificationChannel
+  message    String              @db.Text
+  sentAt     DateTime            @default(now())
+}
+
+model AppSettings {
+  id                  String   @id @default(cuid())
+  companyName         String
+  defaultSlackChannel String?
+  defaultEmailTo      String?
+  updatedAt           DateTime @updatedAt
+}
