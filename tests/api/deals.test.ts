@@ -16,7 +16,7 @@ const mockDeal = {
   client: { id: "client-1", name: "Test Client" },
 };
 
-const mockPrisma = {
+const mockPrisma = vi.hoisted(() => ({
   deal: {
     findMany: vi.fn(),
     findUnique: vi.fn(),
@@ -34,10 +34,10 @@ const mockPrisma = {
     findMany: vi.fn(),
     create: vi.fn(),
   },
-};
+}));
 
 vi.mock("@/lib/prisma", () => ({
-  default: mockPrisma,
+  prisma: mockPrisma,
 }));
 
 describe("Deals API", () => {
