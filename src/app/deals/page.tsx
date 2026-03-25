@@ -2,9 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { mockDeals } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,19 +46,59 @@ const filterOptions = [
   { value: "lost", label: "失注" },
 ];
 
+type Deal = {
+  id: string;
+  title: string;
+  status: string;
+  monthlyAmount: number | null;
+  contractStartDate: string | null;
+  contractEndDate: string | null;
+  client: {
+    id: string;
+    name: string;
+  };
+};
+
 export default function DealsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredDeals =
-    statusFilter === "all"
-      ? mockDeals
-      : mockDeals.filter((d) => d.status === statusFilter);
+  const fetchDeals = useCallback(async () => {
+    setLoading(true);
+    try {
+      const url =
+        statusFilter === "all"
+          ? "/api/deals"
+          : `/api/deals?status=${statusFilter}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setDeals(data);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchDeals();
+  }, [fetchDeals]);
+
+  function formatDate(dateStr: string | null) {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString("ja-JP");
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">案件一覧</h1>
-        <Button>新規作成</Button>
+        <Link href="/deals/new">
+          <Button>新規作成</Button>
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -86,38 +125,52 @@ export default function DealsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredDeals.map((deal) => (
-            <TableRow key={deal.id}>
-              <TableCell>
-                <Link
-                  href={`/deals/${deal.id}`}
-                  className="font-medium text-primary hover:underline"
-                >
-                  {deal.title}
-                </Link>
-              </TableCell>
-              <TableCell>{deal.clientName}</TableCell>
-              <TableCell>
-                <Badge className={statusColors[deal.status]}>
-                  {statusLabels[deal.status] || deal.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {deal.monthlyAmount
-                  ? `\u00a5${deal.monthlyAmount.toLocaleString()}`
-                  : "-"}
-              </TableCell>
-              <TableCell>
-                {deal.contractStartDate && deal.contractEndDate
-                  ? `${deal.contractStartDate} ~ ${deal.contractEndDate}`
-                  : "-"}
+          {!loading &&
+            deals.map((deal) => (
+              <TableRow key={deal.id}>
+                <TableCell>
+                  <Link
+                    href={`/deals/${deal.id}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {deal.title}
+                  </Link>
+                </TableCell>
+                <TableCell>{deal.client.name}</TableCell>
+                <TableCell>
+                  <Badge className={statusColors[deal.status]}>
+                    {statusLabels[deal.status] || deal.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {deal.monthlyAmount
+                    ? `\u00a5${deal.monthlyAmount.toLocaleString()}`
+                    : "-"}
+                </TableCell>
+                <TableCell>
+                  {deal.contractStartDate && deal.contractEndDate
+                    ? `${formatDate(deal.contractStartDate)} ~ ${formatDate(deal.contractEndDate)}`
+                    : "-"}
+                </TableCell>
+              </TableRow>
+            ))}
+          {!loading && deals.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="text-center text-muted-foreground"
+              >
+                該当する案件がありません
               </TableCell>
             </TableRow>
-          ))}
-          {filteredDeals.length === 0 && (
+          )}
+          {loading && (
             <TableRow>
-              <TableCell colSpan={5} className="text-center text-muted-foreground">
-                該当する案件がありません
+              <TableCell
+                colSpan={5}
+                className="text-center text-muted-foreground"
+              >
+                読み込み中...
               </TableCell>
             </TableRow>
           )}

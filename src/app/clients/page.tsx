@@ -1,9 +1,5 @@
-"use client";
-
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
-import { mockClients, mockDeals } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,20 +10,21 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-export default function ClientsPage() {
-  const dealCountByClient = mockDeals.reduce<Record<string, number>>(
-    (acc, deal) => {
-      acc[deal.clientId] = (acc[deal.clientId] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
+export const dynamic = "force-dynamic";
+
+export default async function ClientsPage() {
+  const clients = await prisma.client.findMany({
+    include: { _count: { select: { deals: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">クライアント一覧</h1>
-        <Button>新規作成</Button>
+        <Link href="/clients/new">
+          <Button>新規作成</Button>
+        </Link>
       </div>
 
       <Table>
@@ -41,7 +38,7 @@ export default function ClientsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {mockClients.map((client) => (
+          {clients.map((client) => (
             <TableRow key={client.id}>
               <TableCell>
                 <Link
@@ -51,12 +48,24 @@ export default function ClientsPage() {
                   {client.name}
                 </Link>
               </TableCell>
-              <TableCell>{client.industry}</TableCell>
-              <TableCell>{client.referredBy}</TableCell>
-              <TableCell>{dealCountByClient[client.id] || 0}</TableCell>
-              <TableCell>{client.createdAt}</TableCell>
+              <TableCell>{client.industry ?? "-"}</TableCell>
+              <TableCell>{client.referredBy ?? "-"}</TableCell>
+              <TableCell>{client._count.deals}</TableCell>
+              <TableCell>
+                {client.createdAt.toLocaleDateString("ja-JP")}
+              </TableCell>
             </TableRow>
           ))}
+          {clients.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={5}
+                className="text-center text-muted-foreground"
+              >
+                クライアントがありません
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>

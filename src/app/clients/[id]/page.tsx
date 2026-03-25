@@ -1,10 +1,6 @@
-"use client";
-
-export const dynamic = "force-dynamic";
-
-import { use } from "react";
 import Link from "next/link";
-import { mockClients, mockDeals } from "@/lib/mock-data";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,6 +18,8 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+
+export const dynamic = "force-dynamic";
 
 const statusLabels: Record<string, string> = {
   lead: "リード",
@@ -43,17 +41,20 @@ const statusColors: Record<string, string> = {
   lost: "bg-red-100 text-red-700",
 };
 
-export default function ClientDetailPage({
+export default async function ClientDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const client = mockClients.find((c) => c.id === id);
-  const clientDeals = mockDeals.filter((d) => d.clientId === id);
+  const { id } = await params;
+
+  const client = await prisma.client.findUnique({
+    where: { id },
+    include: { deals: true },
+  });
 
   if (!client) {
-    return <div className="text-muted-foreground">クライアントが見つかりません。</div>;
+    notFound();
   }
 
   return (
@@ -62,18 +63,20 @@ export default function ClientDetailPage({
         <CardHeader>
           <CardTitle className="text-xl">{client.name}</CardTitle>
           <CardAction>
-            <Button variant="outline">編集</Button>
+            <Link href={`/clients/${id}/edit`}>
+              <Button variant="outline">編集</Button>
+            </Link>
           </CardAction>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-2 gap-4">
             <div>
               <dt className="text-muted-foreground">業種</dt>
-              <dd className="font-medium">{client.industry}</dd>
+              <dd className="font-medium">{client.industry ?? "-"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">紹介元</dt>
-              <dd className="font-medium">{client.referredBy}</dd>
+              <dd className="font-medium">{client.referredBy ?? "-"}</dd>
             </div>
             <div className="col-span-2">
               <dt className="text-muted-foreground">メモ</dt>
@@ -94,7 +97,7 @@ export default function ClientDetailPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientDeals.map((deal) => (
+            {client.deals.map((deal) => (
               <TableRow key={deal.id}>
                 <TableCell>
                   <Link
@@ -116,9 +119,12 @@ export default function ClientDetailPage({
                 </TableCell>
               </TableRow>
             ))}
-            {clientDeals.length === 0 && (
+            {client.deals.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={3}
+                  className="text-center text-muted-foreground"
+                >
                   案件がありません
                 </TableCell>
               </TableRow>
