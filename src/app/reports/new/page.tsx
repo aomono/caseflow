@@ -37,7 +37,8 @@ export default function ReportNewPage() {
     day: "numeric",
   });
 
-  const handleDealChange = (value: string) => {
+  const handleDealChange = (value: string | null) => {
+    if (value === null) return;
     setSelectedDealId(value);
     const deal = activeDeals.find((d) => d.id === value);
     if (deal?.monthlyAmount) {
