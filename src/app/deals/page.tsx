@@ -26,13 +26,13 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  lead: "bg-gray-100 text-gray-700",
-  discussion: "bg-blue-100 text-blue-700",
-  expected: "bg-amber-100 text-amber-700",
-  active: "bg-emerald-100 text-emerald-700",
-  renewal: "bg-yellow-100 text-yellow-700",
-  closed: "bg-gray-100 text-gray-700",
-  lost: "bg-red-100 text-red-700",
+  lead: "bg-slate-50 text-slate-700 border border-slate-200",
+  discussion: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  expected: "bg-amber-50 text-amber-700 border border-amber-200",
+  active: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  renewal: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+  closed: "bg-slate-50 text-slate-700 border border-slate-200",
+  lost: "bg-rose-50 text-rose-700 border border-rose-200",
 };
 
 const filterOptions = [
@@ -93,89 +93,102 @@ export default function DealsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">案件一覧</h1>
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">案件一覧</h1>
+          <p className="mt-1 text-sm text-slate-500">すべての案件を管理</p>
+        </div>
         <Link href="/deals/new">
-          <Button>新規作成</Button>
+          <Button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700">新規作成</Button>
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Pill toggle group */}
+      <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
         {filterOptions.map((opt) => (
-          <Button
+          <button
             key={opt.value}
-            variant={statusFilter === opt.value ? "default" : "outline"}
-            size="sm"
             onClick={() => setStatusFilter(opt.value)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+              statusFilter === opt.value
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
           >
             {opt.label}
-          </Button>
+          </button>
         ))}
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>案件名</TableHead>
-            <TableHead>クライアント</TableHead>
-            <TableHead>ステータス</TableHead>
-            <TableHead>月額金額</TableHead>
-            <TableHead>契約期間</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {!loading &&
-            deals.map((deal) => (
-              <TableRow key={deal.id}>
-                <TableCell>
-                  <Link
-                    href={`/deals/${deal.id}`}
-                    className="font-medium text-primary hover:underline"
-                  >
-                    {deal.title}
-                  </Link>
-                </TableCell>
-                <TableCell>{deal.client.name}</TableCell>
-                <TableCell>
-                  <Badge className={statusColors[deal.status]}>
-                    {statusLabels[deal.status] || deal.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {deal.monthlyAmount
-                    ? `\u00a5${deal.monthlyAmount.toLocaleString()}`
-                    : "-"}
-                </TableCell>
-                <TableCell>
-                  {deal.contractStartDate && deal.contractEndDate
-                    ? `${formatDate(deal.contractStartDate)} ~ ${formatDate(deal.contractEndDate)}`
-                    : "-"}
+      <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-slate-100 hover:bg-transparent">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">案件名</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">月額金額</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">契約期間</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {!loading &&
+              deals.map((deal) => (
+                <TableRow key={deal.id} className="border-slate-50 hover:bg-slate-50/50">
+                  <TableCell>
+                    <Link
+                      href={`/deals/${deal.id}`}
+                      className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                    >
+                      {deal.title}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-slate-600">{deal.client.name}</TableCell>
+                  <TableCell>
+                    <Badge className={`badge-pill ${statusColors[deal.status]}`}>
+                      {statusLabels[deal.status] || deal.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="tabular-nums text-slate-700">
+                    {deal.monthlyAmount
+                      ? `\u00a5${deal.monthlyAmount.toLocaleString()}`
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="tabular-nums text-slate-600">
+                    {deal.contractStartDate && deal.contractEndDate
+                      ? `${formatDate(deal.contractStartDate)} ~ ${formatDate(deal.contractEndDate)}`
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            {!loading && deals.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="py-12 text-center text-slate-400"
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-3xl">💼</span>
+                    <p>該当する案件がありません</p>
+                  </div>
                 </TableCell>
               </TableRow>
-            ))}
-          {!loading && deals.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                該当する案件がありません
-              </TableCell>
-            </TableRow>
-          )}
-          {loading && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                読み込み中...
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8">
+                  <div className="flex flex-col gap-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="skeleton h-8 w-full" />
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

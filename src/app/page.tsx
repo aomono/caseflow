@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableHeader,
@@ -80,29 +79,29 @@ const PERIOD_OPTIONS = [
   { label: "全期間", value: "all" },
 ] as const;
 
-const PIE_COLORS = ["#2563eb", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
+const PIE_COLORS = ["#4f46e5", "#f59e0b", "#10b981", "#f43f5e", "#8b5cf6"];
 
 const PIPELINE_BORDER_COLORS: Record<string, string> = {
-  lead: "border-l-gray-400",
-  discussion: "border-l-blue-500",
+  lead: "border-l-slate-400",
+  discussion: "border-l-indigo-500",
   expected: "border-l-amber-500",
-  active: "border-l-green-500",
+  active: "border-l-emerald-500",
   renewal: "border-l-yellow-500",
-  closed: "border-l-gray-400",
-  lost: "border-l-red-500",
+  closed: "border-l-slate-400",
+  lost: "border-l-rose-500",
 };
 
 const REMINDER_STATUS_STYLES: Record<string, { className: string; label: string }> = {
-  pending: { className: "bg-yellow-100 text-yellow-800", label: "未対応" },
-  reminded: { className: "bg-blue-100 text-blue-800", label: "リマインド済" },
-  completed: { className: "bg-green-100 text-green-800", label: "完了" },
+  pending: { className: "bg-amber-50 text-amber-700 border border-amber-200", label: "未対応" },
+  reminded: { className: "bg-indigo-50 text-indigo-700 border border-indigo-200", label: "リマインド済" },
+  completed: { className: "bg-emerald-50 text-emerald-700 border border-emerald-200", label: "完了" },
 };
 
 const ACTIVITY_TYPE_STYLES: Record<string, { className: string; label: string }> = {
-  meeting: { className: "bg-blue-100 text-blue-800", label: "会議" },
-  email: { className: "bg-purple-100 text-purple-800", label: "メール" },
-  phone: { className: "bg-green-100 text-green-800", label: "電話" },
-  note: { className: "bg-gray-100 text-gray-800", label: "メモ" },
+  meeting: { className: "bg-indigo-50 text-indigo-700 border border-indigo-200", label: "会議" },
+  email: { className: "bg-violet-50 text-violet-700 border border-violet-200", label: "メール" },
+  phone: { className: "bg-emerald-50 text-emerald-700 border border-emerald-200", label: "電話" },
+  note: { className: "bg-slate-50 text-slate-700 border border-slate-200", label: "メモ" },
 };
 
 export default function DashboardPage() {
@@ -134,29 +133,36 @@ export default function DashboardPage() {
   const recentActivities = stats?.recentActivities ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">ダッシュボード</h1>
-          <p className="text-sm text-muted-foreground">CaseFlow の概要</p>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">ダッシュボード</h1>
+          <p className="mt-1 text-sm text-slate-500">CaseFlow の概要</p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
           {PERIOD_OPTIONS.map((opt) => (
-            <Button
+            <button
               key={opt.value}
-              variant={period === opt.value ? "default" : "outline"}
-              size="sm"
               onClick={() => setPeriod(opt.value)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+                period === opt.value
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
             >
               {opt.label}
-            </Button>
+            </button>
           ))}
         </div>
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">読み込み中...</p>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="skeleton h-28 rounded-xl" />
+          ))}
+        </div>
       ) : (
         <>
           {/* Pipeline Cards */}
@@ -164,16 +170,16 @@ export default function DashboardPage() {
             {pipeline.map((item) => (
               <Card
                 key={item.status}
-                className={`border-l-4 ${PIPELINE_BORDER_COLORS[item.status] ?? "border-l-gray-300"}`}
+                className={`card-hover border-l-4 rounded-xl border-slate-100 bg-white shadow-sm ${PIPELINE_BORDER_COLORS[item.status] ?? "border-l-slate-300"}`}
               >
-                <CardHeader>
-                  <CardTitle className="text-sm text-muted-foreground">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-500">
                     {item.label}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">{item.count}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-heading text-3xl font-bold tabular-nums text-slate-900">{item.count}</p>
+                  <p className="mt-1 text-sm tabular-nums text-slate-400">
                     {formatJPY(item.amount)}/月
                   </p>
                 </CardContent>
@@ -182,32 +188,41 @@ export default function DashboardPage() {
           </div>
 
           {/* Charts Row */}
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             {/* Revenue Bar Chart */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>売上推移</CardTitle>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">売上推移</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={monthlyRevenue}>
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis
                         dataKey="month"
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 12, fill: "#64748b" }}
                         tickFormatter={(v: string) => {
                           const parts = v.split("-");
                           return `${parts[1]}月`;
                         }}
+                        axisLine={{ stroke: "#e2e8f0" }}
+                        tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 12, fill: "#64748b" }}
                         tickFormatter={(v: number) =>
                           `¥${(v / 10000).toFixed(0)}万`
                         }
+                        axisLine={false}
+                        tickLine={false}
                       />
                       <Tooltip
+                        contentStyle={{
+                          borderRadius: "0.75rem",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
                         formatter={(value: unknown, name: unknown) => {
                           const labels: Record<string, string> = {
                             actual: "実績",
@@ -231,9 +246,9 @@ export default function DashboardPage() {
                           return labels[value] ?? value;
                         }}
                       />
-                      <Bar dataKey="actual" stackId="revenue" fill="#2563eb" />
-                      <Bar dataKey="contracted" stackId="revenue" fill="#93c5fd" />
-                      <Bar dataKey="prospect" stackId="revenue" fill="#d1d5db" fillOpacity={0.7} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="actual" stackId="revenue" fill="#4f46e5" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="contracted" stackId="revenue" fill="#818cf8" />
+                      <Bar dataKey="prospect" stackId="revenue" fill="#cbd5e1" fillOpacity={0.7} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -241,9 +256,9 @@ export default function DashboardPage() {
             </Card>
 
             {/* Client Revenue Pie Chart */}
-            <Card>
+            <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>クライアント別売上</CardTitle>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">クライアント別売上</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-72">
@@ -268,6 +283,11 @@ export default function DashboardPage() {
                         ))}
                       </Pie>
                       <Tooltip
+                        contentStyle={{
+                          borderRadius: "0.75rem",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
                         formatter={(value: unknown) => [formatJPY(Number(value)), "売上"]}
                       />
                     </PieChart>
@@ -278,38 +298,38 @@ export default function DashboardPage() {
           </div>
 
           {/* Tables Row */}
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             {/* Reminders Table */}
-            <Card>
+            <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>直近のリマインド</CardTitle>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">直近のリマインド</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>タイトル</TableHead>
-                      <TableHead>期日</TableHead>
-                      <TableHead>ステータス</TableHead>
+                    <TableRow className="border-slate-100 hover:bg-transparent">
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">タイトル</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">期日</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {reminders.map((reminder) => {
                       const style = REMINDER_STATUS_STYLES[reminder.status] ?? {
-                        className: "bg-gray-100 text-gray-800",
+                        className: "bg-slate-50 text-slate-700 border border-slate-200",
                         label: reminder.status,
                       };
                       return (
-                        <TableRow key={reminder.id}>
-                          <TableCell className="font-medium">
+                        <TableRow key={reminder.id} className="border-slate-50 hover:bg-slate-50/50">
+                          <TableCell className="font-medium text-slate-900">
                             {reminder.title}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="tabular-nums text-slate-600">
                             {new Date(reminder.dueDate).toLocaleDateString("ja-JP")}
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={style.className}
+                              className={`badge-pill ${style.className}`}
                               variant="secondary"
                             >
                               {style.label}
@@ -318,50 +338,64 @@ export default function DashboardPage() {
                         </TableRow>
                       );
                     })}
+                    {reminders.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={3} className="py-8 text-center text-slate-400">
+                          リマインドはありません
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
 
             {/* Activities Table */}
-            <Card>
+            <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle>最近のActivity</CardTitle>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">最近のActivity</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>日付</TableHead>
-                      <TableHead>種別</TableHead>
-                      <TableHead>内容</TableHead>
+                    <TableRow className="border-slate-100 hover:bg-transparent">
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">日付</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">種別</TableHead>
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">内容</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentActivities.map((activity) => {
                       const style = ACTIVITY_TYPE_STYLES[activity.type] ?? {
-                        className: "bg-gray-100 text-gray-800",
+                        className: "bg-slate-50 text-slate-700 border border-slate-200",
                         label: activity.type,
                       };
                       return (
-                        <TableRow key={activity.id}>
-                          <TableCell>
+                        <TableRow key={activity.id} className="border-slate-50 hover:bg-slate-50/50">
+                          <TableCell className="tabular-nums text-slate-600">
                             {new Date(activity.date ?? activity.createdAt).toLocaleDateString("ja-JP")}
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={style.className}
+                              className={`badge-pill ${style.className}`}
                               variant="secondary"
                             >
                               {style.label}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-xs truncate">
+                          <TableCell className="max-w-xs truncate text-slate-700">
                             {activity.summary}
                           </TableCell>
                         </TableRow>
                       );
                     })}
+                    {recentActivities.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={3} className="py-8 text-center text-slate-400">
+                          アクティビティはありません
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { SessionProvider } from "@/components/providers/session-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -28,14 +30,16 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${notoSansJP.variable} h-full antialiased`}
     >
-      <body className="flex h-full min-h-screen">
+      <body className="flex h-full min-h-screen bg-slate-50">
         <SessionProvider>
           <Sidebar />
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col ml-[280px]">
             <Header />
-            <main className="flex-1 overflow-auto p-6">{children}</main>
+            <main className="flex-1 overflow-auto p-8 animate-fade-in">
+              <div className="mx-auto max-w-[1400px]">{children}</div>
+            </main>
           </div>
         </SessionProvider>
       </body>

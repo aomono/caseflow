@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -108,125 +107,132 @@ export function SettingsClient({
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">設定</h1>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">設定</h1>
+        <p className="mt-1 text-sm text-slate-500">アプリケーションの設定を管理</p>
+      </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Slack Integration */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Slack連携</CardTitle>
+        <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">Slack連携</CardTitle>
+            <Badge
+              variant="secondary"
+              className={`badge-pill ${
+                slackConfigured
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-slate-50 text-slate-500 border border-slate-200"
+              }`}
+            >
+              {slackConfigured ? "設定済み" : "未設定"}
+            </Badge>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">ステータス:</span>
-              <Badge
-                variant="secondary"
-                className={
-                  slackConfigured
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }
-              >
-                {slackConfigured ? "設定済み" : "未設定"}
-              </Badge>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">デフォルトチャンネル</label>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">デフォルトチャンネル</label>
               <Input
                 value={slackChannel}
                 onChange={(e) => setSlackChannel(e.target.value)}
                 placeholder="#general"
+                className="rounded-lg border-slate-200"
               />
             </div>
-            <Button
-              variant="outline"
+            <button
               onClick={handleTestSlack}
               disabled={testingSlack || !slackConfigured}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 disabled:opacity-50"
             >
               {testingSlack ? "送信中..." : "Slackテスト送信"}
-            </Button>
+            </button>
           </CardContent>
         </Card>
 
         {/* Email Notification */}
-        <Card>
-          <CardHeader>
-            <CardTitle>メール通知</CardTitle>
+        <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">メール通知</CardTitle>
+            <Badge
+              variant="secondary"
+              className={`badge-pill ${
+                emailConfigured
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-slate-50 text-slate-500 border border-slate-200"
+              }`}
+            >
+              {emailConfigured ? "設定済み" : "未設定"}
+            </Badge>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm">ステータス:</span>
-              <Badge
-                variant="secondary"
-                className={
-                  emailConfigured
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-700"
-                }
-              >
-                {emailConfigured ? "設定済み" : "未設定"}
-              </Badge>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">デフォルト送信先</label>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">デフォルト送信先</label>
               <Input
                 value={emailTo}
                 onChange={(e) => setEmailTo(e.target.value)}
                 placeholder="user@example.com"
+                className="rounded-lg border-slate-200"
               />
             </div>
-            <Button
-              variant="outline"
+            <button
               onClick={handleTestEmail}
               disabled={testingEmail || !emailConfigured}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 disabled:opacity-50"
             >
               {testingEmail ? "送信中..." : "メールテスト送信"}
-            </Button>
+            </button>
           </CardContent>
         </Card>
 
         {/* Company Info */}
-        <Card>
+        <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
           <CardHeader>
-            <CardTitle>会社情報</CardTitle>
+            <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">会社情報</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">会社名</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">会社名</label>
               <Input
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
+                className="rounded-lg border-slate-200"
               />
             </div>
-            <Button onClick={handleSaveSettings} disabled={saving}>
+            <button
+              onClick={handleSaveSettings}
+              disabled={saving}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 disabled:opacity-50"
+            >
               {saving ? "保存中..." : "保存"}
-            </Button>
+            </button>
           </CardContent>
         </Card>
 
         {/* Allowed Users */}
-        <Card>
+        <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
           <CardHeader>
-            <CardTitle>許可ユーザー</CardTitle>
+            <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">許可ユーザー</CardTitle>
           </CardHeader>
           <CardContent>
             {allowedEmails.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {allowedEmails.map((email) => (
                   <li
                     key={email}
-                    className="flex items-center gap-2 text-sm"
+                    className="flex items-center gap-3 text-sm"
                   >
-                    <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-                    {email}
+                    <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
+                    <span className="text-slate-700">{email}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                ALLOWED_EMAILS環境変数が設定されていません
-              </p>
+              <div className="rounded-lg bg-slate-50 py-8 text-center">
+                <p className="text-3xl">🔒</p>
+                <p className="mt-2 text-sm text-slate-400">
+                  ALLOWED_EMAILS環境変数が設定されていません
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>

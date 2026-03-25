@@ -33,10 +33,10 @@ interface Invoice {
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  draft: { label: "下書き", className: "bg-gray-100 text-gray-700" },
-  sent: { label: "送付済", className: "bg-blue-100 text-blue-700" },
-  paid: { label: "入金済", className: "bg-green-100 text-green-700" },
-  overdue: { label: "延滞", className: "bg-red-100 text-red-700" },
+  draft: { label: "下書き", className: "bg-slate-50 text-slate-700 border border-slate-200" },
+  sent: { label: "送付済", className: "bg-indigo-50 text-indigo-700 border border-indigo-200" },
+  paid: { label: "入金済", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+  overdue: { label: "延滞", className: "bg-rose-50 text-rose-700 border border-rose-200" },
 };
 
 function formatAmount(amount: number): string {
@@ -136,7 +136,6 @@ export default function InvoicesPage() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  // We need all invoices (not filtered) for the summary, so fetch all and filter client-side
   const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
@@ -163,143 +162,139 @@ export default function InvoicesPage() {
     .filter((inv) => inv.status === "overdue")
     .reduce((sum, inv) => sum + inv.amount, 0);
 
+  const summaryCards = [
+    { label: "今月の請求額合計", amount: totalAmount, color: "text-slate-900", bg: "bg-white" },
+    { label: "入金済み", amount: paidAmount, color: "text-emerald-600", bg: "bg-emerald-50/50" },
+    { label: "未入金", amount: unpaidAmount, color: "text-indigo-600", bg: "bg-indigo-50/50" },
+    { label: "延滞", amount: overdueAmount, color: "text-rose-600", bg: "bg-rose-50/50" },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">請求書一覧</h1>
-        <Button onClick={handleGenerateMonthly} disabled={generating}>
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">請求書一覧</h1>
+          <p className="mt-1 text-sm text-slate-500">請求と入金の管理</p>
+        </div>
+        <Button
+          onClick={handleGenerateMonthly}
+          disabled={generating}
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700"
+        >
           {generating ? "生成中..." : "月次一括生成"}
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
-              今月の請求額合計
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{formatAmount(totalAmount)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
-              入金済み
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">
-              {formatAmount(paidAmount)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
-              未入金
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-600">
-              {formatAmount(unpaidAmount)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground">
-              延滞
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-600">
-              {formatAmount(overdueAmount)}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {summaryCards.map((card) => (
+          <Card key={card.label} className={`card-hover rounded-xl border-slate-100 shadow-sm ${card.bg}`}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-500">
+                {card.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className={`font-heading text-2xl font-bold tabular-nums ${card.color}`}>
+                {formatAmount(card.amount)}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex gap-2">
-        <Button
-          variant={filter === "all" ? "default" : "outline"}
-          onClick={() => setFilter("all")}
-        >
-          全て
-        </Button>
-        <Button
-          variant={filter === "unpaid" ? "default" : "outline"}
-          onClick={() => setFilter("unpaid")}
-        >
-          未入金
-        </Button>
-        <Button
-          variant={filter === "paid" ? "default" : "outline"}
-          onClick={() => setFilter("paid")}
-        >
-          入金済み
-        </Button>
+      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+        {([
+          { value: "all" as Filter, label: "全て" },
+          { value: "unpaid" as Filter, label: "未入金" },
+          { value: "paid" as Filter, label: "入金済み" },
+        ]).map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setFilter(opt.value)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+              filter === opt.value
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* Invoices Table */}
       {loading ? (
-        <p className="text-muted-foreground">読み込み中...</p>
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="skeleton h-12 w-full rounded-lg" />
+          ))}
+        </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>クライアント</TableHead>
-              <TableHead>案件</TableHead>
-              <TableHead>年月</TableHead>
-              <TableHead>金額</TableHead>
-              <TableHead>支払期限</TableHead>
-              <TableHead>ステータス</TableHead>
-              <TableHead>入金日</TableHead>
-              <TableHead>操作</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoices.map((invoice) => {
-              const config = statusConfig[invoice.status] ?? {
-                label: invoice.status,
-                className: "bg-gray-100 text-gray-700",
-              };
-              return (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-medium">
-                    {invoice.deal.client.name}
-                  </TableCell>
-                  <TableCell>{invoice.deal.title}</TableCell>
-                  <TableCell>
-                    {invoice.year}年{invoice.month}月
-                  </TableCell>
-                  <TableCell>{formatAmount(invoice.amount)}</TableCell>
-                  <TableCell>{formatDate(invoice.dueDate)}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className={config.className}>
-                      {config.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatDate(invoice.paidAt)}</TableCell>
-                  <TableCell>
-                    {(invoice.status === "sent" || invoice.status === "overdue") && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMarkPaid(invoice.id)}
-                      >
-                        入金登録
-                      </Button>
-                    )}
+        <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-slate-100 hover:bg-transparent">
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">案件</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">年月</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">支払期限</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">入金日</TableHead>
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invoices.map((invoice) => {
+                const config = statusConfig[invoice.status] ?? {
+                  label: invoice.status,
+                  className: "bg-slate-50 text-slate-700 border border-slate-200",
+                };
+                return (
+                  <TableRow key={invoice.id} className="border-slate-50 hover:bg-slate-50/50">
+                    <TableCell className="font-medium text-slate-900">
+                      {invoice.deal.client.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600">{invoice.deal.title}</TableCell>
+                    <TableCell className="tabular-nums text-slate-600">
+                      {invoice.year}年{invoice.month}月
+                    </TableCell>
+                    <TableCell className="tabular-nums font-medium text-slate-900">{formatAmount(invoice.amount)}</TableCell>
+                    <TableCell className="tabular-nums text-slate-600">{formatDate(invoice.dueDate)}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={`badge-pill ${config.className}`}>
+                        {config.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="tabular-nums text-slate-600">{formatDate(invoice.paidAt)}</TableCell>
+                    <TableCell>
+                      {(invoice.status === "sent" || invoice.status === "overdue") && (
+                        <button
+                          onClick={() => handleMarkPaid(invoice.id)}
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          入金登録
+                        </button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {invoices.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="py-12 text-center text-slate-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="text-3xl">🧾</span>
+                      <p>請求書がありません</p>
+                    </div>
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );

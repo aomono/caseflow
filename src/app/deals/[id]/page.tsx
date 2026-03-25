@@ -39,13 +39,13 @@ const statusLabels: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  lead: "bg-gray-100 text-gray-700",
-  discussion: "bg-blue-100 text-blue-700",
-  expected: "bg-amber-100 text-amber-700",
-  active: "bg-emerald-100 text-emerald-700",
-  renewal: "bg-yellow-100 text-yellow-700",
-  closed: "bg-gray-100 text-gray-700",
-  lost: "bg-red-100 text-red-700",
+  lead: "bg-slate-50 text-slate-700 border border-slate-200",
+  discussion: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  expected: "bg-amber-50 text-amber-700 border border-amber-200",
+  active: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  renewal: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+  closed: "bg-slate-50 text-slate-700 border border-slate-200",
+  lost: "bg-rose-50 text-rose-700 border border-rose-200",
 };
 
 const roleLabels: Record<string, string> = {
@@ -55,9 +55,9 @@ const roleLabels: Record<string, string> = {
 };
 
 const roleColors: Record<string, string> = {
-  admin: "bg-blue-100 text-blue-700",
-  buyer: "bg-purple-100 text-purple-700",
-  other: "bg-gray-100 text-gray-700",
+  admin: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  buyer: "bg-violet-50 text-violet-700 border border-violet-200",
+  other: "bg-slate-50 text-slate-700 border border-slate-200",
 };
 
 const activityTypeLabels: Record<string, string> = {
@@ -68,10 +68,10 @@ const activityTypeLabels: Record<string, string> = {
 };
 
 const activityTypeColors: Record<string, string> = {
-  meeting: "bg-blue-100 text-blue-700",
-  email: "bg-green-100 text-green-700",
-  phone: "bg-yellow-100 text-yellow-700",
-  note: "bg-gray-100 text-gray-700",
+  meeting: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  email: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  phone: "bg-amber-50 text-amber-700 border border-amber-200",
+  note: "bg-slate-50 text-slate-700 border border-slate-200",
 };
 
 const invoiceStatusLabels: Record<string, string> = {
@@ -82,10 +82,10 @@ const invoiceStatusLabels: Record<string, string> = {
 };
 
 const invoiceStatusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  sent: "bg-blue-100 text-blue-700",
-  paid: "bg-green-100 text-green-700",
-  overdue: "bg-red-100 text-red-700",
+  draft: "bg-slate-50 text-slate-700 border border-slate-200",
+  sent: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  paid: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  overdue: "bg-rose-50 text-rose-700 border border-rose-200",
 };
 
 const reminderStatusLabels: Record<string, string> = {
@@ -95,9 +95,9 @@ const reminderStatusLabels: Record<string, string> = {
 };
 
 const reminderStatusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  reminded: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
+  pending: "bg-amber-50 text-amber-700 border border-amber-200",
+  reminded: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+  completed: "bg-emerald-50 text-emerald-700 border border-emerald-200",
 };
 
 const reminderTypeLabels: Record<string, string> = {
@@ -114,8 +114,8 @@ const reportStatusLabels: Record<string, string> = {
 };
 
 const reportStatusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  finalized: "bg-green-100 text-green-700",
+  draft: "bg-slate-50 text-slate-700 border border-slate-200",
+  finalized: "bg-emerald-50 text-emerald-700 border border-emerald-200",
 };
 
 export default async function DealDetailPage({
@@ -150,82 +150,84 @@ export default async function DealDetailPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">{deal.title}</h1>
-          <div className="flex items-center gap-3 text-muted-foreground">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">{deal.title}</h1>
+            <Badge className={`badge-pill text-sm ${statusColors[deal.status]}`}>
+              {statusLabels[deal.status] || deal.status}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
             <Link
               href={`/clients/${deal.clientId}`}
-              className="text-primary hover:underline"
+              className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
             >
               {deal.client.name}
             </Link>
-            <Badge className={statusColors[deal.status]}>
-              {statusLabels[deal.status] || deal.status}
-            </Badge>
             {deal.monthlyAmount && (
-              <span className="font-semibold text-foreground">
+              <span className="font-heading tabular-nums text-lg font-semibold text-slate-900">
                 {`\u00a5${deal.monthlyAmount.toLocaleString()}`}/月
               </span>
             )}
           </div>
         </div>
         <Link href={`/deals/${id}/edit`}>
-          <Button variant="outline">編集</Button>
+          <Button variant="outline" className="rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50">編集</Button>
         </Link>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">基本情報</TabsTrigger>
-          <TabsTrigger value="contacts">関係者</TabsTrigger>
-          <TabsTrigger value="activities">やりとり</TabsTrigger>
-          <TabsTrigger value="invoices">請求・入金</TabsTrigger>
-          <TabsTrigger value="reports">報告書</TabsTrigger>
-          <TabsTrigger value="reminders">リマインド</TabsTrigger>
+        <TabsList className="border-b border-slate-200 bg-transparent p-0">
+          <TabsTrigger value="info" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">基本情報</TabsTrigger>
+          <TabsTrigger value="contacts" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">関係者</TabsTrigger>
+          <TabsTrigger value="activities" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">やりとり</TabsTrigger>
+          <TabsTrigger value="invoices" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">請求・入金</TabsTrigger>
+          <TabsTrigger value="reports" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">報告書</TabsTrigger>
+          <TabsTrigger value="reminders" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">リマインド</TabsTrigger>
         </TabsList>
 
         {/* 基本情報 */}
-        <TabsContent value="info">
-          <Card>
+        <TabsContent value="info" className="mt-6">
+          <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle>基本情報</CardTitle>
+              <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">基本情報</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-2 gap-4">
+              <dl className="grid grid-cols-2 gap-6">
                 <div className="col-span-2">
-                  <dt className="text-muted-foreground">概要</dt>
-                  <dd className="font-medium">{deal.description || "なし"}</dd>
+                  <dt className="text-sm text-slate-500">概要</dt>
+                  <dd className="mt-1 font-medium text-slate-900">{deal.description || "なし"}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">契約開始日</dt>
-                  <dd className="font-medium">
+                  <dt className="text-sm text-slate-500">契約開始日</dt>
+                  <dd className="mt-1 tabular-nums font-medium text-slate-900">
                     {deal.contractStartDate
                       ? deal.contractStartDate.toLocaleDateString("ja-JP")
                       : "-"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">契約終了日</dt>
-                  <dd className="font-medium">
+                  <dt className="text-sm text-slate-500">契約終了日</dt>
+                  <dd className="mt-1 tabular-nums font-medium text-slate-900">
                     {deal.contractEndDate
                       ? deal.contractEndDate.toLocaleDateString("ja-JP")
                       : "-"}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">更新リマインド</dt>
-                  <dd className="font-medium">
+                  <dt className="text-sm text-slate-500">更新リマインド</dt>
+                  <dd className="mt-1 font-medium text-slate-900">
                     {deal.renewalReminderDays}日前
                   </dd>
                 </div>
                 {deal.contractSummary && (
                   <div className="col-span-2">
-                    <dt className="text-muted-foreground">契約概要</dt>
-                    <dd className="font-medium">{deal.contractSummary}</dd>
+                    <dt className="text-sm text-slate-500">契約概要</dt>
+                    <dd className="mt-1 font-medium text-slate-900">{deal.contractSummary}</dd>
                   </div>
                 )}
               </dl>
@@ -234,115 +236,127 @@ export default async function DealDetailPage({
         </TabsContent>
 
         {/* 関係者 */}
-        <TabsContent value="contacts">
+        <TabsContent value="contacts" className="mt-6">
           <div className="space-y-4">
             <div className="flex justify-end">
               <ContactForm dealId={id} />
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>名前</TableHead>
-                  <TableHead>役割</TableHead>
-                  <TableHead>肩書</TableHead>
-                  <TableHead>メール</TableHead>
-                  <TableHead>電話</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            {deal.contacts.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {deal.contacts.map((contact) => (
-                  <TableRow key={contact.id}>
-                    <TableCell className="font-medium">
-                      {contact.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={roleColors[contact.role]}>
-                        {roleLabels[contact.role] || contact.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{contact.title ?? "-"}</TableCell>
-                    <TableCell>{contact.email ?? "-"}</TableCell>
-                    <TableCell>{contact.phone ?? "-"}</TableCell>
-                  </TableRow>
+                  <Card key={contact.id} className="card-hover rounded-xl border-slate-100 bg-white shadow-sm">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-heading font-semibold text-slate-900">{contact.name}</p>
+                          <p className="text-sm text-slate-500">{contact.title ?? ""}</p>
+                        </div>
+                        <Badge className={`badge-pill ${roleColors[contact.role]}`}>
+                          {roleLabels[contact.role] || contact.role}
+                        </Badge>
+                      </div>
+                      <div className="mt-4 space-y-1.5 text-sm text-slate-600">
+                        {contact.email && (
+                          <p className="flex items-center gap-2">
+                            <span className="text-slate-400">✉</span>
+                            {contact.email}
+                          </p>
+                        )}
+                        {contact.phone && (
+                          <p className="flex items-center gap-2">
+                            <span className="text-slate-400">☎</span>
+                            {contact.phone}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
-                {deal.contacts.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-muted-foreground"
-                    >
-                      関係者がいません
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-slate-100 bg-white py-12 text-center shadow-sm">
+                <p className="text-3xl">👤</p>
+                <p className="mt-2 text-slate-400">関係者がいません</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         {/* やりとり */}
-        <TabsContent value="activities">
+        <TabsContent value="activities" className="mt-6">
           <div className="space-y-4">
             <div className="flex justify-end">
               <ActivityForm dealId={id} />
             </div>
-            <div className="space-y-4">
-              {deal.activities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex gap-4 rounded-lg border p-4"
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-sm text-muted-foreground">
-                      {activity.date.toLocaleDateString("ja-JP")}
-                    </span>
-                    <Badge className={activityTypeColors[activity.type]}>
-                      {activityTypeLabels[activity.type] || activity.type}
-                    </Badge>
+            {deal.activities.length > 0 ? (
+              <div className="relative space-y-0">
+                {/* Timeline connector line */}
+                <div className="absolute left-[27px] top-2 bottom-2 w-px bg-slate-200" />
+                {deal.activities.map((activity, index) => (
+                  <div
+                    key={activity.id}
+                    className={`relative flex gap-4 pb-6 ${index === deal.activities.length - 1 ? "pb-0" : ""}`}
+                  >
+                    {/* Timeline dot */}
+                    <div className="relative z-10 flex h-[54px] w-[54px] flex-shrink-0 flex-col items-center justify-center">
+                      <div className="flex h-3 w-3 items-center justify-center rounded-full border-2 border-indigo-400 bg-white" />
+                    </div>
+                    <Card className="flex-1 rounded-xl border-slate-100 bg-white shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Badge className={`badge-pill ${activityTypeColors[activity.type]}`}>
+                            {activityTypeLabels[activity.type] || activity.type}
+                          </Badge>
+                          <span className="tabular-nums text-sm text-slate-400">
+                            {activity.date.toLocaleDateString("ja-JP")}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm text-slate-700">{activity.summary}</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <p className="flex-1">{activity.summary}</p>
-                </div>
-              ))}
-              {deal.activities.length === 0 && (
-                <p className="text-center text-muted-foreground">
-                  やりとりがありません
-                </p>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-slate-100 bg-white py-12 text-center shadow-sm">
+                <p className="text-3xl">💬</p>
+                <p className="mt-2 text-slate-400">やりとりがありません</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
         {/* 請求・入金 */}
-        <TabsContent value="invoices">
-          <div className="space-y-4">
+        <TabsContent value="invoices" className="mt-6">
+          <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>年/月</TableHead>
-                  <TableHead>金額</TableHead>
-                  <TableHead>支払期日</TableHead>
-                  <TableHead>ステータス</TableHead>
-                  <TableHead>入金日</TableHead>
+                <TableRow className="border-slate-100 hover:bg-transparent">
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">年/月</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">支払期日</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">入金日</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {deal.invoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    <TableCell>
+                  <TableRow key={invoice.id} className="border-slate-50 hover:bg-slate-50/50">
+                    <TableCell className="tabular-nums text-slate-700">
                       {invoice.year}年{invoice.month}月
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="tabular-nums font-medium text-slate-900">
                       {`\u00a5${invoice.amount.toLocaleString()}`}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="tabular-nums text-slate-600">
                       {invoice.dueDate.toLocaleDateString("ja-JP")}
                     </TableCell>
                     <TableCell>
-                      <Badge className={invoiceStatusColors[invoice.status]}>
+                      <Badge className={`badge-pill ${invoiceStatusColors[invoice.status]}`}>
                         {invoiceStatusLabels[invoice.status] || invoice.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="tabular-nums text-slate-600">
                       {invoice.paidAt
                         ? invoice.paidAt.toLocaleDateString("ja-JP")
                         : "-"}
@@ -351,11 +365,11 @@ export default async function DealDetailPage({
                 ))}
                 {deal.invoices.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-muted-foreground"
-                    >
-                      請求データがありません
+                    <TableCell colSpan={5} className="py-12 text-center text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-3xl">🧾</span>
+                        <p>請求データがありません</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -365,25 +379,25 @@ export default async function DealDetailPage({
         </TabsContent>
 
         {/* 報告書 */}
-        <TabsContent value="reports">
-          <div className="space-y-4">
+        <TabsContent value="reports" className="mt-6">
+          <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>期間</TableHead>
-                  <TableHead>金額</TableHead>
-                  <TableHead>ステータス</TableHead>
+                <TableRow className="border-slate-100 hover:bg-transparent">
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">期間</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {deal.reports.map((report) => (
-                  <TableRow key={report.id}>
-                    <TableCell>{report.period}</TableCell>
-                    <TableCell>
+                  <TableRow key={report.id} className="border-slate-50 hover:bg-slate-50/50">
+                    <TableCell className="text-slate-700">{report.period}</TableCell>
+                    <TableCell className="tabular-nums font-medium text-slate-900">
                       {`\u00a5${report.amount.toLocaleString()}`}
                     </TableCell>
                     <TableCell>
-                      <Badge className={reportStatusColors[report.status]}>
+                      <Badge className={`badge-pill ${reportStatusColors[report.status]}`}>
                         {reportStatusLabels[report.status] || report.status}
                       </Badge>
                     </TableCell>
@@ -391,11 +405,11 @@ export default async function DealDetailPage({
                 ))}
                 {deal.reports.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="text-center text-muted-foreground"
-                    >
-                      報告書はまだありません
+                    <TableCell colSpan={3} className="py-12 text-center text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-3xl">📄</span>
+                        <p>報告書はまだありません</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -405,31 +419,31 @@ export default async function DealDetailPage({
         </TabsContent>
 
         {/* リマインド */}
-        <TabsContent value="reminders">
-          <div className="space-y-4">
+        <TabsContent value="reminders" className="mt-6">
+          <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>タイトル</TableHead>
-                  <TableHead>種別</TableHead>
-                  <TableHead>期日</TableHead>
-                  <TableHead>ステータス</TableHead>
+                <TableRow className="border-slate-100 hover:bg-transparent">
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">タイトル</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">種別</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">期日</TableHead>
+                  <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {deal.reminders.map((reminder) => (
-                  <TableRow key={reminder.id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={reminder.id} className="border-slate-50 hover:bg-slate-50/50">
+                    <TableCell className="font-medium text-slate-900">
                       {reminder.title}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-slate-600">
                       {reminderTypeLabels[reminder.type] || reminder.type}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="tabular-nums text-slate-600">
                       {reminder.dueDate.toLocaleDateString("ja-JP")}
                     </TableCell>
                     <TableCell>
-                      <Badge className={reminderStatusColors[reminder.status]}>
+                      <Badge className={`badge-pill ${reminderStatusColors[reminder.status]}`}>
                         {reminderStatusLabels[reminder.status] ||
                           reminder.status}
                       </Badge>
@@ -438,11 +452,11 @@ export default async function DealDetailPage({
                 ))}
                 {deal.reminders.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="text-center text-muted-foreground"
-                    >
-                      リマインドがありません
+                    <TableCell colSpan={4} className="py-12 text-center text-slate-400">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-3xl">🔔</span>
+                        <p>リマインドがありません</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
