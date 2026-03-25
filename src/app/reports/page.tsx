@@ -1,7 +1,3 @@
-"use client";
-
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,33 +9,9 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { prisma } from "@/lib/prisma";
 
-const mockReports = [
-  {
-    id: "rp1",
-    dealTitle: "DX推進コンサルティング",
-    period: "2026年2月",
-    amount: 800000,
-    status: "finalized",
-    pdfUrl: "/reports/rp1.pdf",
-  },
-  {
-    id: "rp2",
-    dealTitle: "PMO支援",
-    period: "2026年2月",
-    amount: 600000,
-    status: "finalized",
-    pdfUrl: "/reports/rp2.pdf",
-  },
-  {
-    id: "rp3",
-    dealTitle: "組織改革コンサルティング",
-    period: "2026年3月",
-    amount: 500000,
-    status: "draft",
-    pdfUrl: null,
-  },
-];
+export const dynamic = "force-dynamic";
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: "下書き", className: "bg-gray-100 text-gray-700" },
@@ -50,7 +22,12 @@ function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString()}`;
 }
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const reports = await prisma.report.findMany({
+    include: { deal: { include: { client: true } } },
+    orderBy: [{ year: "desc" }, { month: "desc" }],
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -72,12 +49,15 @@ export default function ReportsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {mockReports.map((report) => {
-            const config = statusConfig[report.status];
+          {reports.map((report) => {
+            const config = statusConfig[report.status] ?? {
+              label: report.status,
+              className: "bg-gray-100 text-gray-700",
+            };
             return (
               <TableRow key={report.id}>
                 <TableCell className="font-medium">
-                  {report.dealTitle}
+                  {report.deal.client.name} - {report.deal.title}
                 </TableCell>
                 <TableCell>{report.period}</TableCell>
                 <TableCell>{formatAmount(report.amount)}</TableCell>
@@ -91,6 +71,8 @@ export default function ReportsPage() {
                     <a
                       href={report.pdfUrl}
                       className="text-primary hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       ダウンロード
                     </a>
@@ -99,9 +81,11 @@ export default function ReportsPage() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button variant="outline" size="sm">
-                    編集
-                  </Button>
+                  <Link href={`/reports/new?reportId=${report.id}`}>
+                    <Button variant="outline" size="sm">
+                      編集
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             );

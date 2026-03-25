@@ -1,9 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useState } from "react";
-import { mockDeals } from "@/lib/mock-data";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -16,23 +14,55 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
-const activeDeals = mockDeals.filter((d) => d.status === "active");
+interface Deal {
+  id: string;
+  title: string;
+  monthlyAmount: number | null;
+  contractSummary: string | null;
+  client: {
+    name: string;
+  };
+}
 
 function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString()}`;
 }
 
 export default function ReportNewPage() {
-  const [selectedDealId, setSelectedDealId] = useState<string>(
-    activeDeals[0]?.id || ""
-  );
-  const [period, setPeriod] = useState("2026年3月");
+  const router = useRouter();
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [selectedDealId, setSelectedDealId] = useState<string>("");
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [period, setPeriod] = useState(`${new Date().getFullYear()}年${new Date().getMonth() + 1}月`);
   const [content, setContent] = useState("");
-  const [amount, setAmount] = useState<number>(
-    activeDeals[0]?.monthlyAmount || 0
-  );
+  const [amount, setAmount] = useState<number>(0);
+  const [saving, setSaving] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [savedReportId, setSavedReportId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const selectedDeal = activeDeals.find((d) => d.id === selectedDealId);
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        const res = await fetch("/api/deals?status=active");
+        const data: Deal[] = await res.json();
+        setDeals(data);
+        if (data.length > 0) {
+          setSelectedDealId(data[0].id);
+          if (data[0].monthlyAmount) setAmount(data[0].monthlyAmount);
+          if (data[0].contractSummary) setContent(data[0].contractSummary);
+        }
+      } catch (err) {
+        console.error("Failed to fetch deals:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDeals();
+  }, []);
+
+  const selectedDeal = deals.find((d) => d.id === selectedDealId);
   const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "long",
@@ -42,11 +72,101 @@ export default function ReportNewPage() {
   const handleDealChange = (value: string | null) => {
     if (value === null) return;
     setSelectedDealId(value);
-    const deal = activeDeals.find((d) => d.id === value);
+    const deal = deals.find((d) => d.id === value);
     if (deal?.monthlyAmount) {
       setAmount(deal.monthlyAmount);
     }
+    if (deal?.contractSummary) {
+      setContent(deal.contractSummary);
+    } else {
+      setContent("");
+    }
   };
+
+  const handleSave = async (): Promise<string | null> => {
+    if (!selectedDealId || !period || !content || amount <= 0) {
+      alert("全てのフィールドを入力してください");
+      return null;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dealId: selectedDealId,
+          year,
+          month,
+          period,
+          workDescription: content,
+          amount,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`保存に失敗しました: ${err.error}`);
+        return null;
+      }
+
+      const report = await res.json();
+      setSavedReportId(report.id);
+      return report.id;
+    } catch (err) {
+      console.error("Failed to save report:", err);
+      alert("保存に失敗しました");
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveOnly = async () => {
+    const id = await handleSave();
+    if (id) {
+      alert("報告書を保存しました");
+      router.push("/reports");
+    }
+  };
+
+  const handleGeneratePdf = async () => {
+    let reportId = savedReportId;
+
+    if (!reportId) {
+      reportId = await handleSave();
+      if (!reportId) return;
+    }
+
+    setGeneratingPdf(true);
+    try {
+      const res = await fetch(`/api/reports/${reportId}/pdf`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`PDF生成に失敗しました: ${err.error}`);
+        return;
+      }
+
+      const data = await res.json();
+      alert("PDF生成が完了しました");
+      if (data.pdfUrl) {
+        window.open(data.pdfUrl, "_blank");
+      }
+      router.push("/reports");
+    } catch (err) {
+      console.error("Failed to generate PDF:", err);
+      alert("PDF生成に失敗しました");
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
+  if (loading) {
+    return <p className="text-muted-foreground">読み込み中...</p>;
+  }
 
   return (
     <div className="space-y-6">
@@ -65,13 +185,34 @@ export default function ReportNewPage() {
                 <SelectValue placeholder="案件を選択" />
               </SelectTrigger>
               <SelectContent>
-                {activeDeals.map((deal) => (
+                {deals.map((deal) => (
                   <SelectItem key={deal.id} value={deal.id}>
-                    {deal.clientName} - {deal.title}
+                    {deal.client.name} - {deal.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">年</label>
+              <Input
+                type="number"
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">月</label>
+              <Input
+                type="number"
+                min={1}
+                max={12}
+                value={month}
+                onChange={(e) => setMonth(Number(e.target.value))}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -124,7 +265,7 @@ export default function ReportNewPage() {
 
             <div className="text-sm">
               <p className="font-medium">
-                {selectedDeal?.clientName || "（クライアント未選択）"} 御中
+                {selectedDeal?.client.name || "（クライアント未選択）"} 御中
               </p>
             </div>
 
@@ -152,8 +293,13 @@ export default function ReportNewPage() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button>PDF生成</Button>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={handleSaveOnly} disabled={saving}>
+          {saving ? "保存中..." : "下書き保存"}
+        </Button>
+        <Button onClick={handleGeneratePdf} disabled={generatingPdf || saving}>
+          {generatingPdf ? "PDF生成中..." : "PDF生成"}
+        </Button>
       </div>
     </div>
   );
