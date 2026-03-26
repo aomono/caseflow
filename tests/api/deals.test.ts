@@ -6,6 +6,8 @@ const mockDeal = {
   title: "Test Deal",
   status: "lead",
   monthlyAmount: null,
+  billingType: "monthly",
+  contractAmount: null,
   contractStartDate: null,
   contractEndDate: null,
   renewalReminderDays: 30,
@@ -99,6 +101,35 @@ describe("Deals API", () => {
         data: { clientId: "client-1", title: "Test Deal", status: "lead" },
         include: { client: true },
       });
+    });
+
+    it("should create a lumpsum deal", async () => {
+      const lumpsumDeal = {
+        ...mockDeal,
+        id: "deal-lumpsum",
+        billingType: "lumpsum",
+        contractAmount: 3000000,
+        monthlyAmount: null,
+      };
+      mockPrisma.deal.create.mockResolvedValue(lumpsumDeal);
+
+      const { POST } = await import("@/app/api/deals/route");
+      const request = new Request("http://localhost/api/deals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: "client-1",
+          title: "Lumpsum Deal",
+          billingType: "lumpsum",
+          contractAmount: 3000000,
+        }),
+      });
+      const response = await POST(request as never);
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.billingType).toBe("lumpsum");
+      expect(data.contractAmount).toBe(3000000);
     });
 
     it("should return 400 when clientId or title is missing", async () => {
