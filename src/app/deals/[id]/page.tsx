@@ -167,11 +167,15 @@ export default async function DealDetailPage({
             >
               {deal.client.name}
             </Link>
-            {deal.monthlyAmount && (
+            {deal.billingType === "lumpsum" && deal.contractAmount ? (
+              <span className="font-heading tabular-nums text-lg font-semibold text-slate-900">
+                {`\u00a5${deal.contractAmount.toLocaleString()}`}（一括{deal.contractEndDate ? `・${deal.contractEndDate.toLocaleDateString("ja-JP", { year: "numeric", month: "long" })}計上` : ""}）
+              </span>
+            ) : deal.monthlyAmount ? (
               <span className="font-heading tabular-nums text-lg font-semibold text-slate-900">
                 {`\u00a5${deal.monthlyAmount.toLocaleString()}`}/月
               </span>
-            )}
+            ) : null}
           </div>
         </div>
         <Link href={`/deals/${id}/edit`}>

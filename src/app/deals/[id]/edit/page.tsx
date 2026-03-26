@@ -28,6 +28,8 @@ export default async function EditDealPage({
           title: deal.title,
           status: deal.status,
           monthlyAmount: deal.monthlyAmount,
+          billingType: deal.billingType,
+          contractAmount: deal.contractAmount,
           description: deal.description,
           contractStartDate: deal.contractStartDate
             ? deal.contractStartDate.toISOString().split("T")[0]

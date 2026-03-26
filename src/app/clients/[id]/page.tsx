@@ -93,7 +93,7 @@ export default async function ClientDetailPage({
             <TableRow>
               <TableHead>案件名</TableHead>
               <TableHead>ステータス</TableHead>
-              <TableHead>月額金額</TableHead>
+              <TableHead>金額</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -113,9 +113,11 @@ export default async function ClientDetailPage({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {deal.monthlyAmount
-                    ? `\u00a5${deal.monthlyAmount.toLocaleString()}`
-                    : "-"}
+                  {deal.billingType === "lumpsum" && deal.contractAmount
+                    ? `\u00a5${deal.contractAmount.toLocaleString()}（一括）`
+                    : deal.monthlyAmount
+                      ? `\u00a5${deal.monthlyAmount.toLocaleString()}/月`
+                      : "-"}
                 </TableCell>
               </TableRow>
             ))}

@@ -9,6 +9,8 @@ type Props = {
     title: string;
     status: string;
     monthlyAmount: number | null;
+    billingType: "monthly" | "lumpsum";
+    contractAmount: number | null;
     description: string | null;
     contractStartDate: string | null;
     contractEndDate: string | null;

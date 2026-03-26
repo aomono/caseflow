@@ -24,6 +24,8 @@ type DealFormProps = {
     title: string;
     status: string;
     monthlyAmount: number | null;
+    billingType: "monthly" | "lumpsum";
+    contractAmount: number | null;
     description: string | null;
     contractStartDate: string | null;
     contractEndDate: string | null;
@@ -50,8 +52,14 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
   const [clientId, setClientId] = useState(initialData?.clientId ?? "");
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [status, setStatus] = useState(initialData?.status ?? "lead");
+  const [billingType, setBillingType] = useState<"monthly" | "lumpsum">(
+    initialData?.billingType ?? "monthly"
+  );
   const [monthlyAmount, setMonthlyAmount] = useState(
     initialData?.monthlyAmount?.toString() ?? ""
+  );
+  const [contractAmount, setContractAmount] = useState(
+    initialData?.contractAmount?.toString() ?? ""
   );
   const [description, setDescription] = useState(
     initialData?.description ?? ""
@@ -82,7 +90,9 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
       clientId,
       title: title.trim(),
       status,
-      monthlyAmount: monthlyAmount ? parseInt(monthlyAmount, 10) : null,
+      billingType,
+      monthlyAmount: billingType === "monthly" && monthlyAmount ? parseInt(monthlyAmount, 10) : null,
+      contractAmount: billingType === "lumpsum" && contractAmount ? parseInt(contractAmount, 10) : null,
       description: description.trim() || null,
       contractStartDate: contractStartDate
         ? new Date(contractStartDate).toISOString()
@@ -186,17 +196,57 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
               </select>
             </div>
             <div className="space-y-1">
-              <label htmlFor="monthlyAmount" className="text-sm font-medium">
-                月額金額
-              </label>
-              <Input
-                id="monthlyAmount"
-                type="number"
-                value={monthlyAmount}
-                onChange={(e) => setMonthlyAmount(e.target.value)}
-                placeholder="800000"
-              />
+              <label className="text-sm font-medium">金額タイプ</label>
+              <div className="flex gap-4 mt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="billingType"
+                    value="monthly"
+                    checked={billingType === "monthly"}
+                    onChange={() => setBillingType("monthly")}
+                  />
+                  <span className="text-sm">月額</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="billingType"
+                    value="lumpsum"
+                    checked={billingType === "lumpsum"}
+                    onChange={() => setBillingType("lumpsum")}
+                  />
+                  <span className="text-sm">一括（契約総額）</span>
+                </label>
+              </div>
             </div>
+            {billingType === "monthly" ? (
+              <div className="space-y-1">
+                <label htmlFor="monthlyAmount" className="text-sm font-medium">
+                  月額金額
+                </label>
+                <Input
+                  id="monthlyAmount"
+                  type="number"
+                  value={monthlyAmount}
+                  onChange={(e) => setMonthlyAmount(e.target.value)}
+                  placeholder="800000"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label htmlFor="contractAmount" className="text-sm font-medium">
+                  契約総額
+                </label>
+                <Input
+                  id="contractAmount"
+                  type="number"
+                  value={contractAmount}
+                  onChange={(e) => setContractAmount(e.target.value)}
+                  placeholder="3000000"
+                />
+              </div>
+            )}
             <div className="space-y-1">
               <label htmlFor="description" className="text-sm font-medium">
                 概要
