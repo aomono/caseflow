@@ -28,11 +28,13 @@ export type AggregateDeal = {
 
 export type DealAvgAggregateOutputType = {
   monthlyAmount: number | null
+  contractAmount: number | null
   renewalReminderDays: number | null
 }
 
 export type DealSumAggregateOutputType = {
   monthlyAmount: number | null
+  contractAmount: number | null
   renewalReminderDays: number | null
 }
 
@@ -42,6 +44,8 @@ export type DealMinAggregateOutputType = {
   title: string | null
   status: $Enums.DealStatus | null
   monthlyAmount: number | null
+  billingType: $Enums.BillingType | null
+  contractAmount: number | null
   contractStartDate: Date | null
   contractEndDate: Date | null
   renewalReminderDays: number | null
@@ -57,6 +61,8 @@ export type DealMaxAggregateOutputType = {
   title: string | null
   status: $Enums.DealStatus | null
   monthlyAmount: number | null
+  billingType: $Enums.BillingType | null
+  contractAmount: number | null
   contractStartDate: Date | null
   contractEndDate: Date | null
   renewalReminderDays: number | null
@@ -72,6 +78,8 @@ export type DealCountAggregateOutputType = {
   title: number
   status: number
   monthlyAmount: number
+  billingType: number
+  contractAmount: number
   contractStartDate: number
   contractEndDate: number
   renewalReminderDays: number
@@ -85,11 +93,13 @@ export type DealCountAggregateOutputType = {
 
 export type DealAvgAggregateInputType = {
   monthlyAmount?: true
+  contractAmount?: true
   renewalReminderDays?: true
 }
 
 export type DealSumAggregateInputType = {
   monthlyAmount?: true
+  contractAmount?: true
   renewalReminderDays?: true
 }
 
@@ -99,6 +109,8 @@ export type DealMinAggregateInputType = {
   title?: true
   status?: true
   monthlyAmount?: true
+  billingType?: true
+  contractAmount?: true
   contractStartDate?: true
   contractEndDate?: true
   renewalReminderDays?: true
@@ -114,6 +126,8 @@ export type DealMaxAggregateInputType = {
   title?: true
   status?: true
   monthlyAmount?: true
+  billingType?: true
+  contractAmount?: true
   contractStartDate?: true
   contractEndDate?: true
   renewalReminderDays?: true
@@ -129,6 +143,8 @@ export type DealCountAggregateInputType = {
   title?: true
   status?: true
   monthlyAmount?: true
+  billingType?: true
+  contractAmount?: true
   contractStartDate?: true
   contractEndDate?: true
   renewalReminderDays?: true
@@ -231,6 +247,8 @@ export type DealGroupByOutputType = {
   title: string
   status: $Enums.DealStatus
   monthlyAmount: number | null
+  billingType: $Enums.BillingType
+  contractAmount: number | null
   contractStartDate: Date | null
   contractEndDate: Date | null
   renewalReminderDays: number
@@ -269,6 +287,8 @@ export type DealWhereInput = {
   title?: Prisma.StringFilter<"Deal"> | string
   status?: Prisma.EnumDealStatusFilter<"Deal"> | $Enums.DealStatus
   monthlyAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
+  billingType?: Prisma.EnumBillingTypeFilter<"Deal"> | $Enums.BillingType
+  contractAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
   contractStartDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   contractEndDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
@@ -290,6 +310,8 @@ export type DealOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   monthlyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingType?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   contractStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   contractEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
@@ -314,6 +336,8 @@ export type DealWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Deal"> | string
   status?: Prisma.EnumDealStatusFilter<"Deal"> | $Enums.DealStatus
   monthlyAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
+  billingType?: Prisma.EnumBillingTypeFilter<"Deal"> | $Enums.BillingType
+  contractAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
   contractStartDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   contractEndDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
@@ -335,6 +359,8 @@ export type DealOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   monthlyAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  billingType?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   contractStartDate?: Prisma.SortOrderInput | Prisma.SortOrder
   contractEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
@@ -358,6 +384,8 @@ export type DealScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Deal"> | string
   status?: Prisma.EnumDealStatusWithAggregatesFilter<"Deal"> | $Enums.DealStatus
   monthlyAmount?: Prisma.IntNullableWithAggregatesFilter<"Deal"> | number | null
+  billingType?: Prisma.EnumBillingTypeWithAggregatesFilter<"Deal"> | $Enums.BillingType
+  contractAmount?: Prisma.IntNullableWithAggregatesFilter<"Deal"> | number | null
   contractStartDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Deal"> | Date | string | null
   contractEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Deal"> | Date | string | null
   renewalReminderDays?: Prisma.IntWithAggregatesFilter<"Deal"> | number
@@ -372,6 +400,8 @@ export type DealCreateInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -393,6 +423,8 @@ export type DealUncheckedCreateInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -412,6 +444,8 @@ export type DealUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -433,6 +467,8 @@ export type DealUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -453,6 +489,8 @@ export type DealCreateManyInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -467,6 +505,8 @@ export type DealUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -482,6 +522,8 @@ export type DealUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -507,6 +549,8 @@ export type DealCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   monthlyAmount?: Prisma.SortOrder
+  billingType?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrder
   contractStartDate?: Prisma.SortOrder
   contractEndDate?: Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
@@ -518,6 +562,7 @@ export type DealCountOrderByAggregateInput = {
 
 export type DealAvgOrderByAggregateInput = {
   monthlyAmount?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
 }
 
@@ -527,6 +572,8 @@ export type DealMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   monthlyAmount?: Prisma.SortOrder
+  billingType?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrder
   contractStartDate?: Prisma.SortOrder
   contractEndDate?: Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
@@ -542,6 +589,8 @@ export type DealMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   monthlyAmount?: Prisma.SortOrder
+  billingType?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrder
   contractStartDate?: Prisma.SortOrder
   contractEndDate?: Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
@@ -553,6 +602,7 @@ export type DealMinOrderByAggregateInput = {
 
 export type DealSumOrderByAggregateInput = {
   monthlyAmount?: Prisma.SortOrder
+  contractAmount?: Prisma.SortOrder
   renewalReminderDays?: Prisma.SortOrder
 }
 
@@ -618,6 +668,10 @@ export type NullableIntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type EnumBillingTypeFieldUpdateOperationsInput = {
+  set?: $Enums.BillingType
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -709,6 +763,8 @@ export type DealCreateWithoutClientInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -728,6 +784,8 @@ export type DealUncheckedCreateWithoutClientInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -777,6 +835,8 @@ export type DealScalarWhereInput = {
   title?: Prisma.StringFilter<"Deal"> | string
   status?: Prisma.EnumDealStatusFilter<"Deal"> | $Enums.DealStatus
   monthlyAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
+  billingType?: Prisma.EnumBillingTypeFilter<"Deal"> | $Enums.BillingType
+  contractAmount?: Prisma.IntNullableFilter<"Deal"> | number | null
   contractStartDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   contractEndDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
@@ -791,6 +851,8 @@ export type DealCreateWithoutContactsInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -811,6 +873,8 @@ export type DealUncheckedCreateWithoutContactsInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -845,6 +909,8 @@ export type DealUpdateWithoutContactsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -865,6 +931,8 @@ export type DealUncheckedUpdateWithoutContactsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -883,6 +951,8 @@ export type DealCreateWithoutActivitiesInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -903,6 +973,8 @@ export type DealUncheckedCreateWithoutActivitiesInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -937,6 +1009,8 @@ export type DealUpdateWithoutActivitiesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -957,6 +1031,8 @@ export type DealUncheckedUpdateWithoutActivitiesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -975,6 +1051,8 @@ export type DealCreateWithoutInvoicesInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -995,6 +1073,8 @@ export type DealUncheckedCreateWithoutInvoicesInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1029,6 +1109,8 @@ export type DealUpdateWithoutInvoicesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1049,6 +1131,8 @@ export type DealUncheckedUpdateWithoutInvoicesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1067,6 +1151,8 @@ export type DealCreateWithoutReportsInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1087,6 +1173,8 @@ export type DealUncheckedCreateWithoutReportsInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1121,6 +1209,8 @@ export type DealUpdateWithoutReportsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1141,6 +1231,8 @@ export type DealUncheckedUpdateWithoutReportsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1159,6 +1251,8 @@ export type DealCreateWithoutRemindersInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1179,6 +1273,8 @@ export type DealUncheckedCreateWithoutRemindersInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1213,6 +1309,8 @@ export type DealUpdateWithoutRemindersInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1233,6 +1331,8 @@ export type DealUncheckedUpdateWithoutRemindersInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1251,6 +1351,8 @@ export type DealCreateManyClientInput = {
   title: string
   status?: $Enums.DealStatus
   monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
   contractStartDate?: Date | string | null
   contractEndDate?: Date | string | null
   renewalReminderDays?: number
@@ -1265,6 +1367,8 @@ export type DealUpdateWithoutClientInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1284,6 +1388,8 @@ export type DealUncheckedUpdateWithoutClientInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1303,6 +1409,8 @@ export type DealUncheckedUpdateManyWithoutClientInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
   monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1385,6 +1493,8 @@ export type DealSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   title?: boolean
   status?: boolean
   monthlyAmount?: boolean
+  billingType?: boolean
+  contractAmount?: boolean
   contractStartDate?: boolean
   contractEndDate?: boolean
   renewalReminderDays?: boolean
@@ -1407,6 +1517,8 @@ export type DealSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   status?: boolean
   monthlyAmount?: boolean
+  billingType?: boolean
+  contractAmount?: boolean
   contractStartDate?: boolean
   contractEndDate?: boolean
   renewalReminderDays?: boolean
@@ -1423,6 +1535,8 @@ export type DealSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   status?: boolean
   monthlyAmount?: boolean
+  billingType?: boolean
+  contractAmount?: boolean
   contractStartDate?: boolean
   contractEndDate?: boolean
   renewalReminderDays?: boolean
@@ -1439,6 +1553,8 @@ export type DealSelectScalar = {
   title?: boolean
   status?: boolean
   monthlyAmount?: boolean
+  billingType?: boolean
+  contractAmount?: boolean
   contractStartDate?: boolean
   contractEndDate?: boolean
   renewalReminderDays?: boolean
@@ -1448,7 +1564,7 @@ export type DealSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DealOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "title" | "status" | "monthlyAmount" | "contractStartDate" | "contractEndDate" | "renewalReminderDays" | "description" | "contractSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["deal"]>
+export type DealOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "title" | "status" | "monthlyAmount" | "billingType" | "contractAmount" | "contractStartDate" | "contractEndDate" | "renewalReminderDays" | "description" | "contractSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["deal"]>
 export type DealInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   contacts?: boolean | Prisma.Deal$contactsArgs<ExtArgs>
@@ -1481,6 +1597,8 @@ export type $DealPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     title: string
     status: $Enums.DealStatus
     monthlyAmount: number | null
+    billingType: $Enums.BillingType
+    contractAmount: number | null
     contractStartDate: Date | null
     contractEndDate: Date | null
     renewalReminderDays: number
@@ -1922,6 +2040,8 @@ export interface DealFieldRefs {
   readonly title: Prisma.FieldRef<"Deal", 'String'>
   readonly status: Prisma.FieldRef<"Deal", 'DealStatus'>
   readonly monthlyAmount: Prisma.FieldRef<"Deal", 'Int'>
+  readonly billingType: Prisma.FieldRef<"Deal", 'BillingType'>
+  readonly contractAmount: Prisma.FieldRef<"Deal", 'Int'>
   readonly contractStartDate: Prisma.FieldRef<"Deal", 'DateTime'>
   readonly contractEndDate: Prisma.FieldRef<"Deal", 'DateTime'>
   readonly renewalReminderDays: Prisma.FieldRef<"Deal", 'Int'>

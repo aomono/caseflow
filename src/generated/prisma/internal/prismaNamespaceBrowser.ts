@@ -97,6 +97,8 @@ export const DealScalarFieldEnum = {
   title: 'title',
   status: 'status',
   monthlyAmount: 'monthlyAmount',
+  billingType: 'billingType',
+  contractAmount: 'contractAmount',
   contractStartDate: 'contractStartDate',
   contractEndDate: 'contractEndDate',
   renewalReminderDays: 'renewalReminderDays',

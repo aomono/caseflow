@@ -128,6 +128,13 @@ export type IntNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedIntNullableFilter<$PrismaModel> | number | null
 }
 
+export type EnumBillingTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BillingType | Prisma.EnumBillingTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel> | $Enums.BillingType
+}
+
 export type DateTimeNullableFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel> | null
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -174,6 +181,16 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
+}
+
+export type EnumBillingTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BillingType | Prisma.EnumBillingTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBillingTypeWithAggregatesFilter<$PrismaModel> | $Enums.BillingType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel>
 }
 
 export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -441,6 +458,13 @@ export type NestedEnumDealStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumDealStatusFilter<$PrismaModel> | $Enums.DealStatus
 }
 
+export type NestedEnumBillingTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BillingType | Prisma.EnumBillingTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel> | $Enums.BillingType
+}
+
 export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel> | null
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -487,6 +511,16 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumBillingTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BillingType | Prisma.EnumBillingTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BillingType[] | Prisma.ListEnumBillingTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBillingTypeWithAggregatesFilter<$PrismaModel> | $Enums.BillingType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBillingTypeFilter<$PrismaModel>
 }
 
 export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {

@@ -19,6 +19,11 @@ enum DealStatus {
   lost
 }
 
+enum BillingType {
+  monthly
+  lumpsum
+}
+
 enum ContactRole {
   admin
   buyer
@@ -84,6 +89,8 @@ model Deal {
   title               String
   status              DealStatus @default(lead)
   monthlyAmount       Int?
+  billingType         BillingType @default(monthly)
+  contractAmount      Int?
   contractStartDate   DateTime?
   contractEndDate     DateTime?
   renewalReminderDays Int        @default(30)

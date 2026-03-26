@@ -22,6 +22,14 @@ export const DealStatus = {
 export type DealStatus = (typeof DealStatus)[keyof typeof DealStatus]
 
 
+export const BillingType = {
+  monthly: 'monthly',
+  lumpsum: 'lumpsum'
+} as const
+
+export type BillingType = (typeof BillingType)[keyof typeof BillingType]
+
+
 export const ContactRole = {
   admin: 'admin',
   buyer: 'buyer',
