@@ -18,6 +18,8 @@ interface Deal {
   id: string;
   title: string;
   monthlyAmount: number | null;
+  billingType: "monthly" | "lumpsum";
+  contractAmount: number | null;
   contractSummary: string | null;
   client: {
     name: string;
@@ -50,7 +52,8 @@ export default function ReportNewPage() {
         setDeals(data);
         if (data.length > 0) {
           setSelectedDealId(data[0].id);
-          if (data[0].monthlyAmount) setAmount(data[0].monthlyAmount);
+          const defaultAmt = data[0].billingType === "lumpsum" ? data[0].contractAmount : data[0].monthlyAmount;
+          if (defaultAmt) setAmount(defaultAmt);
           if (data[0].contractSummary) setContent(data[0].contractSummary);
         }
       } catch (err) {
@@ -73,8 +76,9 @@ export default function ReportNewPage() {
     if (value === null) return;
     setSelectedDealId(value);
     const deal = deals.find((d) => d.id === value);
-    if (deal?.monthlyAmount) {
-      setAmount(deal.monthlyAmount);
+    const dealAmount = deal?.billingType === "lumpsum" ? deal?.contractAmount : deal?.monthlyAmount;
+    if (dealAmount) {
+      setAmount(dealAmount);
     }
     if (deal?.contractSummary) {
       setContent(deal.contractSummary);

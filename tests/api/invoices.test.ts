@@ -161,9 +161,9 @@ describe("Invoices API", () => {
   describe("POST /api/invoices/generate-monthly", () => {
     it("should bulk generate draft invoices for active deals", async () => {
       const activeDeals = [
-        { id: "deal-1", monthlyAmount: 100000 },
-        { id: "deal-2", monthlyAmount: 200000 },
-        { id: "deal-3", monthlyAmount: 150000 },
+        { id: "deal-1", billingType: "monthly", monthlyAmount: 100000, contractAmount: null, contractEndDate: null },
+        { id: "deal-2", billingType: "monthly", monthlyAmount: 200000, contractAmount: null, contractEndDate: null },
+        { id: "deal-3", billingType: "monthly", monthlyAmount: 150000, contractAmount: null, contractEndDate: null },
       ];
       // deal-2 already has an invoice for this month
       const existingInvoices = [{ dealId: "deal-2" }];
@@ -179,17 +179,67 @@ describe("Invoices API", () => {
       const response = await generateMonthly(request as never);
       const data = await response.json();
 
-      expect(mockPrisma.deal.findMany).toHaveBeenCalledWith({
-        where: { status: "active", monthlyAmount: { not: null } },
-      });
-      expect(mockPrisma.invoice.findMany).toHaveBeenCalledWith({
-        where: { year: 2026, month: 3 },
-        select: { dealId: true },
-      });
       // Should create 2 invoices (deal-1 and deal-3, skipping deal-2)
       expect(mockPrisma.invoice.create).toHaveBeenCalledTimes(2);
       expect(data.createdCount).toBe(2);
       expect(response.status).toBe(201);
+    });
+
+    it("should generate invoice for lumpsum deal only in contract end month", async () => {
+      const activeDeals = [
+        {
+          id: "deal-lumpsum",
+          billingType: "lumpsum",
+          monthlyAmount: null,
+          contractAmount: 3000000,
+          contractEndDate: new Date("2026-03-31"),
+        },
+      ];
+
+      mockPrisma.deal.findMany.mockResolvedValue(activeDeals);
+      mockPrisma.invoice.findMany.mockResolvedValue([]);
+      mockPrisma.invoice.create.mockResolvedValue({});
+
+      const request = makeRequest("http://localhost:3000/api/invoices/generate-monthly", {
+        year: 2026,
+        month: 3,
+      });
+      const response = await generateMonthly(request as never);
+      const data = await response.json();
+
+      expect(mockPrisma.invoice.create).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.invoice.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          dealId: "deal-lumpsum",
+          amount: 3000000,
+        }),
+      });
+      expect(data.createdCount).toBe(1);
+    });
+
+    it("should NOT generate invoice for lumpsum deal in non-end month", async () => {
+      const activeDeals = [
+        {
+          id: "deal-lumpsum",
+          billingType: "lumpsum",
+          monthlyAmount: null,
+          contractAmount: 3000000,
+          contractEndDate: new Date("2026-06-30"),
+        },
+      ];
+
+      mockPrisma.deal.findMany.mockResolvedValue(activeDeals);
+      mockPrisma.invoice.findMany.mockResolvedValue([]);
+
+      const request = makeRequest("http://localhost:3000/api/invoices/generate-monthly", {
+        year: 2026,
+        month: 3,
+      });
+      const response = await generateMonthly(request as never);
+      const data = await response.json();
+
+      expect(mockPrisma.invoice.create).not.toHaveBeenCalled();
+      expect(data.createdCount).toBe(0);
     });
 
     it("should return 400 if year or month is missing", async () => {

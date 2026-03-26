@@ -60,11 +60,16 @@ export async function GET(request: NextRequest) {
   const deals = await prisma.deal.findMany({
     where: {
       status: { in: ["active", "closed", "renewal", "discussion", "expected"] },
-      monthlyAmount: { not: null },
+      OR: [
+        { billingType: "monthly", monthlyAmount: { not: null } },
+        { billingType: "lumpsum", contractAmount: { not: null } },
+      ],
     },
     select: {
       status: true,
       monthlyAmount: true,
+      billingType: true,
+      contractAmount: true,
       contractStartDate: true,
       contractEndDate: true,
       client: { select: { name: true } },
@@ -77,38 +82,60 @@ export async function GET(request: NextRequest) {
   const revenueByClient: Record<string, number> = {};
 
   for (const deal of deals) {
-    if (!deal.monthlyAmount) continue;
+    if (deal.billingType === "lumpsum") {
+      // 一括契約: 終了月にまとめて計上
+      if (!deal.contractAmount || !deal.contractEndDate) continue;
+      const endMonth = formatMonth(deal.contractEndDate);
+      if (startDate && endMonth < formatMonth(startDate)) continue;
 
-    const dealStart = deal.contractStartDate ?? now;
-    const dealEnd = deal.contractEndDate ?? new Date(now.getFullYear(), now.getMonth() + 12, 0);
-    const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
-    const months = generateMonthRange(rangeStart, dealEnd);
-
-    for (const m of months) {
       if (deal.status === "closed") {
-        // Closed deals are always actual (past revenue)
-        actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+        actualByMonth[endMonth] = (actualByMonth[endMonth] ?? 0) + deal.contractAmount;
+        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.contractAmount;
       } else if (deal.status === "active" || deal.status === "renewal") {
-        // Active/renewal: past months = actual, current & future = contracted
-        if (m < currentMonth) {
-          actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+        if (endMonth < currentMonth) {
+          actualByMonth[endMonth] = (actualByMonth[endMonth] ?? 0) + deal.contractAmount;
+          revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.contractAmount;
         } else {
-          contractedByMonth[m] = (contractedByMonth[m] ?? 0) + deal.monthlyAmount;
+          contractedByMonth[endMonth] = (contractedByMonth[endMonth] ?? 0) + deal.contractAmount;
         }
       } else {
-        // discussion, expected = prospect
-        prospectByMonth[m] = (prospectByMonth[m] ?? 0) + deal.monthlyAmount;
+        // discussion, expected
+        if (deal.contractEndDate) {
+          prospectByMonth[endMonth] = (prospectByMonth[endMonth] ?? 0) + deal.contractAmount;
+        }
       }
-    }
+    } else {
+      // 月額契約: 既存ロジック
+      if (!deal.monthlyAmount) continue;
 
-    // Client revenue: total from actual months (closed + active past)
-    const totalMonths = months.length;
-    if (deal.status === "closed") {
-      revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * totalMonths;
-    } else if (deal.status === "active" || deal.status === "renewal") {
-      const pastMonths = months.filter((m) => m < currentMonth).length;
-      if (pastMonths > 0) {
-        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * pastMonths;
+      const dealStart = deal.contractStartDate ?? now;
+      const dealEnd = deal.contractEndDate ?? new Date(now.getFullYear(), now.getMonth() + 12, 0);
+      const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
+      const months = generateMonthRange(rangeStart, dealEnd);
+
+      for (const m of months) {
+        if (deal.status === "closed") {
+          actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+        } else if (deal.status === "active" || deal.status === "renewal") {
+          if (m < currentMonth) {
+            actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+          } else {
+            contractedByMonth[m] = (contractedByMonth[m] ?? 0) + deal.monthlyAmount;
+          }
+        } else {
+          prospectByMonth[m] = (prospectByMonth[m] ?? 0) + deal.monthlyAmount;
+        }
+      }
+
+      // Client revenue: total from actual months (closed + active past)
+      const totalMonths = months.length;
+      if (deal.status === "closed") {
+        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * totalMonths;
+      } else if (deal.status === "active" || deal.status === "renewal") {
+        const pastMonths = months.filter((m) => m < currentMonth).length;
+        if (pastMonths > 0) {
+          revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * pastMonths;
+        }
       }
     }
   }
@@ -153,7 +180,7 @@ export async function GET(request: NextRequest) {
 
   // --- Pipeline ---
   const allDeals = await prisma.deal.findMany({
-    select: { status: true, monthlyAmount: true },
+    select: { status: true, monthlyAmount: true, billingType: true, contractAmount: true },
   });
 
   const pipelineMap: Record<string, { count: number; amount: number }> = {};
@@ -162,7 +189,10 @@ export async function GET(request: NextRequest) {
       pipelineMap[deal.status] = { count: 0, amount: 0 };
     }
     pipelineMap[deal.status].count += 1;
-    pipelineMap[deal.status].amount += deal.monthlyAmount ?? 0;
+    const dealAmount = deal.billingType === "lumpsum"
+      ? (deal.contractAmount ?? 0)
+      : (deal.monthlyAmount ?? 0);
+    pipelineMap[deal.status].amount += dealAmount;
   }
 
   const pipeline = Object.entries(pipelineMap).map(([status, data]) => ({
