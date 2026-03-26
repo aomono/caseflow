@@ -30,14 +30,15 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">報告書一覧</h1>
         <Link href="/reports/new">
           <Button>新規作成</Button>
         </Link>
       </div>
 
-      <Table>
+      <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>
             <TableHead>案件</TableHead>
@@ -92,6 +93,7 @@ export default async function ReportsPage() {
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

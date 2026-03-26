@@ -171,7 +171,7 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">請求書一覧</h1>
           <p className="mt-1 text-sm text-slate-500">請求と入金の管理</p>
@@ -186,7 +186,7 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
           <Card key={card.label} className={`card-hover rounded-xl border-slate-100 shadow-sm ${card.bg}`}>
             <CardHeader className="pb-2">
@@ -232,8 +232,8 @@ export default function InvoicesPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
-          <Table>
+        <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="border-slate-100 hover:bg-transparent">
                 <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>

@@ -14,7 +14,7 @@ export function Header() {
     .toUpperCase();
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-8">
+    <header className="hidden h-14 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-8 lg:flex">
       <div />
       <div className="flex items-center gap-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">

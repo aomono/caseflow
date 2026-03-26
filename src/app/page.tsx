@@ -158,7 +158,7 @@ export default function DashboardPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="skeleton h-28 rounded-xl" />
           ))}
@@ -166,7 +166,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Pipeline Cards */}
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {pipeline.map((item) => (
               <Card
                 key={item.status}
@@ -189,6 +189,7 @@ export default function DashboardPage() {
 
           {/* Charts Row */}
           <div className="grid gap-6 lg:grid-cols-3">
+
             {/* Revenue Bar Chart */}
             <Card className="lg:col-span-2 rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>

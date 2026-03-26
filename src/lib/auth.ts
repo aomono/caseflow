@@ -12,7 +12,7 @@ declare module "next-auth" {
   }
 }
 
-const ALLOWED_EMAILS = process.env.ALLOWED_EMAILS?.split(",") ?? [];
+const ALLOWED_EMAILS = process.env.ALLOWED_EMAILS?.split(",").filter(Boolean) ?? [];
 
 export const authOptions: NextAuthOptions = {
   session: {
