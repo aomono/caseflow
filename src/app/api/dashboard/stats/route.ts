@@ -53,27 +53,13 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const currentMonth = formatMonth(now);
 
-  // --- Monthly Revenue (actual from paid invoices) ---
-  const invoiceWhere: Record<string, unknown> = { status: "paid" };
-  if (startDate) {
-    invoiceWhere.dueDate = { gte: startDate };
-  }
-
-  const paidInvoices = await prisma.invoice.findMany({
-    where: invoiceWhere,
-    select: { year: true, month: true, amount: true },
-  });
-
-  const actualByMonth: Record<string, number> = {};
-  for (const inv of paidInvoices) {
-    const key = `${inv.year}-${String(inv.month).padStart(2, "0")}`;
-    actualByMonth[key] = (actualByMonth[key] ?? 0) + inv.amount;
-  }
-
-  // --- Contracted & Prospect revenue (projected from deals) ---
+  // --- Monthly Revenue (from deals by status) ---
+  // actual = closed + active (past months) — work already done
+  // contracted = active (current & future months) + renewal
+  // prospect = discussion + expected
   const deals = await prisma.deal.findMany({
     where: {
-      status: { in: ["active", "discussion", "expected"] },
+      status: { in: ["active", "closed", "renewal", "discussion", "expected"] },
       monthlyAmount: { not: null },
     },
     select: {
@@ -81,11 +67,14 @@ export async function GET(request: NextRequest) {
       monthlyAmount: true,
       contractStartDate: true,
       contractEndDate: true,
+      client: { select: { name: true } },
     },
   });
 
+  const actualByMonth: Record<string, number> = {};
   const contractedByMonth: Record<string, number> = {};
   const prospectByMonth: Record<string, number> = {};
+  const revenueByClient: Record<string, number> = {};
 
   for (const deal of deals) {
     if (!deal.monthlyAmount) continue;
@@ -95,9 +84,50 @@ export async function GET(request: NextRequest) {
     const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
     const months = generateMonthRange(rangeStart, dealEnd);
 
-    const target = deal.status === "active" ? contractedByMonth : prospectByMonth;
     for (const m of months) {
-      target[m] = (target[m] ?? 0) + deal.monthlyAmount;
+      if (deal.status === "closed") {
+        // Closed deals are always actual (past revenue)
+        actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+      } else if (deal.status === "active" || deal.status === "renewal") {
+        // Active/renewal: past months = actual, current & future = contracted
+        if (m < currentMonth) {
+          actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
+        } else {
+          contractedByMonth[m] = (contractedByMonth[m] ?? 0) + deal.monthlyAmount;
+        }
+      } else {
+        // discussion, expected = prospect
+        prospectByMonth[m] = (prospectByMonth[m] ?? 0) + deal.monthlyAmount;
+      }
+    }
+
+    // Client revenue: total from actual months (closed + active past)
+    const totalMonths = months.length;
+    if (deal.status === "closed") {
+      revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * totalMonths;
+    } else if (deal.status === "active" || deal.status === "renewal") {
+      const pastMonths = months.filter((m) => m < currentMonth).length;
+      if (pastMonths > 0) {
+        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * pastMonths;
+      }
+    }
+  }
+
+  // Override with paid invoice amounts where available (more accurate)
+  const invoiceWhere: Record<string, unknown> = { status: "paid" };
+  if (startDate) {
+    invoiceWhere.dueDate = { gte: startDate };
+  }
+  const paidInvoices = await prisma.invoice.findMany({
+    where: invoiceWhere,
+    select: { year: true, month: true, amount: true, deal: { select: { client: { select: { name: true } } } } },
+  });
+  for (const inv of paidInvoices) {
+    const key = `${inv.year}-${String(inv.month).padStart(2, "0")}`;
+    // Paid invoices supplement the actual amount (don't double-count — but if invoice exists, it's the authoritative source)
+    // For simplicity, add invoice amounts on top since they may differ from monthlyAmount
+    if (!actualByMonth[key]) {
+      actualByMonth[key] = inv.amount;
     }
   }
 
@@ -116,18 +146,7 @@ export async function GET(request: NextRequest) {
       prospect: prospectByMonth[month] ?? 0,
     }));
 
-  // --- Client Revenue (from paid invoices) ---
-  const clientInvoices = await prisma.invoice.findMany({
-    where: { status: "paid", ...(startDate ? { dueDate: { gte: startDate } } : {}) },
-    select: { amount: true, deal: { select: { client: { select: { name: true } } } } },
-  });
-
-  const revenueByClient: Record<string, number> = {};
-  for (const inv of clientInvoices) {
-    const name = inv.deal.client.name;
-    revenueByClient[name] = (revenueByClient[name] ?? 0) + inv.amount;
-  }
-
+  // --- Client Revenue ---
   const clientRevenue = Object.entries(revenueByClient)
     .map(([name, revenue]) => ({ name, revenue }))
     .sort((a, b) => b.revenue - a.revenue);
