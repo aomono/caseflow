@@ -316,18 +316,29 @@ export async function GET(request: NextRequest) {
   ].filter((item) => item.amount > 0);
 
   // --- Available Fiscal Years ---
-  const oldestDeal = await prisma.deal.findFirst({
-    where: { contractStartDate: { not: null } },
-    orderBy: { contractStartDate: "asc" },
-    select: { contractStartDate: true },
-  });
+  const [oldestDeal, newestDeal] = await Promise.all([
+    prisma.deal.findFirst({
+      where: { contractStartDate: { not: null } },
+      orderBy: { contractStartDate: "asc" },
+      select: { contractStartDate: true },
+    }),
+    prisma.deal.findFirst({
+      where: { OR: [{ contractStartDate: { not: null } }, { contractEndDate: { not: null } }] },
+      orderBy: { contractEndDate: "desc" },
+      select: { contractStartDate: true, contractEndDate: true },
+    }),
+  ]);
+  const toFiscalYear = (d: Date) =>
+    d.getMonth() < FISCAL_YEAR_START_MONTH - 1 ? d.getFullYear() - 1 : d.getFullYear();
   const firstYear = oldestDeal?.contractStartDate
-    ? (oldestDeal.contractStartDate.getMonth() < FISCAL_YEAR_START_MONTH - 1
-        ? oldestDeal.contractStartDate.getFullYear() - 1
-        : oldestDeal.contractStartDate.getFullYear())
+    ? toFiscalYear(oldestDeal.contractStartDate)
+    : currentFiscalYear;
+  const latestDate = newestDeal?.contractEndDate ?? newestDeal?.contractStartDate;
+  const lastYear = latestDate
+    ? Math.max(currentFiscalYear, toFiscalYear(latestDate))
     : currentFiscalYear;
   const fiscalYears: number[] = [];
-  for (let y = firstYear; y <= currentFiscalYear; y++) {
+  for (let y = firstYear; y <= lastYear; y++) {
     fiscalYears.push(y);
   }
 
