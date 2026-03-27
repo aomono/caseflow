@@ -24,10 +24,20 @@ export type DealStatus = (typeof DealStatus)[keyof typeof DealStatus]
 
 export const BillingType = {
   monthly: 'monthly',
-  lumpsum: 'lumpsum'
+  lumpsum: 'lumpsum',
+  prorated: 'prorated'
 } as const
 
 export type BillingType = (typeof BillingType)[keyof typeof BillingType]
+
+
+export const ProrateBase = {
+  fixed30: 'fixed30',
+  calendar: 'calendar',
+  business: 'business'
+} as const
+
+export type ProrateBase = (typeof ProrateBase)[keyof typeof ProrateBase]
 
 
 export const ContactRole = {

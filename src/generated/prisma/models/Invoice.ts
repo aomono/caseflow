@@ -30,12 +30,16 @@ export type InvoiceAvgAggregateOutputType = {
   year: number | null
   month: number | null
   amount: number | null
+  workingDays: number | null
+  baseDays: number | null
 }
 
 export type InvoiceSumAggregateOutputType = {
   year: number | null
   month: number | null
   amount: number | null
+  workingDays: number | null
+  baseDays: number | null
 }
 
 export type InvoiceMinAggregateOutputType = {
@@ -44,6 +48,8 @@ export type InvoiceMinAggregateOutputType = {
   year: number | null
   month: number | null
   amount: number | null
+  workingDays: number | null
+  baseDays: number | null
   invoiceDate: Date | null
   dueDate: Date | null
   status: $Enums.InvoiceStatus | null
@@ -58,6 +64,8 @@ export type InvoiceMaxAggregateOutputType = {
   year: number | null
   month: number | null
   amount: number | null
+  workingDays: number | null
+  baseDays: number | null
   invoiceDate: Date | null
   dueDate: Date | null
   status: $Enums.InvoiceStatus | null
@@ -72,6 +80,8 @@ export type InvoiceCountAggregateOutputType = {
   year: number
   month: number
   amount: number
+  workingDays: number
+  baseDays: number
   invoiceDate: number
   dueDate: number
   status: number
@@ -86,12 +96,16 @@ export type InvoiceAvgAggregateInputType = {
   year?: true
   month?: true
   amount?: true
+  workingDays?: true
+  baseDays?: true
 }
 
 export type InvoiceSumAggregateInputType = {
   year?: true
   month?: true
   amount?: true
+  workingDays?: true
+  baseDays?: true
 }
 
 export type InvoiceMinAggregateInputType = {
@@ -100,6 +114,8 @@ export type InvoiceMinAggregateInputType = {
   year?: true
   month?: true
   amount?: true
+  workingDays?: true
+  baseDays?: true
   invoiceDate?: true
   dueDate?: true
   status?: true
@@ -114,6 +130,8 @@ export type InvoiceMaxAggregateInputType = {
   year?: true
   month?: true
   amount?: true
+  workingDays?: true
+  baseDays?: true
   invoiceDate?: true
   dueDate?: true
   status?: true
@@ -128,6 +146,8 @@ export type InvoiceCountAggregateInputType = {
   year?: true
   month?: true
   amount?: true
+  workingDays?: true
+  baseDays?: true
   invoiceDate?: true
   dueDate?: true
   status?: true
@@ -229,6 +249,8 @@ export type InvoiceGroupByOutputType = {
   year: number
   month: number
   amount: number
+  workingDays: number | null
+  baseDays: number | null
   invoiceDate: Date | null
   dueDate: Date
   status: $Enums.InvoiceStatus
@@ -266,6 +288,8 @@ export type InvoiceWhereInput = {
   year?: Prisma.IntFilter<"Invoice"> | number
   month?: Prisma.IntFilter<"Invoice"> | number
   amount?: Prisma.IntFilter<"Invoice"> | number
+  workingDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
+  baseDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
   invoiceDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   dueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
@@ -281,6 +305,8 @@ export type InvoiceOrderByWithRelationInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  baseDays?: Prisma.SortOrderInput | Prisma.SortOrder
   invoiceDate?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -300,6 +326,8 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   year?: Prisma.IntFilter<"Invoice"> | number
   month?: Prisma.IntFilter<"Invoice"> | number
   amount?: Prisma.IntFilter<"Invoice"> | number
+  workingDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
+  baseDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
   invoiceDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   dueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
@@ -315,6 +343,8 @@ export type InvoiceOrderByWithAggregationInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  baseDays?: Prisma.SortOrderInput | Prisma.SortOrder
   invoiceDate?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -337,6 +367,8 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   year?: Prisma.IntWithAggregatesFilter<"Invoice"> | number
   month?: Prisma.IntWithAggregatesFilter<"Invoice"> | number
   amount?: Prisma.IntWithAggregatesFilter<"Invoice"> | number
+  workingDays?: Prisma.IntNullableWithAggregatesFilter<"Invoice"> | number | null
+  baseDays?: Prisma.IntNullableWithAggregatesFilter<"Invoice"> | number | null
   invoiceDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   status?: Prisma.EnumInvoiceStatusWithAggregatesFilter<"Invoice"> | $Enums.InvoiceStatus
@@ -350,6 +382,8 @@ export type InvoiceCreateInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -365,6 +399,8 @@ export type InvoiceUncheckedCreateInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -378,6 +414,8 @@ export type InvoiceUpdateInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -393,6 +431,8 @@ export type InvoiceUncheckedUpdateInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -407,6 +447,8 @@ export type InvoiceCreateManyInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -420,6 +462,8 @@ export type InvoiceUpdateManyMutationInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -434,6 +478,8 @@ export type InvoiceUncheckedUpdateManyInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -464,6 +510,8 @@ export type InvoiceCountOrderByAggregateInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  baseDays?: Prisma.SortOrder
   invoiceDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -476,6 +524,8 @@ export type InvoiceAvgOrderByAggregateInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  baseDays?: Prisma.SortOrder
 }
 
 export type InvoiceMaxOrderByAggregateInput = {
@@ -484,6 +534,8 @@ export type InvoiceMaxOrderByAggregateInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  baseDays?: Prisma.SortOrder
   invoiceDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -498,6 +550,8 @@ export type InvoiceMinOrderByAggregateInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  baseDays?: Prisma.SortOrder
   invoiceDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -510,6 +564,8 @@ export type InvoiceSumOrderByAggregateInput = {
   year?: Prisma.SortOrder
   month?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  workingDays?: Prisma.SortOrder
+  baseDays?: Prisma.SortOrder
 }
 
 export type InvoiceCreateNestedManyWithoutDealInput = {
@@ -563,6 +619,8 @@ export type InvoiceCreateWithoutDealInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -576,6 +634,8 @@ export type InvoiceUncheckedCreateWithoutDealInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -619,6 +679,8 @@ export type InvoiceScalarWhereInput = {
   year?: Prisma.IntFilter<"Invoice"> | number
   month?: Prisma.IntFilter<"Invoice"> | number
   amount?: Prisma.IntFilter<"Invoice"> | number
+  workingDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
+  baseDays?: Prisma.IntNullableFilter<"Invoice"> | number | null
   invoiceDate?: Prisma.DateTimeNullableFilter<"Invoice"> | Date | string | null
   dueDate?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
@@ -632,6 +694,8 @@ export type InvoiceCreateManyDealInput = {
   year: number
   month: number
   amount: number
+  workingDays?: number | null
+  baseDays?: number | null
   invoiceDate?: Date | string | null
   dueDate: Date | string
   status?: $Enums.InvoiceStatus
@@ -645,6 +709,8 @@ export type InvoiceUpdateWithoutDealInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -658,6 +724,8 @@ export type InvoiceUncheckedUpdateWithoutDealInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -671,6 +739,8 @@ export type InvoiceUncheckedUpdateManyWithoutDealInput = {
   year?: Prisma.IntFieldUpdateOperationsInput | number
   month?: Prisma.IntFieldUpdateOperationsInput | number
   amount?: Prisma.IntFieldUpdateOperationsInput | number
+  workingDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  baseDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   invoiceDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
@@ -687,6 +757,8 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   year?: boolean
   month?: boolean
   amount?: boolean
+  workingDays?: boolean
+  baseDays?: boolean
   invoiceDate?: boolean
   dueDate?: boolean
   status?: boolean
@@ -702,6 +774,8 @@ export type InvoiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   year?: boolean
   month?: boolean
   amount?: boolean
+  workingDays?: boolean
+  baseDays?: boolean
   invoiceDate?: boolean
   dueDate?: boolean
   status?: boolean
@@ -717,6 +791,8 @@ export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   year?: boolean
   month?: boolean
   amount?: boolean
+  workingDays?: boolean
+  baseDays?: boolean
   invoiceDate?: boolean
   dueDate?: boolean
   status?: boolean
@@ -732,6 +808,8 @@ export type InvoiceSelectScalar = {
   year?: boolean
   month?: boolean
   amount?: boolean
+  workingDays?: boolean
+  baseDays?: boolean
   invoiceDate?: boolean
   dueDate?: boolean
   status?: boolean
@@ -740,7 +818,7 @@ export type InvoiceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dealId" | "year" | "month" | "amount" | "invoiceDate" | "dueDate" | "status" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dealId" | "year" | "month" | "amount" | "workingDays" | "baseDays" | "invoiceDate" | "dueDate" | "status" | "paidAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   deal?: boolean | Prisma.DealDefaultArgs<ExtArgs>
 }
@@ -762,6 +840,8 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     year: number
     month: number
     amount: number
+    workingDays: number | null
+    baseDays: number | null
     invoiceDate: Date | null
     dueDate: Date
     status: $Enums.InvoiceStatus
@@ -1197,6 +1277,8 @@ export interface InvoiceFieldRefs {
   readonly year: Prisma.FieldRef<"Invoice", 'Int'>
   readonly month: Prisma.FieldRef<"Invoice", 'Int'>
   readonly amount: Prisma.FieldRef<"Invoice", 'Int'>
+  readonly workingDays: Prisma.FieldRef<"Invoice", 'Int'>
+  readonly baseDays: Prisma.FieldRef<"Invoice", 'Int'>
   readonly invoiceDate: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly dueDate: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly status: Prisma.FieldRef<"Invoice", 'InvoiceStatus'>

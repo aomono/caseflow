@@ -1138,6 +1138,7 @@ export const DealScalarFieldEnum = {
   monthlyAmount: 'monthlyAmount',
   billingType: 'billingType',
   contractAmount: 'contractAmount',
+  prorateBase: 'prorateBase',
   contractStartDate: 'contractStartDate',
   contractEndDate: 'contractEndDate',
   renewalReminderDays: 'renewalReminderDays',
@@ -1183,6 +1184,8 @@ export const InvoiceScalarFieldEnum = {
   year: 'year',
   month: 'month',
   amount: 'amount',
+  workingDays: 'workingDays',
+  baseDays: 'baseDays',
   invoiceDate: 'invoiceDate',
   dueDate: 'dueDate',
   status: 'status',
@@ -1346,6 +1349,20 @@ export type EnumBillingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'BillingType[]'
  */
 export type ListEnumBillingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProrateBase'
+ */
+export type EnumProrateBaseFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProrateBase'>
+    
+
+
+/**
+ * Reference to a field of type 'ProrateBase[]'
+ */
+export type ListEnumProrateBaseFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProrateBase[]'>
     
 
 

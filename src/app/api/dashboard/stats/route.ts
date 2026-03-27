@@ -4,18 +4,47 @@ import { calculateProrate, type ProrateBaseType } from "@/lib/prorate";
 
 export const dynamic = "force-dynamic";
 
-function getStartDate(period: string | null): Date | null {
+// 会計年度: 6月〜翌5月（決算期5月末）
+const FISCAL_YEAR_START_MONTH = 6; // 6月始まり
+
+function getFiscalYearRange(fy: number): { start: Date; end: Date } {
+  return {
+    start: new Date(fy, FISCAL_YEAR_START_MONTH - 1, 1), // 6月1日
+    end: new Date(fy + 1, FISCAL_YEAR_START_MONTH - 1, 0), // 翌年5月末日
+  };
+}
+
+function getCurrentFiscalYear(): number {
+  const now = new Date();
+  // 1月〜5月は前年度の会計年度
+  return now.getMonth() < FISCAL_YEAR_START_MONTH - 1
+    ? now.getFullYear() - 1
+    : now.getFullYear();
+}
+
+function getDateRange(
+  period: string | null,
+  fy: string | null
+): { start: Date | null; end: Date | null } {
+  if (fy) {
+    const fyNum = parseInt(fy, 10);
+    if (!isNaN(fyNum)) {
+      const range = getFiscalYearRange(fyNum);
+      return { start: range.start, end: range.end };
+    }
+  }
+
   const now = new Date();
   switch (period) {
     case "3m":
-      return new Date(now.getFullYear(), now.getMonth() - 3, 1);
+      return { start: new Date(now.getFullYear(), now.getMonth() - 3, 1), end: null };
     case "6m":
-      return new Date(now.getFullYear(), now.getMonth() - 6, 1);
+      return { start: new Date(now.getFullYear(), now.getMonth() - 6, 1), end: null };
     case "12m":
-      return new Date(now.getFullYear(), now.getMonth() - 12, 1);
+      return { start: new Date(now.getFullYear(), now.getMonth() - 12, 1), end: null };
     case "all":
     default:
-      return null;
+      return { start: null, end: null };
   }
 }
 
@@ -49,10 +78,12 @@ const STATUS_LABELS: Record<string, string> = {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const period = searchParams.get("period");
-  const startDate = getStartDate(period);
+  const fy = searchParams.get("fy");
+  const { start: startDate, end: endDate } = getDateRange(period, fy);
 
   const now = new Date();
   const currentMonth = formatMonth(now);
+  const currentFiscalYear = getCurrentFiscalYear();
 
   // --- Monthly Revenue (from deals by status) ---
   // actual = closed + active (past months) — work already done
@@ -201,20 +232,44 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Merge all months
+  // Merge all months — when fiscal year mode, ensure all 12 months are present
   const allMonths = new Set([
     ...Object.keys(actualByMonth),
     ...Object.keys(contractedByMonth),
     ...Object.keys(prospectByMonth),
   ]);
-  const monthlyRevenue = Array.from(allMonths)
-    .sort()
-    .map((month) => ({
+
+  // If fiscal year mode, fill in all months in the fiscal year range
+  if (fy && startDate && endDate) {
+    const fyMonths = generateMonthRange(startDate, endDate);
+    for (const m of fyMonths) {
+      allMonths.add(m);
+    }
+  }
+
+  const sortedMonths = Array.from(allMonths).sort();
+  const monthlyRevenue = sortedMonths.map((month) => ({
+    month,
+    actual: actualByMonth[month] ?? 0,
+    contracted: contractedByMonth[month] ?? 0,
+    prospect: prospectByMonth[month] ?? 0,
+  }));
+
+  // Cumulative revenue (for fiscal year view)
+  let cumActual = 0;
+  let cumContracted = 0;
+  let cumProspect = 0;
+  const cumulativeRevenue = sortedMonths.map((month) => {
+    cumActual += actualByMonth[month] ?? 0;
+    cumContracted += contractedByMonth[month] ?? 0;
+    cumProspect += prospectByMonth[month] ?? 0;
+    return {
       month,
-      actual: actualByMonth[month] ?? 0,
-      contracted: contractedByMonth[month] ?? 0,
-      prospect: prospectByMonth[month] ?? 0,
-    }));
+      actual: cumActual,
+      contracted: cumActual + cumContracted,
+      prospect: cumActual + cumContracted + cumProspect,
+    };
+  });
 
   // --- Client Revenue ---
   const clientRevenue = Object.entries(revenueByClient)
@@ -245,6 +300,40 @@ export async function GET(request: NextRequest) {
     amount: data.amount,
   }));
 
+  // --- Revenue by Status (for stacked breakdown) ---
+  const revenueByStatus: Record<string, number> = {};
+  for (const deal of deals) {
+    let amount = 0;
+    if (deal.billingType === "lumpsum") {
+      amount = deal.contractAmount ?? 0;
+    } else {
+      amount = deal.monthlyAmount ?? 0;
+    }
+    if (amount > 0) {
+      const statusLabel = STATUS_LABELS[deal.status] ?? deal.status;
+      revenueByStatus[statusLabel] = (revenueByStatus[statusLabel] ?? 0) + amount;
+    }
+  }
+  const statusRevenue = Object.entries(revenueByStatus)
+    .map(([status, amount]) => ({ status, amount }))
+    .sort((a, b) => b.amount - a.amount);
+
+  // --- Available Fiscal Years ---
+  const oldestDeal = await prisma.deal.findFirst({
+    where: { contractStartDate: { not: null } },
+    orderBy: { contractStartDate: "asc" },
+    select: { contractStartDate: true },
+  });
+  const firstYear = oldestDeal?.contractStartDate
+    ? (oldestDeal.contractStartDate.getMonth() < FISCAL_YEAR_START_MONTH - 1
+        ? oldestDeal.contractStartDate.getFullYear() - 1
+        : oldestDeal.contractStartDate.getFullYear())
+    : currentFiscalYear;
+  const fiscalYears: number[] = [];
+  for (let y = firstYear; y <= currentFiscalYear; y++) {
+    fiscalYears.push(y);
+  }
+
   // --- Reminders (pending/reminded, limit 10) ---
   const reminders = await prisma.reminder.findMany({
     where: { status: { in: ["pending", "reminded"] } },
@@ -262,9 +351,13 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     monthlyRevenue,
+    cumulativeRevenue,
     clientRevenue,
+    statusRevenue,
     pipeline,
     reminders,
     recentActivities,
+    currentFiscalYear,
+    fiscalYears,
   });
 }

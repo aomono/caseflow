@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import {
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -32,9 +34,21 @@ interface MonthlyRevenue {
   prospect: number;
 }
 
+interface CumulativeRevenue {
+  month: string;
+  actual: number;
+  contracted: number;
+  prospect: number;
+}
+
 interface ClientRevenue {
   name: string;
   revenue: number;
+}
+
+interface StatusRevenue {
+  status: string;
+  amount: number;
 }
 
 interface PipelineItem {
@@ -63,14 +77,20 @@ interface Activity {
 
 interface DashboardStats {
   monthlyRevenue: MonthlyRevenue[];
+  cumulativeRevenue: CumulativeRevenue[];
   clientRevenue: ClientRevenue[];
+  statusRevenue: StatusRevenue[];
   pipeline: PipelineItem[];
   reminders: Reminder[];
   recentActivities: Activity[];
+  currentFiscalYear: number;
+  fiscalYears: number[];
 }
 
 const formatJPY = (value: number) =>
   `¥${value.toLocaleString("ja-JP")}`;
+
+type ViewMode = "period" | "fy";
 
 const PERIOD_OPTIONS = [
   { label: "3ヶ月", value: "3m" },
@@ -79,7 +99,9 @@ const PERIOD_OPTIONS = [
   { label: "全期間", value: "all" },
 ] as const;
 
-const PIE_COLORS = ["#4f46e5", "#f59e0b", "#10b981", "#f43f5e", "#8b5cf6"];
+const PIE_COLORS = ["#4f46e5", "#f59e0b", "#10b981", "#f43f5e", "#8b5cf6", "#06b6d4", "#ec4899"];
+
+const STATUS_PIE_COLORS = ["#4f46e5", "#818cf8", "#10b981", "#f59e0b", "#f43f5e", "#8b5cf6", "#64748b"];
 
 const PIPELINE_BORDER_COLORS: Record<string, string> = {
   lead: "border-l-slate-400",
@@ -104,33 +126,64 @@ const ACTIVITY_TYPE_STYLES: Record<string, { className: string; label: string }>
   note: { className: "bg-slate-50 text-slate-700 border border-slate-200", label: "メモ" },
 };
 
+function formatMonthLabel(v: string): string {
+  const parts = v.split("-");
+  return `${parts[1]}月`;
+}
+
+function formatMonthLabelFull(v: string): string {
+  const parts = v.split("-");
+  return `${parts[0]}年${parts[1]}月`;
+}
+
 export default function DashboardPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>("fy");
   const [period, setPeriod] = useState("12m");
+  const [fiscalYear, setFiscalYear] = useState<number | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/dashboard/stats?period=${period}`);
+      const params = new URLSearchParams();
+      if (viewMode === "fy" && fiscalYear) {
+        params.set("fy", String(fiscalYear));
+      } else {
+        params.set("period", period);
+      }
+      const res = await fetch(`/api/dashboard/stats?${params}`);
       const data: DashboardStats = await res.json();
       setStats(data);
+      if (!fiscalYear && data.currentFiscalYear) {
+        setFiscalYear(data.currentFiscalYear);
+      }
     } catch (err) {
       console.error("Failed to fetch dashboard stats:", err);
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [viewMode, period, fiscalYear]);
 
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
 
   const monthlyRevenue = stats?.monthlyRevenue ?? [];
+  const cumulativeRevenue = stats?.cumulativeRevenue ?? [];
   const clientRevenue = stats?.clientRevenue ?? [];
+  const statusRevenue = stats?.statusRevenue ?? [];
   const pipeline = stats?.pipeline ?? [];
   const reminders = stats?.reminders ?? [];
   const recentActivities = stats?.recentActivities ?? [];
+  const fiscalYears = stats?.fiscalYears ?? [];
+
+  const totalRevenue = monthlyRevenue.reduce((sum, m) => sum + m.actual + m.contracted + m.prospect, 0);
+  const totalActual = monthlyRevenue.reduce((sum, m) => sum + m.actual, 0);
+
+  const fyLabel = fiscalYear
+    ? `FY${fiscalYear} (${fiscalYear}年6月〜${fiscalYear + 1}年5月)`
+    : "";
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -138,22 +191,70 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">ダッシュボード</h1>
-          <p className="mt-1 text-sm text-slate-500">CaseFlow の概要</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {viewMode === "fy" ? fyLabel : "CaseFlow の概要"}
+          </p>
         </div>
-        <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
-          {PERIOD_OPTIONS.map((opt) => (
+
+        <div className="flex items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
             <button
-              key={opt.value}
-              onClick={() => setPeriod(opt.value)}
-              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
-                period === opt.value
+              onClick={() => setViewMode("fy")}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                viewMode === "fy"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              {opt.label}
+              会計年度
             </button>
-          ))}
+            <button
+              onClick={() => setViewMode("period")}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                viewMode === "period"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              期間指定
+            </button>
+          </div>
+
+          {/* Period/FY Selector */}
+          {viewMode === "fy" ? (
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+              {fiscalYears.map((fy) => (
+                <button
+                  key={fy}
+                  onClick={() => setFiscalYear(fy)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                    fiscalYear === fy
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  FY{fy}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+              {PERIOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPeriod(opt.value)}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
+                    period === opt.value
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -165,6 +266,42 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
+          {/* Summary Cards (FY mode) */}
+          {viewMode === "fy" && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Card className="rounded-xl border-slate-100 bg-gradient-to-br from-indigo-50 to-white shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-500">期間売上実績</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-heading text-3xl font-bold tabular-nums text-indigo-700">
+                    {formatJPY(totalActual)}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-xl border-slate-100 bg-gradient-to-br from-emerald-50 to-white shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-500">契約済み（実績+確定）</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-heading text-3xl font-bold tabular-nums text-emerald-700">
+                    {formatJPY(totalActual + monthlyRevenue.reduce((s, m) => s + m.contracted, 0))}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-xl border-slate-100 bg-gradient-to-br from-amber-50 to-white shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-500">見込み含む合計</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="font-heading text-3xl font-bold tabular-nums text-amber-700">
+                    {formatJPY(totalRevenue)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Pipeline Cards */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {pipeline.map((item) => (
@@ -187,13 +324,90 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* Cumulative Revenue Chart (FY mode) */}
+          {viewMode === "fy" && cumulativeRevenue.length > 0 && (
+            <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
+              <CardHeader>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">
+                  売上累計推移（{fyLabel}）
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={cumulativeRevenue}>
+                      <defs>
+                        <linearGradient id="gradActual" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.05} />
+                        </linearGradient>
+                        <linearGradient id="gradContracted" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                        </linearGradient>
+                        <linearGradient id="gradProspect" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#cbd5e1" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#cbd5e1" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fontSize: 12, fill: "#64748b" }}
+                        tickFormatter={formatMonthLabel}
+                        axisLine={{ stroke: "#e2e8f0" }}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: "#64748b" }}
+                        tickFormatter={(v: number) =>
+                          v >= 10000 ? `¥${(v / 10000).toFixed(0)}万` : `¥${v.toLocaleString()}`
+                        }
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "0.75rem",
+                          border: "1px solid #e2e8f0",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
+                        formatter={(value: unknown, name: unknown) => {
+                          const labels: Record<string, string> = {
+                            actual: "実績累計",
+                            contracted: "契約済み累計",
+                            prospect: "見込み含む累計",
+                          };
+                          return [formatJPY(Number(value)), labels[String(name)] ?? String(name)];
+                        }}
+                        labelFormatter={(label: unknown) => formatMonthLabelFull(String(label))}
+                      />
+                      <Legend
+                        formatter={(value: string) => {
+                          const labels: Record<string, string> = {
+                            actual: "実績累計",
+                            contracted: "契約済み累計",
+                            prospect: "見込み含む累計",
+                          };
+                          return labels[value] ?? value;
+                        }}
+                      />
+                      <Area type="monotone" dataKey="prospect" stroke="#94a3b8" fill="url(#gradProspect)" strokeWidth={1.5} strokeDasharray="4 2" />
+                      <Area type="monotone" dataKey="contracted" stroke="#10b981" fill="url(#gradContracted)" strokeWidth={2} />
+                      <Area type="monotone" dataKey="actual" stroke="#4f46e5" fill="url(#gradActual)" strokeWidth={2.5} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Charts Row */}
           <div className="grid gap-6 lg:grid-cols-3">
-
             {/* Revenue Bar Chart */}
             <Card className="lg:col-span-2 rounded-xl border-slate-100 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">売上推移</CardTitle>
+                <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">月次売上推移</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-72">
@@ -203,10 +417,7 @@ export default function DashboardPage() {
                       <XAxis
                         dataKey="month"
                         tick={{ fontSize: 12, fill: "#64748b" }}
-                        tickFormatter={(v: string) => {
-                          const parts = v.split("-");
-                          return `${parts[1]}月`;
-                        }}
+                        tickFormatter={formatMonthLabel}
                         axisLine={{ stroke: "#e2e8f0" }}
                         tickLine={false}
                       />
@@ -232,10 +443,7 @@ export default function DashboardPage() {
                           };
                           return [formatJPY(Number(value)), labels[String(name)] ?? String(name)];
                         }}
-                        labelFormatter={(label: unknown) => {
-                          const parts = String(label).split("-");
-                          return `${parts[0]}年${parts[1]}月`;
-                        }}
+                        labelFormatter={(label: unknown) => formatMonthLabelFull(String(label))}
                       />
                       <Legend
                         formatter={(value: string) => {
@@ -297,6 +505,86 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Status Revenue Breakdown (FY mode) */}
+          {viewMode === "fy" && statusRevenue.length > 0 && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
+                <CardHeader>
+                  <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">ステータス別売上構成</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusRevenue}
+                          dataKey="amount"
+                          nameKey="status"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          innerRadius={40}
+                          label={((props: { status: string; percent: number }) =>
+                            `${props.status} ${(props.percent * 100).toFixed(0)}%`
+                          ) as unknown as boolean}
+                        >
+                          {statusRevenue.map((_, index) => (
+                            <Cell
+                              key={`cell-status-${index}`}
+                              fill={STATUS_PIE_COLORS[index % STATUS_PIE_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: "0.75rem",
+                            border: "1px solid #e2e8f0",
+                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                          }}
+                          formatter={(value: unknown) => [formatJPY(Number(value)), "月額"]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Status Revenue Table */}
+              <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
+                <CardHeader>
+                  <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">ステータス別内訳</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-slate-100 hover:bg-transparent">
+                        <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+                        <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-slate-400">月額</TableHead>
+                        <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-slate-400">構成比</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {statusRevenue.map((item, idx) => {
+                        const totalAmount = statusRevenue.reduce((s, i) => s + i.amount, 0);
+                        const pct = totalAmount > 0 ? ((item.amount / totalAmount) * 100).toFixed(1) : "0";
+                        return (
+                          <TableRow key={item.status} className="border-slate-50 hover:bg-slate-50/50">
+                            <TableCell className="font-medium text-slate-900">
+                              <span className="mr-2 inline-block h-3 w-3 rounded-full" style={{ backgroundColor: STATUS_PIE_COLORS[idx % STATUS_PIE_COLORS.length] }} />
+                              {item.status}
+                            </TableCell>
+                            <TableCell className="text-right tabular-nums text-slate-700">{formatJPY(item.amount)}</TableCell>
+                            <TableCell className="text-right tabular-nums text-slate-500">{pct}%</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Tables Row */}
           <div className="grid gap-6 lg:grid-cols-2">
