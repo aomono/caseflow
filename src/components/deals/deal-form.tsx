@@ -24,8 +24,9 @@ type DealFormProps = {
     title: string;
     status: string;
     monthlyAmount: number | null;
-    billingType: "monthly" | "lumpsum";
+    billingType: "monthly" | "lumpsum" | "prorated";
     contractAmount: number | null;
+    prorateBase: "fixed30" | "calendar" | "business" | null;
     description: string | null;
     contractStartDate: string | null;
     contractEndDate: string | null;
@@ -52,8 +53,11 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
   const [clientId, setClientId] = useState(initialData?.clientId ?? "");
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [status, setStatus] = useState(initialData?.status ?? "lead");
-  const [billingType, setBillingType] = useState<"monthly" | "lumpsum">(
+  const [billingType, setBillingType] = useState<"monthly" | "lumpsum" | "prorated">(
     initialData?.billingType ?? "monthly"
+  );
+  const [prorateBase, setProrateBase] = useState<"fixed30" | "calendar" | "business">(
+    initialData?.prorateBase ?? "fixed30"
   );
   const [monthlyAmount, setMonthlyAmount] = useState(
     initialData?.monthlyAmount?.toString() ?? ""
@@ -91,8 +95,9 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
       title: title.trim(),
       status,
       billingType,
-      monthlyAmount: billingType === "monthly" && monthlyAmount ? parseInt(monthlyAmount, 10) : null,
+      monthlyAmount: (billingType === "monthly" || billingType === "prorated") && monthlyAmount ? parseInt(monthlyAmount, 10) : null,
       contractAmount: billingType === "lumpsum" && contractAmount ? parseInt(contractAmount, 10) : null,
+      prorateBase: billingType === "prorated" ? prorateBase : null,
       description: description.trim() || null,
       contractStartDate: contractStartDate
         ? new Date(contractStartDate).toISOString()
@@ -218,9 +223,32 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
                   />
                   <span className="text-sm">一括（契約総額）</span>
                 </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="billingType"
+                    value="prorated"
+                    checked={billingType === "prorated"}
+                    onChange={() => setBillingType("prorated")}
+                  />
+                  <span className="text-sm">月額日割り</span>
+                </label>
               </div>
             </div>
-            {billingType === "monthly" ? (
+            {billingType === "lumpsum" ? (
+              <div className="space-y-1">
+                <label htmlFor="contractAmount" className="text-sm font-medium">
+                  契約総額
+                </label>
+                <Input
+                  id="contractAmount"
+                  type="number"
+                  value={contractAmount}
+                  onChange={(e) => setContractAmount(e.target.value)}
+                  placeholder="3000000"
+                />
+              </div>
+            ) : (
               <div className="space-y-1">
                 <label htmlFor="monthlyAmount" className="text-sm font-medium">
                   月額金額
@@ -233,18 +261,22 @@ export default function DealForm({ mode, initialData }: DealFormProps) {
                   placeholder="800000"
                 />
               </div>
-            ) : (
+            )}
+            {billingType === "prorated" && (
               <div className="space-y-1">
-                <label htmlFor="contractAmount" className="text-sm font-medium">
-                  契約総額
+                <label htmlFor="prorateBase" className="text-sm font-medium">
+                  日割り基準
                 </label>
-                <Input
-                  id="contractAmount"
-                  type="number"
-                  value={contractAmount}
-                  onChange={(e) => setContractAmount(e.target.value)}
-                  placeholder="3000000"
-                />
+                <select
+                  id="prorateBase"
+                  value={prorateBase}
+                  onChange={(e) => setProrateBase(e.target.value as "fixed30" | "calendar" | "business")}
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                >
+                  <option value="fixed30">30日固定</option>
+                  <option value="calendar">暦日（当月日数）</option>
+                  <option value="business">稼働日（土日祝除く）</option>
+                </select>
               </div>
             )}
             <div className="space-y-1">

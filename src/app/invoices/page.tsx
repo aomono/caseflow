@@ -21,6 +21,8 @@ interface Invoice {
   year: number;
   month: number;
   amount: number;
+  workingDays: number | null;
+  baseDays: number | null;
   dueDate: string;
   status: string;
   paidAt: string | null;
@@ -261,7 +263,12 @@ export default function InvoicesPage() {
                     <TableCell className="tabular-nums text-slate-600">
                       {invoice.year}年{invoice.month}月
                     </TableCell>
-                    <TableCell className="tabular-nums font-medium text-slate-900">{formatAmount(invoice.amount)}</TableCell>
+                    <TableCell className="tabular-nums font-medium text-slate-900">
+                      {formatAmount(invoice.amount)}
+                      {invoice.workingDays != null && invoice.baseDays != null && (
+                        <span className="ml-1 text-xs text-slate-400">({invoice.workingDays}/{invoice.baseDays}日)</span>
+                      )}
+                    </TableCell>
                     <TableCell className="tabular-nums text-slate-600">{formatDate(invoice.dueDate)}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={`badge-pill ${config.className}`}>

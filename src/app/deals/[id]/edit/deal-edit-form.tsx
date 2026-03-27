@@ -9,8 +9,9 @@ type Props = {
     title: string;
     status: string;
     monthlyAmount: number | null;
-    billingType: "monthly" | "lumpsum";
+    billingType: "monthly" | "lumpsum" | "prorated";
     contractAmount: number | null;
+    prorateBase: "fixed30" | "calendar" | "business" | null;
     description: string | null;
     contractStartDate: string | null;
     contractEndDate: string | null;

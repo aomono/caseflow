@@ -51,7 +51,7 @@ type Deal = {
   title: string;
   status: string;
   monthlyAmount: number | null;
-  billingType: "monthly" | "lumpsum";
+  billingType: "monthly" | "lumpsum" | "prorated";
   contractAmount: number | null;
   contractStartDate: string | null;
   contractEndDate: string | null;
@@ -156,7 +156,7 @@ export default function DealsPage() {
                     {deal.billingType === "lumpsum" && deal.contractAmount
                       ? `\u00a5${deal.contractAmount.toLocaleString()}（一括）`
                       : deal.monthlyAmount
-                        ? `\u00a5${deal.monthlyAmount.toLocaleString()}/月`
+                        ? `\u00a5${deal.monthlyAmount.toLocaleString()}/月${deal.billingType === "prorated" ? "（日割り）" : ""}`
                         : "-"}
                   </TableCell>
                   <TableCell className="tabular-nums text-slate-600">

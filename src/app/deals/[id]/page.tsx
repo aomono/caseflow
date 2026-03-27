@@ -173,7 +173,7 @@ export default async function DealDetailPage({
               </span>
             ) : deal.monthlyAmount ? (
               <span className="font-heading tabular-nums text-lg font-semibold text-slate-900">
-                {`\u00a5${deal.monthlyAmount.toLocaleString()}`}/月
+                {`\u00a5${deal.monthlyAmount.toLocaleString()}`}/月{deal.billingType === "prorated" ? "（日割り）" : ""}
               </span>
             ) : null}
           </div>
