@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
       if (!deal.contractAmount || !deal.contractEndDate) continue;
       const endMonth = formatMonth(deal.contractEndDate);
       if (startDate && endMonth < formatMonth(startDate)) continue;
+      if (endDate && endMonth > formatMonth(endDate)) continue;
 
       if (deal.status === "closed") {
         actualByMonth[endMonth] = (actualByMonth[endMonth] ?? 0) + deal.contractAmount;
@@ -145,7 +146,8 @@ export async function GET(request: NextRequest) {
       const dealStart = deal.contractStartDate;
       const dealEnd = deal.contractEndDate;
       const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
-      const months = generateMonthRange(rangeStart, dealEnd);
+      const rangeEnd = endDate && endDate < dealEnd ? endDate : dealEnd;
+      const months = generateMonthRange(rangeStart, rangeEnd);
       const prorateBase = (deal.prorateBase as ProrateBaseType) ?? "fixed30";
 
       let clientTotal = 0;
@@ -185,7 +187,8 @@ export async function GET(request: NextRequest) {
       const dealStart = deal.contractStartDate ?? now;
       const dealEnd = deal.contractEndDate ?? new Date(now.getFullYear(), now.getMonth() + 12, 0);
       const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
-      const months = generateMonthRange(rangeStart, dealEnd);
+      const rangeEnd = endDate && endDate < dealEnd ? endDate : dealEnd;
+      const months = generateMonthRange(rangeStart, rangeEnd);
 
       for (const m of months) {
         if (deal.status === "closed") {
@@ -216,8 +219,11 @@ export async function GET(request: NextRequest) {
 
   // Override with paid invoice amounts where available (more accurate)
   const invoiceWhere: Record<string, unknown> = { status: "paid" };
-  if (startDate) {
-    invoiceWhere.dueDate = { gte: startDate };
+  const dueDateFilter: Record<string, unknown> = {};
+  if (startDate) dueDateFilter.gte = startDate;
+  if (endDate) dueDateFilter.lte = endDate;
+  if (Object.keys(dueDateFilter).length > 0) {
+    invoiceWhere.dueDate = dueDateFilter;
   }
   const paidInvoices = await prisma.invoice.findMany({
     where: invoiceWhere,
