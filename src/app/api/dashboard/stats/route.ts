@@ -27,7 +27,7 @@ function getDateRange(
   fy: string | null
 ): { start: Date | null; end: Date | null } {
   if (fy) {
-    const fyNum = parseInt(fy, 10);
+    const fyNum = fy === "current" ? getCurrentFiscalYear() : parseInt(fy, 10);
     if (!isNaN(fyNum)) {
       const range = getFiscalYearRange(fyNum);
       return { start: range.start, end: range.end };
@@ -287,42 +287,33 @@ export async function GET(request: NextRequest) {
     select: { status: true, monthlyAmount: true, billingType: true, contractAmount: true },
   });
 
-  const pipelineMap: Record<string, { count: number; amount: number }> = {};
+  const pipelineMap: Record<string, { count: number; monthlyAmount: number; lumpsumAmount: number }> = {};
   for (const deal of allDeals) {
     if (!pipelineMap[deal.status]) {
-      pipelineMap[deal.status] = { count: 0, amount: 0 };
+      pipelineMap[deal.status] = { count: 0, monthlyAmount: 0, lumpsumAmount: 0 };
     }
     pipelineMap[deal.status].count += 1;
-    const dealAmount = deal.billingType === "lumpsum"
-      ? (deal.contractAmount ?? 0)
-      : (deal.monthlyAmount ?? 0);
-    pipelineMap[deal.status].amount += dealAmount;
+    if (deal.billingType === "lumpsum") {
+      pipelineMap[deal.status].lumpsumAmount += deal.contractAmount ?? 0;
+    } else {
+      pipelineMap[deal.status].monthlyAmount += deal.monthlyAmount ?? 0;
+    }
   }
 
   const pipeline = Object.entries(pipelineMap).map(([status, data]) => ({
     status,
     label: STATUS_LABELS[status] ?? status,
     count: data.count,
-    amount: data.amount,
+    monthlyAmount: data.monthlyAmount,
+    lumpsumAmount: data.lumpsumAmount,
   }));
 
-  // --- Revenue by Status (for stacked breakdown) ---
-  const revenueByStatus: Record<string, number> = {};
-  for (const deal of deals) {
-    let amount = 0;
-    if (deal.billingType === "lumpsum") {
-      amount = deal.contractAmount ?? 0;
-    } else {
-      amount = deal.monthlyAmount ?? 0;
-    }
-    if (amount > 0) {
-      const statusLabel = STATUS_LABELS[deal.status] ?? deal.status;
-      revenueByStatus[statusLabel] = (revenueByStatus[statusLabel] ?? 0) + amount;
-    }
-  }
-  const statusRevenue = Object.entries(revenueByStatus)
-    .map(([status, amount]) => ({ status, amount }))
-    .sort((a, b) => b.amount - a.amount);
+  // --- Revenue by Status (period-filtered, from monthly data) ---
+  const statusRevenue = [
+    { status: "実績", amount: sortedMonths.reduce((s, m) => s + (actualByMonth[m] ?? 0), 0) },
+    { status: "契約済み", amount: sortedMonths.reduce((s, m) => s + (contractedByMonth[m] ?? 0), 0) },
+    { status: "見込み", amount: sortedMonths.reduce((s, m) => s + (prospectByMonth[m] ?? 0), 0) },
+  ].filter((item) => item.amount > 0);
 
   // --- Available Fiscal Years ---
   const oldestDeal = await prisma.deal.findFirst({

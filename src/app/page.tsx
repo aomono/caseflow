@@ -11,6 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -55,7 +56,8 @@ interface PipelineItem {
   status: string;
   label: string;
   count: number;
-  amount: number;
+  monthlyAmount: number;
+  lumpsumAmount: number;
 }
 
 interface Reminder {
@@ -147,8 +149,10 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (viewMode === "fy" && fiscalYear) {
-        params.set("fy", String(fiscalYear));
+      if (viewMode === "fy") {
+        // fiscalYearがnull（初回）の場合、APIにfy指定なし→APIがcurrentFiscalYearベースで返す
+        // fy=currentを送ってAPI側で判定させる
+        params.set("fy", fiscalYear ? String(fiscalYear) : "current");
       } else {
         params.set("period", period);
       }
@@ -184,6 +188,9 @@ export default function DashboardPage() {
   const fyLabel = fiscalYear
     ? `FY${fiscalYear} (${fiscalYear}年6月〜${fiscalYear + 1}年5月)`
     : "";
+
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -316,9 +323,16 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="font-heading text-3xl font-bold tabular-nums text-slate-900">{item.count}</p>
-                  <p className="mt-1 text-sm tabular-nums text-slate-400">
-                    {formatJPY(item.amount)}/月
-                  </p>
+                  {item.monthlyAmount > 0 && (
+                    <p className="mt-1 text-sm tabular-nums text-slate-400">
+                      {formatJPY(item.monthlyAmount)}/月
+                    </p>
+                  )}
+                  {item.lumpsumAmount > 0 && (
+                    <p className="mt-0.5 text-sm tabular-nums text-slate-400">
+                      {formatJPY(item.lumpsumAmount)}（一括）
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -395,6 +409,13 @@ export default function DashboardPage() {
                       <Area type="monotone" dataKey="prospect" stroke="#94a3b8" fill="url(#gradProspect)" strokeWidth={1.5} strokeDasharray="4 2" />
                       <Area type="monotone" dataKey="contracted" stroke="#10b981" fill="url(#gradContracted)" strokeWidth={2} />
                       <Area type="monotone" dataKey="actual" stroke="#4f46e5" fill="url(#gradActual)" strokeWidth={2.5} />
+                      <ReferenceLine
+                        x={currentMonthKey}
+                        stroke="#f43f5e"
+                        strokeWidth={1.5}
+                        strokeDasharray="6 3"
+                        label={{ value: "現在", position: "top", fill: "#f43f5e", fontSize: 12, fontWeight: 600 }}
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -458,6 +479,14 @@ export default function DashboardPage() {
                       <Bar dataKey="actual" stackId="revenue" fill="#4f46e5" radius={[0, 0, 0, 0]} />
                       <Bar dataKey="contracted" stackId="revenue" fill="#818cf8" />
                       <Bar dataKey="prospect" stackId="revenue" fill="#cbd5e1" fillOpacity={0.7} radius={[4, 4, 0, 0]} />
+                      {viewMode === "fy" && (
+                        <ReferenceLine
+                          x={currentMonthKey}
+                          stroke="#f43f5e"
+                          strokeWidth={1.5}
+                          strokeDasharray="6 3"
+                        />
+                      )}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
