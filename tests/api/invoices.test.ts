@@ -242,6 +242,42 @@ describe("Invoices API", () => {
       expect(data.createdCount).toBe(0);
     });
 
+    it("should generate prorated invoice for partial month", async () => {
+      const activeDeals = [
+        {
+          id: "deal-prorated",
+          billingType: "prorated",
+          monthlyAmount: 6600000,
+          contractAmount: null,
+          prorateBase: "fixed30",
+          contractStartDate: new Date("2026-03-16"),
+          contractEndDate: new Date("2026-07-03"),
+        },
+      ];
+
+      mockPrisma.deal.findMany.mockResolvedValue(activeDeals);
+      mockPrisma.invoice.findMany.mockResolvedValue([]);
+      mockPrisma.invoice.create.mockResolvedValue({});
+
+      const request = makeRequest("http://localhost:3000/api/invoices/generate-monthly", {
+        year: 2026,
+        month: 3,
+      });
+      const response = await generateMonthly(request as never);
+      const data = await response.json();
+
+      expect(mockPrisma.invoice.create).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.invoice.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          dealId: "deal-prorated",
+          amount: Math.round(6600000 * 16 / 30), // 3,520,000
+          workingDays: 16,
+          baseDays: 30,
+        }),
+      });
+      expect(data.createdCount).toBe(1);
+    });
+
     it("should return 400 if year or month is missing", async () => {
       const request = makeRequest("http://localhost:3000/api/invoices/generate-monthly", {
         year: 2026,

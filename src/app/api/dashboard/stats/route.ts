@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
       OR: [
         { billingType: "monthly", monthlyAmount: { not: null } },
         { billingType: "lumpsum", contractAmount: { not: null } },
+        { billingType: "prorated", monthlyAmount: { not: null } },
       ],
     },
     select: {
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
       monthlyAmount: true,
       billingType: true,
       contractAmount: true,
+      prorateBase: true,
       contractStartDate: true,
       contractEndDate: true,
       client: { select: { name: true } },

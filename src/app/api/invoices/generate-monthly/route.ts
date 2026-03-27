@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculateProrate, isWithinContract, type ProrateBaseType } from "@/lib/prorate";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
       OR: [
         { billingType: "monthly", monthlyAmount: { not: null } },
         { billingType: "lumpsum", contractAmount: { not: null } },
+        { billingType: "prorated", monthlyAmount: { not: null } },
       ],
     },
   });
@@ -53,6 +55,33 @@ export async function POST(request: NextRequest) {
           year,
           month,
           amount: deal.contractAmount,
+          dueDate,
+          status: "draft",
+        },
+      });
+      createdCount++;
+    } else if (deal.billingType === "prorated") {
+      // 日割り契約: 契約期間内の月のみ生成、日割り計算
+      if (!deal.contractStartDate || !deal.contractEndDate || !deal.monthlyAmount) continue;
+      if (!isWithinContract(year, month, deal.contractStartDate, deal.contractEndDate)) continue;
+
+      const prorate = calculateProrate({
+        monthlyAmount: deal.monthlyAmount,
+        year,
+        month,
+        contractStartDate: deal.contractStartDate,
+        contractEndDate: deal.contractEndDate,
+        prorateBase: (deal.prorateBase as ProrateBaseType) ?? "fixed30",
+      });
+
+      await prisma.invoice.create({
+        data: {
+          dealId: deal.id,
+          year,
+          month,
+          amount: prorate.amount,
+          workingDays: prorate.workingDays,
+          baseDays: prorate.baseDays,
           dueDate,
           status: "draft",
         },
