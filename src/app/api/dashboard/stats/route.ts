@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculateProrate, type ProrateBaseType } from "@/lib/prorate";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +106,46 @@ export async function GET(request: NextRequest) {
         if (deal.contractEndDate) {
           prospectByMonth[endMonth] = (prospectByMonth[endMonth] ?? 0) + deal.contractAmount;
         }
+      }
+    } else if (deal.billingType === "prorated") {
+      // 日割り契約: 月ごとに日割り金額を計算
+      if (!deal.monthlyAmount || !deal.contractStartDate || !deal.contractEndDate) continue;
+
+      const dealStart = deal.contractStartDate;
+      const dealEnd = deal.contractEndDate;
+      const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
+      const months = generateMonthRange(rangeStart, dealEnd);
+      const prorateBase = (deal.prorateBase as ProrateBaseType) ?? "fixed30";
+
+      let clientTotal = 0;
+      for (const m of months) {
+        const [y, mo] = m.split("-").map(Number);
+        const prorate = calculateProrate({
+          monthlyAmount: deal.monthlyAmount,
+          year: y,
+          month: mo,
+          contractStartDate: dealStart,
+          contractEndDate: dealEnd,
+          prorateBase,
+        });
+
+        if (deal.status === "closed") {
+          actualByMonth[m] = (actualByMonth[m] ?? 0) + prorate.amount;
+          clientTotal += prorate.amount;
+        } else if (deal.status === "active" || deal.status === "renewal") {
+          if (m < currentMonth) {
+            actualByMonth[m] = (actualByMonth[m] ?? 0) + prorate.amount;
+            clientTotal += prorate.amount;
+          } else {
+            contractedByMonth[m] = (contractedByMonth[m] ?? 0) + prorate.amount;
+          }
+        } else {
+          prospectByMonth[m] = (prospectByMonth[m] ?? 0) + prorate.amount;
+        }
+      }
+
+      if (clientTotal > 0) {
+        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + clientTotal;
       }
     } else {
       // 月額契約: 既存ロジック
