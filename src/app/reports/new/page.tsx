@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -44,6 +44,14 @@ function formatDate(dateStr: string | null): string {
 }
 
 export default function ReportNewPage() {
+  return (
+    <Suspense fallback={<div className="space-y-6"><div className="skeleton h-8 w-48 rounded-lg" /><div className="skeleton h-64 w-full rounded-xl" /></div>}>
+      <ReportNewContent />
+    </Suspense>
+  );
+}
+
+function ReportNewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editReportId = searchParams.get("reportId");
