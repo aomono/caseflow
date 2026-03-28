@@ -63,7 +63,7 @@ function ReportNewContent() {
   const [generatingDocx, setGeneratingDocx] = useState(false);
   const [uploadingDocx, setUploadingDocx] = useState(false);
   const [docxUploaded, setDocxUploaded] = useState(false);
-  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   const isEditMode = !!editReportId;
@@ -209,31 +209,39 @@ function ReportNewContent() {
     }
   };
 
-  // Step 3: Generate PDF
-  const handleGeneratePdf = async () => {
-    if (!savedReportId) return;
+  // Step 3: Upload PDF (user converts Word→PDF locally)
+  const handleUploadPdf = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !savedReportId) return;
 
-    setGeneratingPdf(true);
+    setUploadingPdf(true);
     try {
+      const formData = new FormData();
+      formData.append("file", file);
       const res = await fetch(`/api/reports/${savedReportId}/pdf`, {
-        method: "POST",
+        method: "PUT",
+        body: formData,
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(`PDF生成に失敗しました: ${err.error}`);
-        return;
-      }
-
-      const data = await res.json();
-      if (data.pdfUrl) {
-        setPdfUrl(data.pdfUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.pdfUrl) {
+          setPdfUrl(data.pdfUrl);
+        }
+      } else {
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(`PDFアップロードに失敗しました: ${err.error}`);
+        } catch {
+          alert("PDFアップロードに失敗しました");
+        }
       }
     } catch (err) {
-      console.error("Failed to generate PDF:", err);
-      alert("PDF生成に失敗しました");
+      console.error("Failed to upload PDF:", err);
+      alert("PDFアップロードに失敗しました");
     } finally {
-      setGeneratingPdf(false);
+      setUploadingPdf(false);
+      e.target.value = "";
     }
   };
 
@@ -380,17 +388,14 @@ function ReportNewContent() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">3</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[14px] font-semibold text-slate-800">PDF生成</p>
+                    <p className="text-[14px] font-semibold text-slate-800">PDFをアップロード</p>
                     {pdfUrl && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
                   </div>
-                  <p className="text-[12px] text-slate-400 mt-0.5">報告書をPDF化します</p>
-                  <button
-                    onClick={handleGeneratePdf}
-                    disabled={generatingPdf || !docxUploaded}
-                    className="mt-3 rounded-lg bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 disabled:opacity-50"
-                  >
-                    {generatingPdf ? "PDF生成中..." : "PDF生成"}
-                  </button>
+                  <p className="text-[12px] text-slate-400 mt-0.5">Wordから書き出したPDFをアップロードしてください</p>
+                  <label className={`mt-3 inline-flex cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 ${!docxUploaded ? "pointer-events-none opacity-50" : ""}`}>
+                    {uploadingPdf ? "アップロード中..." : "PDFアップロード"}
+                    <input type="file" accept=".pdf" onChange={handleUploadPdf} className="hidden" disabled={uploadingPdf || !docxUploaded} />
+                  </label>
                 </div>
               </div>
 
