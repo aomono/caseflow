@@ -55,11 +55,12 @@ export async function GET(
       // Blob storage may not be configured — continue with direct download
     }
 
-    const clientName = encodeURIComponent(report.deal.client.name);
+    const filename = `${report.deal.client.name}_ASP業務完了報告書_${report.year}-${report.month}.docx`;
+    const encodedFilename = encodeURIComponent(filename);
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${clientName}_ASP業務完了報告書_${report.year}-${report.month}.docx"`,
+        "Content-Disposition": `attachment; filename="report.docx"; filename*=UTF-8''${encodedFilename}`,
       },
     });
   } catch (error) {
