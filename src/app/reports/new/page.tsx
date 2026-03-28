@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -11,39 +10,43 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface Deal {
   id: string;
   title: string;
+  status: string;
   monthlyAmount: number | null;
-  billingType: "monthly" | "lumpsum";
+  billingType: string;
   contractAmount: number | null;
+  contractStartDate: string | null;
+  contractEndDate: string | null;
   contractSummary: string | null;
   client: {
     name: string;
   };
 }
 
-function formatAmount(amount: number): string {
-  return `¥${amount.toLocaleString()}`;
+function formatJPY(amount: number): string {
+  return `¥${amount.toLocaleString("ja-JP")}`;
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("ja-JP");
 }
 
 export default function ReportNewPage() {
   const router = useRouter();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string>("");
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [period, setPeriod] = useState(`${new Date().getFullYear()}年${new Date().getMonth() + 1}月`);
-  const [content, setContent] = useState("");
-  const [amount, setAmount] = useState<number>(0);
-  const [saving, setSaving] = useState(false);
-  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [savedReportId, setSavedReportId] = useState<string | null>(null);
   const [generatingDocx, setGeneratingDocx] = useState(false);
   const [uploadingDocx, setUploadingDocx] = useState(false);
-  const [savedReportId, setSavedReportId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [docxUploaded, setDocxUploaded] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -53,9 +56,6 @@ export default function ReportNewPage() {
         setDeals(data);
         if (data.length > 0) {
           setSelectedDealId(data[0].id);
-          const defaultAmt = data[0].billingType === "lumpsum" ? data[0].contractAmount : data[0].monthlyAmount;
-          if (defaultAmt) setAmount(defaultAmt);
-          if (data[0].contractSummary) setContent(data[0].contractSummary);
         }
       } catch (err) {
         console.error("Failed to fetch deals:", err);
@@ -67,117 +67,57 @@ export default function ReportNewPage() {
   }, []);
 
   const selectedDeal = deals.find((d) => d.id === selectedDealId);
-  const today = new Date().toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
   const handleDealChange = (value: string | null) => {
     if (value === null) return;
     setSelectedDealId(value);
-    const deal = deals.find((d) => d.id === value);
-    const dealAmount = deal?.billingType === "lumpsum" ? deal?.contractAmount : deal?.monthlyAmount;
-    if (dealAmount) {
-      setAmount(dealAmount);
-    }
-    if (deal?.contractSummary) {
-      setContent(deal.contractSummary);
-    } else {
-      setContent("");
-    }
+    // Reset workflow state when deal changes
+    setSavedReportId(null);
+    setDocxUploaded(false);
+    setPdfUrl(null);
   };
 
-  const handleSave = async (): Promise<string | null> => {
-    if (!selectedDealId || !period || !content || amount <= 0) {
-      alert("全てのフィールドを入力してください");
-      return null;
-    }
-
-    setSaving(true);
-    try {
-      const res = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dealId: selectedDealId,
-          year,
-          month,
-          period,
-          workDescription: content,
-          amount,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(`保存に失敗しました: ${err.error}`);
-        return null;
-      }
-
-      const report = await res.json();
-      setSavedReportId(report.id);
-      return report.id;
-    } catch (err) {
-      console.error("Failed to save report:", err);
-      alert("保存に失敗しました");
-      return null;
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveOnly = async () => {
-    const id = await handleSave();
-    if (id) {
-      alert("報告書を保存しました");
-      router.push("/reports");
-    }
-  };
-
-  const handleGeneratePdf = async () => {
-    let reportId = savedReportId;
-
-    if (!reportId) {
-      reportId = await handleSave();
-      if (!reportId) return;
-    }
-
-    setGeneratingPdf(true);
-    try {
-      const res = await fetch(`/api/reports/${reportId}/pdf`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(`PDF生成に失敗しました: ${err.error}`);
-        return;
-      }
-
-      const data = await res.json();
-      alert("PDF生成が完了しました");
-      if (data.pdfUrl) {
-        window.open(data.pdfUrl, "_blank");
-      }
-      router.push("/reports");
-    } catch (err) {
-      console.error("Failed to generate PDF:", err);
-      alert("PDF生成に失敗しました");
-    } finally {
-      setGeneratingPdf(false);
-    }
-  };
-
+  // Step 1: Save report + generate docx
   const handleGenerateDocx = async () => {
-    let reportId = savedReportId;
-    if (!reportId) {
-      reportId = await handleSave();
-      if (!reportId) return;
-    }
+    if (!selectedDeal) return;
 
     setGeneratingDocx(true);
     try {
+      // Auto-save report from deal data
+      let reportId = savedReportId;
+      if (!reportId) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const amount = selectedDeal.billingType === "lumpsum"
+          ? (selectedDeal.contractAmount ?? 0)
+          : (selectedDeal.monthlyAmount ?? 0);
+
+        const res = await fetch("/api/reports", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dealId: selectedDeal.id,
+            year,
+            month,
+            period: `${year}年${month}月`,
+            workDescription: selectedDeal.contractSummary || "コンサルティング業務",
+            amount,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert(`保存に失敗しました: ${err.error}`);
+          return;
+        }
+
+        const report = await res.json();
+        reportId = report.id;
+        setSavedReportId(reportId);
+      }
+
+      // Generate and download docx
       const res = await fetch(`/api/reports/${reportId}/docx`);
       if (!res.ok) {
         const err = await res.json();
@@ -188,7 +128,7 @@ export default function ReportNewPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `報告書_${year}-${month}.docx`;
+      a.download = `${selectedDeal.client.name}_ASP業務完了報告書_${selectedDeal.title}.docx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -199,26 +139,21 @@ export default function ReportNewPage() {
     }
   };
 
+  // Step 2: Upload edited docx
   const handleUploadDocx = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reportId = savedReportId;
-    if (!reportId) {
-      alert("先に報告書を保存してください");
-      return;
-    }
+    if (!file || !savedReportId) return;
 
     setUploadingDocx(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch(`/api/reports/${reportId}/docx`, {
+      const res = await fetch(`/api/reports/${savedReportId}/docx`, {
         method: "PUT",
         body: formData,
       });
       if (res.ok) {
-        alert("Wordファイルをアップロードしました");
+        setDocxUploaded(true);
       } else {
         const err = await res.json();
         alert(`アップロードに失敗しました: ${err.error}`);
@@ -232,32 +167,62 @@ export default function ReportNewPage() {
     }
   };
 
+  // Step 3: Generate PDF from uploaded docx
+  const handleGeneratePdf = async () => {
+    if (!savedReportId) return;
+
+    setGeneratingPdf(true);
+    try {
+      const res = await fetch(`/api/reports/${savedReportId}/pdf`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`PDF生成に失敗しました: ${err.error}`);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.pdfUrl) {
+        setPdfUrl(data.pdfUrl);
+      }
+    } catch (err) {
+      console.error("Failed to generate PDF:", err);
+      alert("PDF生成に失敗しました");
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="skeleton h-8 w-48 rounded-lg" />
         <div className="skeleton h-64 w-full rounded-xl" />
-        <div className="skeleton h-48 w-full rounded-xl" />
       </div>
     );
   }
 
+  const dealAmount = selectedDeal
+    ? (selectedDeal.billingType === "lumpsum" ? selectedDeal.contractAmount : selectedDeal.monthlyAmount) ?? 0
+    : 0;
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">報告書 新規作成</h1>
-        <p className="mt-1 text-sm text-slate-500">業務完了報告書を作成</p>
+        <h1 className="font-heading text-[22px] font-bold tracking-tight text-slate-900">報告書 新規作成</h1>
+        <p className="mt-0.5 text-[13px] text-slate-400">案件を選択してWord報告書を生成</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Form */}
-        <Card className="rounded-xl border-slate-100 bg-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="font-heading text-base font-semibold tracking-tight text-slate-900">報告書情報</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">案件選択</label>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left: Deal Selection + Info */}
+        <div className="lg:col-span-1 space-y-4">
+          <Card className="rounded-xl border-slate-200/60 bg-white shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">案件選択</CardTitle>
+            </CardHeader>
+            <CardContent>
               <Select value={selectedDealId} onValueChange={handleDealChange}>
                 <SelectTrigger className="w-full rounded-lg border-slate-200">
                   <SelectValue placeholder="案件を選択" />
@@ -270,138 +235,163 @@ export default function ReportNewPage() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">年</label>
-                <Input
-                  type="number"
-                  value={year}
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className="rounded-lg border-slate-200"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">月</label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={month}
-                  onChange={(e) => setMonth(Number(e.target.value))}
-                  className="rounded-lg border-slate-200"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">対象期間</label>
-              <Input
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                placeholder="例: 2026年3月"
-                className="rounded-lg border-slate-200"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">作業内容</label>
-              <textarea
-                className="flex min-h-[120px] w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm transition-colors outline-none placeholder:text-slate-400 focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500/20"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="コンサルティング業務"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">金額</label>
-              <Input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
-                className="rounded-lg border-slate-200 tabular-nums"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Preview - styled like a paper document */}
-        <div>
-          <h2 className="mb-4 font-heading text-base font-semibold tracking-tight text-slate-900">プレビュー</h2>
-          <div className="rounded-xl bg-white p-8 shadow-lg ring-1 ring-slate-200/50" style={{ boxShadow: "0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)" }}>
-            <div className="space-y-6">
-              <div className="flex justify-between items-start">
+          {/* Deal Info (read-only) */}
+          {selectedDeal && (
+            <Card className="rounded-xl border-slate-200/60 bg-white shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">契約情報</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div>
-                  <h2 className="font-heading text-lg font-bold text-slate-900">株式会社Asterio</h2>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">クライアント</p>
+                  <p className="text-[13px] font-medium text-slate-800 mt-0.5">{selectedDeal.client.name}</p>
                 </div>
-                <div className="text-sm text-slate-500">
-                  発行日: {today}
+                <div>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">案件名</p>
+                  <p className="text-[13px] font-medium text-slate-800 mt-0.5">{selectedDeal.title}</p>
                 </div>
-              </div>
-
-              <Separator className="bg-slate-200" />
-
-              <div className="text-sm">
-                <p className="font-medium text-slate-700">
-                  {selectedDeal?.client.name || "（クライアント未選択）"} 御中
-                </p>
-              </div>
-
-              <h3 className="text-center font-heading text-xl font-bold tracking-tight text-slate-900">業務完了報告書</h3>
-
-              <div className="space-y-4 text-sm">
-                <div className="grid grid-cols-[120px_1fr] gap-2">
-                  <span className="font-medium text-slate-500">
-                    対象期間
-                  </span>
-                  <span className="text-slate-900">{period || "-"}</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">契約開始</p>
+                    <p className="text-[13px] tabular-nums text-slate-700 mt-0.5">{formatDate(selectedDeal.contractStartDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">契約終了</p>
+                    <p className="text-[13px] tabular-nums text-slate-700 mt-0.5">{formatDate(selectedDeal.contractEndDate)}</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-[120px_1fr] gap-2">
-                  <span className="font-medium text-slate-500">
-                    作業内容
-                  </span>
-                  <span className="text-slate-900">{content || "コンサルティング業務"}</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">請求タイプ</p>
+                    <p className="text-[13px] text-slate-700 mt-0.5">
+                      {selectedDeal.billingType === "lumpsum" ? "一括" : selectedDeal.billingType === "prorated" ? "日割り" : "月額"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">金額</p>
+                    <p className="text-[13px] font-semibold tabular-nums text-slate-800 mt-0.5">{formatJPY(dealAmount)}</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-[120px_1fr] gap-2">
-                  <span className="font-medium text-slate-500">金額</span>
-                  <span className="font-heading text-lg font-bold tabular-nums text-slate-900">{formatAmount(amount)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                {selectedDeal.contractSummary && (
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">契約概要</p>
+                    <p className="text-[13px] text-slate-700 mt-0.5 whitespace-pre-line">{selectedDeal.contractSummary}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
-      </div>
 
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={handleSaveOnly}
-          disabled={saving}
-          className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 disabled:opacity-50"
-        >
-          {saving ? "保存中..." : "下書き保存"}
-        </button>
-        <button
-          onClick={handleGenerateDocx}
-          disabled={generatingDocx || saving}
-          className="rounded-lg border border-indigo-200 bg-indigo-50 px-5 py-2.5 text-sm font-medium text-indigo-700 transition-colors duration-150 hover:bg-indigo-100 disabled:opacity-50"
-        >
-          {generatingDocx ? "生成中..." : "Word生成"}
-        </button>
-        {savedReportId && (
-          <label className="cursor-pointer rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">
-            {uploadingDocx ? "アップロード中..." : "Wordアップロード"}
-            <input type="file" accept=".docx" onChange={handleUploadDocx} className="hidden" disabled={uploadingDocx} />
-          </label>
-        )}
-        <button
-          onClick={handleGeneratePdf}
-          disabled={generatingPdf || saving}
-          className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 disabled:opacity-50"
-        >
-          {generatingPdf ? "PDF生成中..." : "PDF生成"}
-        </button>
+        {/* Right: Workflow Steps */}
+        <div className="lg:col-span-2">
+          <Card className="rounded-xl border-slate-200/60 bg-white shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">報告書作成フロー</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-0">
+              {/* Step 1: Word生成 */}
+              <div className="flex gap-4 py-5 border-b border-slate-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">1</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[14px] font-semibold text-slate-800">Word報告書を生成</p>
+                    {savedReportId && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
+                  </div>
+                  <p className="text-[12px] text-slate-400 mt-0.5">テンプレートに契約情報を自動入力して.docxを生成します</p>
+                  <button
+                    onClick={handleGenerateDocx}
+                    disabled={generatingDocx || !selectedDeal}
+                    className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-5 py-2 text-[13px] font-medium text-indigo-700 transition-colors duration-150 hover:bg-indigo-100 disabled:opacity-50"
+                  >
+                    {generatingDocx ? "生成中..." : "Word生成・ダウンロード"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 2: Upload */}
+              <div className={`flex gap-4 py-5 border-b border-slate-100 ${!savedReportId ? "opacity-40" : ""}`}>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">2</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[14px] font-semibold text-slate-800">修正したWordをアップロード</p>
+                    {docxUploaded && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
+                  </div>
+                  <p className="text-[12px] text-slate-400 mt-0.5">ダウンロードしたWordを手元で修正し、アップロードしてください</p>
+                  <label className={`mt-3 inline-flex cursor-pointer rounded-lg border border-slate-200 px-5 py-2 text-[13px] font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 ${!savedReportId ? "pointer-events-none" : ""}`}>
+                    {uploadingDocx ? "アップロード中..." : "修正版Wordをアップロード"}
+                    <input type="file" accept=".docx" onChange={handleUploadDocx} className="hidden" disabled={uploadingDocx || !savedReportId} />
+                  </label>
+                </div>
+              </div>
+
+              {/* Step 3: PDF */}
+              <div className={`flex gap-4 py-5 border-b border-slate-100 ${!docxUploaded ? "opacity-40" : ""}`}>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">3</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[14px] font-semibold text-slate-800">PDF生成</p>
+                    {pdfUrl && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
+                  </div>
+                  <p className="text-[12px] text-slate-400 mt-0.5">報告書をPDF化します</p>
+                  <button
+                    onClick={handleGeneratePdf}
+                    disabled={generatingPdf || !docxUploaded}
+                    className="mt-3 rounded-lg bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {generatingPdf ? "PDF生成中..." : "PDF生成"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 4: Preview & Download */}
+              <div className={`flex gap-4 py-5 ${!pdfUrl ? "opacity-40" : ""}`}>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">4</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-semibold text-slate-800">プレビュー・ダウンロード</p>
+                  <p className="text-[12px] text-slate-400 mt-0.5">PDFを確認してダウンロード</p>
+                  <div className="mt-3 flex gap-3">
+                    {pdfUrl && (
+                      <>
+                        <a
+                          href={pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-lg border border-slate-200 px-5 py-2 text-[13px] font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50"
+                        >
+                          プレビュー
+                        </a>
+                        <a
+                          href={pdfUrl}
+                          download
+                          className="rounded-lg bg-emerald-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-emerald-700"
+                        >
+                          PDFダウンロード
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* Done */}
+          {pdfUrl && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => router.push("/reports")}
+                className="rounded-lg bg-slate-900 px-6 py-2.5 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-slate-800"
+              >
+                報告書一覧に戻る
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
