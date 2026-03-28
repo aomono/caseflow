@@ -35,10 +35,10 @@ export default function RootLayout({
       <body className="flex h-full min-h-screen bg-slate-50">
         <SessionProvider>
           <Sidebar />
-          <div className="flex flex-1 flex-col lg:ml-[280px]">
+          <div className="flex flex-1 flex-col lg:ml-[260px]">
             <Header />
-            <main className="flex-1 overflow-auto p-4 pt-16 sm:p-6 sm:pt-16 lg:p-8 lg:pt-8 animate-fade-in">
-              <div className="mx-auto max-w-[1400px]">{children}</div>
+            <main className="flex-1 overflow-auto p-4 pt-16 sm:p-6 sm:pt-16 lg:p-8 lg:pt-4 animate-fade-in">
+              <div className="mx-auto max-w-[1360px]">{children}</div>
             </main>
           </div>
         </SessionProvider>
