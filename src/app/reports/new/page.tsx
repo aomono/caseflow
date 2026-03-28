@@ -192,8 +192,13 @@ function ReportNewContent() {
       if (res.ok) {
         setDocxUploaded(true);
       } else {
-        const err = await res.json();
-        alert(`アップロードに失敗しました: ${err.error}`);
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(`アップロードに失敗しました: ${err.error}`);
+        } catch {
+          alert("アップロードに失敗しました");
+        }
       }
     } catch (err) {
       console.error("Failed to upload docx:", err);

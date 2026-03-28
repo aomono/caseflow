@@ -115,16 +115,25 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid docx file" }, { status: 400 });
   }
 
-  const filename = `reports/${report.id}_${report.year}-${report.month}.docx`;
-  const blob = await put(filename, buffer, {
-    access: "public",
-    contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  });
+  try {
+    const filename = `reports/${report.id}_${report.year}-${report.month}.docx`;
+    const blob = await put(filename, buffer, {
+      access: "public",
+      contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
 
-  const updated = await prisma.report.update({
-    where: { id },
-    data: { docxUrl: blob.url },
-  });
+    const updated = await prisma.report.update({
+      where: { id },
+      data: { docxUrl: blob.url },
+    });
 
-  return NextResponse.json({ docxUrl: updated.docxUrl });
+    return NextResponse.json({ docxUrl: updated.docxUrl });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Failed to upload docx:", message, error);
+    return NextResponse.json(
+      { error: `Failed to upload docx: ${message}` },
+      { status: 500 },
+    );
+  }
 }
