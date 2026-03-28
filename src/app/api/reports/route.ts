@@ -41,17 +41,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const report = await prisma.report.create({
-    data: {
-      dealId: body.dealId,
-      year: Number(body.year),
-      month: Number(body.month),
-      period: body.period,
-      workDescription: body.workDescription,
-      amount: Number(body.amount),
-      status: "draft",
-    },
-  });
+  try {
+    const report = await prisma.report.upsert({
+      where: {
+        dealId_year_month: {
+          dealId: body.dealId,
+          year: Number(body.year),
+          month: Number(body.month),
+        },
+      },
+      update: {
+        period: body.period,
+        workDescription: body.workDescription,
+        amount: Number(body.amount),
+      },
+      create: {
+        dealId: body.dealId,
+        year: Number(body.year),
+        month: Number(body.month),
+        period: body.period,
+        workDescription: body.workDescription,
+        amount: Number(body.amount),
+        status: "draft",
+      },
+    });
 
-  return NextResponse.json(report, { status: 201 });
+    return NextResponse.json(report, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create/update report:", error);
+    return NextResponse.json(
+      { error: "Failed to create report" },
+      { status: 500 },
+    );
+  }
 }

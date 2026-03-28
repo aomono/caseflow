@@ -5,6 +5,7 @@ const mockPrisma = vi.hoisted(() => ({
     findMany: vi.fn(),
     findUnique: vi.fn(),
     create: vi.fn(),
+    upsert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
   },
@@ -93,7 +94,7 @@ describe("Reports API", () => {
         amount: 500000,
         status: "draft",
       };
-      mockPrisma.report.create.mockResolvedValue(created);
+      mockPrisma.report.upsert.mockResolvedValue(created);
 
       const request = makeRequest("http://localhost:3000/api/reports", {
         dealId: "d1",
@@ -106,8 +107,20 @@ describe("Reports API", () => {
       const response = await createReport(request as never);
       const data = await response.json();
 
-      expect(mockPrisma.report.create).toHaveBeenCalledWith({
-        data: {
+      expect(mockPrisma.report.upsert).toHaveBeenCalledWith({
+        where: {
+          dealId_year_month: {
+            dealId: "d1",
+            year: 2026,
+            month: 3,
+          },
+        },
+        update: {
+          period: "2026/03/01-2026/03/31",
+          workDescription: "Development work",
+          amount: 500000,
+        },
+        create: {
           dealId: "d1",
           year: 2026,
           month: 3,
@@ -128,7 +141,7 @@ describe("Reports API", () => {
       const response = await createReport(request as never);
 
       expect(response.status).toBe(400);
-      expect(mockPrisma.report.create).not.toHaveBeenCalled();
+      expect(mockPrisma.report.upsert).not.toHaveBeenCalled();
     });
   });
 
