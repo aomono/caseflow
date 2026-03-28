@@ -167,6 +167,7 @@ export const ReportScalarFieldEnum = {
   workDescription: 'workDescription',
   amount: 'amount',
   pdfUrl: 'pdfUrl',
+  docxUrl: 'docxUrl',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

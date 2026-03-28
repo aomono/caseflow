@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -41,6 +40,8 @@ export default function ReportNewPage() {
   const [amount, setAmount] = useState<number>(0);
   const [saving, setSaving] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [generatingDocx, setGeneratingDocx] = useState(false);
+  const [uploadingDocx, setUploadingDocx] = useState(false);
   const [savedReportId, setSavedReportId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -165,6 +166,69 @@ export default function ReportNewPage() {
       alert("PDF生成に失敗しました");
     } finally {
       setGeneratingPdf(false);
+    }
+  };
+
+  const handleGenerateDocx = async () => {
+    let reportId = savedReportId;
+    if (!reportId) {
+      reportId = await handleSave();
+      if (!reportId) return;
+    }
+
+    setGeneratingDocx(true);
+    try {
+      const res = await fetch(`/api/reports/${reportId}/docx`);
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Word生成に失敗しました: ${err.error}`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `報告書_${year}-${month}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to generate docx:", err);
+      alert("Word生成に失敗しました");
+    } finally {
+      setGeneratingDocx(false);
+    }
+  };
+
+  const handleUploadDocx = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reportId = savedReportId;
+    if (!reportId) {
+      alert("先に報告書を保存してください");
+      return;
+    }
+
+    setUploadingDocx(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/reports/${reportId}/docx`, {
+        method: "PUT",
+        body: formData,
+      });
+      if (res.ok) {
+        alert("Wordファイルをアップロードしました");
+      } else {
+        const err = await res.json();
+        alert(`アップロードに失敗しました: ${err.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to upload docx:", err);
+      alert("アップロードに失敗しました");
+    } finally {
+      setUploadingDocx(false);
+      e.target.value = "";
     }
   };
 
@@ -318,6 +382,19 @@ export default function ReportNewPage() {
         >
           {saving ? "保存中..." : "下書き保存"}
         </button>
+        <button
+          onClick={handleGenerateDocx}
+          disabled={generatingDocx || saving}
+          className="rounded-lg border border-indigo-200 bg-indigo-50 px-5 py-2.5 text-sm font-medium text-indigo-700 transition-colors duration-150 hover:bg-indigo-100 disabled:opacity-50"
+        >
+          {generatingDocx ? "生成中..." : "Word生成"}
+        </button>
+        {savedReportId && (
+          <label className="cursor-pointer rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50">
+            {uploadingDocx ? "アップロード中..." : "Wordアップロード"}
+            <input type="file" accept=".docx" onChange={handleUploadDocx} className="hidden" disabled={uploadingDocx} />
+          </label>
+        )}
         <button
           onClick={handleGeneratePdf}
           disabled={generatingPdf || saving}

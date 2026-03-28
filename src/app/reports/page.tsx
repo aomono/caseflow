@@ -45,6 +45,7 @@ export default async function ReportsPage() {
             <TableHead>対象期間</TableHead>
             <TableHead>金額</TableHead>
             <TableHead>ステータス</TableHead>
+            <TableHead>Word</TableHead>
             <TableHead>PDF</TableHead>
             <TableHead>操作</TableHead>
           </TableRow>
@@ -66,6 +67,20 @@ export default async function ReportsPage() {
                   <Badge variant="secondary" className={config.className}>
                     {config.label}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {report.docxUrl ? (
+                    <a
+                      href={report.docxUrl}
+                      className="text-primary hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      ダウンロード
+                    </a>
+                  ) : (
+                    "-"
+                  )}
                 </TableCell>
                 <TableCell>
                   {report.pdfUrl ? (
