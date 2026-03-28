@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -27,6 +27,13 @@ interface Deal {
   };
 }
 
+interface ExistingReport {
+  id: string;
+  dealId: string;
+  docxUrl: string | null;
+  pdfUrl: string | null;
+}
+
 function formatJPY(amount: number): string {
   return `¥${amount.toLocaleString("ja-JP")}`;
 }
@@ -38,40 +45,56 @@ function formatDate(dateStr: string | null): string {
 
 export default function ReportNewPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editReportId = searchParams.get("reportId");
+
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [savedReportId, setSavedReportId] = useState<string | null>(null);
+  const [savedReportId, setSavedReportId] = useState<string | null>(editReportId);
   const [generatingDocx, setGeneratingDocx] = useState(false);
   const [uploadingDocx, setUploadingDocx] = useState(false);
   const [docxUploaded, setDocxUploaded] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
+  const isEditMode = !!editReportId;
+
   useEffect(() => {
-    const fetchDeals = async () => {
+    const init = async () => {
       try {
-        const res = await fetch("/api/deals?status=active");
-        const data: Deal[] = await res.json();
-        setDeals(data);
-        if (data.length > 0) {
-          setSelectedDealId(data[0].id);
+        // Fetch deals
+        const dealsRes = await fetch("/api/deals?status=active");
+        const dealsData: Deal[] = await dealsRes.json();
+        setDeals(dealsData);
+
+        // If editing, load existing report and set deal
+        if (editReportId) {
+          const reportRes = await fetch(`/api/reports/${editReportId}`);
+          if (reportRes.ok) {
+            const report: ExistingReport = await reportRes.json();
+            setSelectedDealId(report.dealId);
+            setSavedReportId(report.id);
+            if (report.docxUrl) setDocxUploaded(true);
+            if (report.pdfUrl) setPdfUrl(report.pdfUrl);
+          }
+        } else if (dealsData.length > 0) {
+          setSelectedDealId(dealsData[0].id);
         }
       } catch (err) {
-        console.error("Failed to fetch deals:", err);
+        console.error("Failed to initialize:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchDeals();
-  }, []);
+    init();
+  }, [editReportId]);
 
   const selectedDeal = deals.find((d) => d.id === selectedDealId);
 
   const handleDealChange = (value: string | null) => {
     if (value === null) return;
     setSelectedDealId(value);
-    // Reset workflow state when deal changes
     setSavedReportId(null);
     setDocxUploaded(false);
     setPdfUrl(null);
@@ -83,7 +106,6 @@ export default function ReportNewPage() {
 
     setGeneratingDocx(true);
     try {
-      // Auto-save report from deal data
       let reportId = savedReportId;
       if (!reportId) {
         const now = new Date();
@@ -125,7 +147,7 @@ export default function ReportNewPage() {
           const err = JSON.parse(text);
           alert(`Word生成に失敗しました: ${err.error}`);
         } catch {
-          alert(`Word生成に失敗しました`);
+          alert("Word生成に失敗しました");
         }
         return;
       }
@@ -134,8 +156,10 @@ export default function ReportNewPage() {
       const a = document.createElement("a");
       a.href = url;
       a.download = `${selectedDeal.client.name}_ASP業務完了報告書_${selectedDeal.title}.docx`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       console.error("Failed to generate docx:", err);
       alert("Word生成に失敗しました");
@@ -172,7 +196,7 @@ export default function ReportNewPage() {
     }
   };
 
-  // Step 3: Generate PDF from uploaded docx
+  // Step 3: Generate PDF
   const handleGeneratePdf = async () => {
     if (!savedReportId) return;
 
@@ -216,8 +240,12 @@ export default function ReportNewPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="font-heading text-[22px] font-bold tracking-tight text-slate-900">報告書 新規作成</h1>
-        <p className="mt-0.5 text-[13px] text-slate-400">案件を選択してWord報告書を生成</p>
+        <h1 className="font-heading text-[22px] font-bold tracking-tight text-slate-900">
+          {isEditMode ? "報告書 編集" : "報告書 新規作成"}
+        </h1>
+        <p className="mt-0.5 text-[13px] text-slate-400">
+          {isEditMode ? "既存の報告書を編集" : "案件を選択してWord報告書を生成"}
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -245,7 +273,6 @@ export default function ReportNewPage() {
             </CardContent>
           </Card>
 
-          {/* Deal Info (read-only) */}
           {selectedDeal && (
             <Card className="rounded-xl border-slate-200/60 bg-white shadow-none">
               <CardHeader className="pb-3">
@@ -300,7 +327,7 @@ export default function ReportNewPage() {
               <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">報告書作成フロー</CardTitle>
             </CardHeader>
             <CardContent className="space-y-0">
-              {/* Step 1: Word生成 */}
+              {/* Step 1 */}
               <div className="flex gap-4 py-5 border-b border-slate-100">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">1</div>
                 <div className="flex-1 min-w-0">
@@ -314,12 +341,12 @@ export default function ReportNewPage() {
                     disabled={generatingDocx || !selectedDeal}
                     className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-5 py-2 text-[13px] font-medium text-indigo-700 transition-colors duration-150 hover:bg-indigo-100 disabled:opacity-50"
                   >
-                    {generatingDocx ? "生成中..." : "Word生成・ダウンロード"}
+                    {generatingDocx ? "生成中..." : savedReportId ? "Word再生成・ダウンロード" : "Word生成・ダウンロード"}
                   </button>
                 </div>
               </div>
 
-              {/* Step 2: Upload */}
+              {/* Step 2 */}
               <div className={`flex gap-4 py-5 border-b border-slate-100 ${!savedReportId ? "opacity-40" : ""}`}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">2</div>
                 <div className="flex-1 min-w-0">
@@ -335,7 +362,7 @@ export default function ReportNewPage() {
                 </div>
               </div>
 
-              {/* Step 3: PDF */}
+              {/* Step 3 */}
               <div className={`flex gap-4 py-5 border-b border-slate-100 ${!docxUploaded ? "opacity-40" : ""}`}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">3</div>
                 <div className="flex-1 min-w-0">
@@ -354,7 +381,7 @@ export default function ReportNewPage() {
                 </div>
               </div>
 
-              {/* Step 4: Preview & Download */}
+              {/* Step 4 */}
               <div className={`flex gap-4 py-5 ${!pdfUrl ? "opacity-40" : ""}`}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">4</div>
                 <div className="flex-1 min-w-0">
@@ -383,11 +410,9 @@ export default function ReportNewPage() {
                   </div>
                 </div>
               </div>
-
             </CardContent>
           </Card>
 
-          {/* Done */}
           {pdfUrl && (
             <div className="mt-4 flex justify-end">
               <button
