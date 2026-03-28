@@ -61,6 +61,7 @@ export async function GET(
       const blob = await put(filename, buffer, {
         access: "public",
         addRandomSuffix: false,
+        allowOverwrite: true,
         contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
       await prisma.report.update({

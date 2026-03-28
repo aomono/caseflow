@@ -36,7 +36,7 @@ export async function POST(
     const blob = await put(
       `reports/${report.id}_${report.year}-${report.month}.pdf`,
       pdfBuffer,
-      { access: "public", addRandomSuffix: false, contentType: "application/pdf" },
+      { access: "public", addRandomSuffix: false, allowOverwrite: true, contentType: "application/pdf" },
     );
 
     const updated = await prisma.report.update({
