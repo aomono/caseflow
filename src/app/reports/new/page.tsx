@@ -61,8 +61,6 @@ function ReportNewContent() {
   const [loading, setLoading] = useState(true);
   const [savedReportId, setSavedReportId] = useState<string | null>(editReportId);
   const [generatingDocx, setGeneratingDocx] = useState(false);
-  const [uploadingDocx, setUploadingDocx] = useState(false);
-  const [docxUploaded, setDocxUploaded] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
@@ -71,19 +69,16 @@ function ReportNewContent() {
   useEffect(() => {
     const init = async () => {
       try {
-        // Fetch deals
         const dealsRes = await fetch("/api/deals?status=active");
         const dealsData: Deal[] = await dealsRes.json();
         setDeals(dealsData);
 
-        // If editing, load existing report and set deal
         if (editReportId) {
           const reportRes = await fetch(`/api/reports/${editReportId}`);
           if (reportRes.ok) {
             const report: ExistingReport = await reportRes.json();
             setSelectedDealId(report.dealId);
             setSavedReportId(report.id);
-            if (report.docxUrl) setDocxUploaded(true);
             if (report.pdfUrl) setPdfUrl(report.pdfUrl);
           }
         } else if (dealsData.length > 0) {
@@ -104,7 +99,6 @@ function ReportNewContent() {
     if (value === null) return;
     setSelectedDealId(value);
     setSavedReportId(null);
-    setDocxUploaded(false);
     setPdfUrl(null);
   };
 
@@ -147,7 +141,6 @@ function ReportNewContent() {
         setSavedReportId(reportId);
       }
 
-      // Generate and download docx
       const res = await fetch(`/api/reports/${reportId}/docx`);
       if (!res.ok) {
         const text = await res.text();
@@ -176,40 +169,7 @@ function ReportNewContent() {
     }
   };
 
-  // Step 2: Upload edited docx
-  const handleUploadDocx = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !savedReportId) return;
-
-    setUploadingDocx(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`/api/reports/${savedReportId}/docx`, {
-        method: "PUT",
-        body: formData,
-      });
-      if (res.ok) {
-        setDocxUploaded(true);
-      } else {
-        const text = await res.text();
-        try {
-          const err = JSON.parse(text);
-          alert(`アップロードに失敗しました: ${err.error}`);
-        } catch {
-          alert("アップロードに失敗しました");
-        }
-      }
-    } catch (err) {
-      console.error("Failed to upload docx:", err);
-      alert("アップロードに失敗しました");
-    } finally {
-      setUploadingDocx(false);
-      e.target.value = "";
-    }
-  };
-
-  // Step 3: Upload PDF (user converts Word→PDF locally)
+  // Step 2: Upload PDF
   const handleUploadPdf = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !savedReportId) return;
@@ -348,15 +308,15 @@ function ReportNewContent() {
               <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">報告書作成フロー</CardTitle>
             </CardHeader>
             <CardContent className="space-y-0">
-              {/* Step 1 */}
+              {/* Step 1: Word生成 */}
               <div className="flex gap-4 py-5 border-b border-slate-100">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">1</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[14px] font-semibold text-slate-800">Word報告書を生成</p>
+                    <p className="text-[14px] font-semibold text-slate-800">Word報告書を生成・ダウンロード</p>
                     {savedReportId && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
                   </div>
-                  <p className="text-[12px] text-slate-400 mt-0.5">テンプレートに契約情報を自動入力して.docxを生成します</p>
+                  <p className="text-[12px] text-slate-400 mt-0.5">テンプレートに契約情報を自動入力して.docxを生成します。ダウンロード後、手元で内容を修正してください。</p>
                   <button
                     onClick={handleGenerateDocx}
                     disabled={generatingDocx || !selectedDeal}
@@ -367,41 +327,25 @@ function ReportNewContent() {
                 </div>
               </div>
 
-              {/* Step 2 */}
+              {/* Step 2: PDFアップロード */}
               <div className={`flex gap-4 py-5 border-b border-slate-100 ${!savedReportId ? "opacity-40" : ""}`}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">2</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-[14px] font-semibold text-slate-800">修正したWordをアップロード</p>
-                    {docxUploaded && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
-                  </div>
-                  <p className="text-[12px] text-slate-400 mt-0.5">ダウンロードしたWordを手元で修正し、アップロードしてください</p>
-                  <label className={`mt-3 inline-flex cursor-pointer rounded-lg border border-slate-200 px-5 py-2 text-[13px] font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 ${!savedReportId ? "pointer-events-none" : ""}`}>
-                    {uploadingDocx ? "アップロード中..." : "修正版Wordをアップロード"}
-                    <input type="file" accept=".docx" onChange={handleUploadDocx} className="hidden" disabled={uploadingDocx || !savedReportId} />
-                  </label>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className={`flex gap-4 py-5 border-b border-slate-100 ${!docxUploaded ? "opacity-40" : ""}`}>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">3</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[14px] font-semibold text-slate-800">PDFをアップロード</p>
                     {pdfUrl && <Badge className="badge-pill bg-emerald-50 text-emerald-700 border border-emerald-200" variant="secondary">完了</Badge>}
                   </div>
-                  <p className="text-[12px] text-slate-400 mt-0.5">Wordから書き出したPDFをアップロードしてください</p>
-                  <label className={`mt-3 inline-flex cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 ${!docxUploaded ? "pointer-events-none opacity-50" : ""}`}>
+                  <p className="text-[12px] text-slate-400 mt-0.5">修正したWordをPDFとして書き出し、アップロードしてください</p>
+                  <label className={`mt-3 inline-flex cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 text-[13px] font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 ${!savedReportId ? "pointer-events-none opacity-50" : ""}`}>
                     {uploadingPdf ? "アップロード中..." : "PDFアップロード"}
-                    <input type="file" accept=".pdf" onChange={handleUploadPdf} className="hidden" disabled={uploadingPdf || !docxUploaded} />
+                    <input type="file" accept=".pdf" onChange={handleUploadPdf} className="hidden" disabled={uploadingPdf || !savedReportId} />
                   </label>
                 </div>
               </div>
 
-              {/* Step 4 */}
+              {/* Step 3: プレビュー・ダウンロード */}
               <div className={`flex gap-4 py-5 ${!pdfUrl ? "opacity-40" : ""}`}>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">4</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700 shrink-0">3</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-semibold text-slate-800">プレビュー・ダウンロード</p>
                   <p className="text-[12px] text-slate-400 mt-0.5">PDFを確認してダウンロード</p>
