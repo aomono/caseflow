@@ -4,6 +4,7 @@ import { put } from "@vercel/blob";
 import { buildReportDocx } from "@/lib/report-builder";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 // GET: generate docx from report data and return as download
 export async function GET(
@@ -62,9 +63,10 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Failed to generate docx:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Failed to generate docx:", message, error);
     return NextResponse.json(
-      { error: "Failed to generate docx" },
+      { error: `Failed to generate docx: ${message}` },
       { status: 500 },
     );
   }
