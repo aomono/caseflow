@@ -36,8 +36,6 @@ export async function PUT(
     const filename = `reports/${report.id}_${report.year}-${report.month}.pdf`;
     const blob = await put(filename, buffer, {
       access: "public",
-      addRandomSuffix: false,
-      allowOverwrite: true,
       contentType: "application/pdf",
     });
 
