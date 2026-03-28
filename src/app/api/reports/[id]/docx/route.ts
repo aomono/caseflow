@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { put } from "@vercel/blob";
 import { buildReportDocx } from "@/lib/report-builder";
+import { generateReportContent } from "@/lib/report-ai";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 30;
 
 // GET: generate docx from report data and return as download
 export async function GET(
@@ -33,36 +35,24 @@ export async function GET(
       ? `${formatJaDate(report.deal.contractStartDate)}～${formatJaDate(report.deal.contractEndDate)}`
       : report.period;
 
-    // 実施業務内容: contractSummaryとworkDescriptionから構成
-    const workItems: string[] = ["契約に基づき、以下の業務を完了しました。"];
-    const summary = report.deal.contractSummary || report.workDescription;
-    if (summary) {
-      for (const line of summary.split("\n").filter(Boolean)) {
-        workItems.push(line.startsWith("・") ? line : `・${line}`);
-      }
-    }
-
-    // 成果物: workDescriptionに「成果物」「納品」キーワードがあれば抽出、なければ案件名ベースで生成
-    const deliverables: string[] = [];
-    const desc = report.deal.description || "";
-    for (const line of desc.split("\n").filter(Boolean)) {
-      if (line.includes("成果物") || line.includes("納品") || line.includes("資料")) {
-        deliverables.push(line.startsWith("・") ? line : `・${line}`);
-      }
-    }
-    if (deliverables.length === 0) {
-      deliverables.push("・定例会議資料");
-      deliverables.push("・業務報告書");
-    }
+    // AIで業務内容・成果物・今後の対応を推測生成
+    const aiContent = await generateReportContent({
+      clientName: report.deal.client.name,
+      dealTitle: report.deal.title,
+      contractStartDate: report.deal.contractStartDate ? formatJaDate(report.deal.contractStartDate) : null,
+      contractEndDate: report.deal.contractEndDate ? formatJaDate(report.deal.contractEndDate) : null,
+      contractSummary: report.deal.contractSummary,
+      description: report.deal.description,
+    });
 
     const buffer = await buildReportDocx({
       clientName: report.deal.client.name,
       dealTitle: report.deal.title,
       reportDate,
       period,
-      workDescriptionItems: workItems,
-      deliverables,
-      nextActions: ["・次期対応については別途協議"],
+      workDescriptionItems: aiContent.workDescriptionItems,
+      deliverables: aiContent.deliverables,
+      nextActions: aiContent.nextActions,
     });
 
     // Try to save to blob (non-blocking — download works even if blob fails)
