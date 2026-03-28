@@ -13,11 +13,11 @@ Font.register({
   family: "NotoSansJP",
   fonts: [
     {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@5.1.2/files/noto-sans-jp-japanese-400-normal.woff",
+      src: "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansjp/NotoSansJP-Regular.ttf",
       fontWeight: 400,
     },
     {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@5.1.2/files/noto-sans-jp-japanese-700-normal.woff",
+      src: "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansjp/NotoSansJP-Bold.ttf",
       fontWeight: 700,
     },
   ],
