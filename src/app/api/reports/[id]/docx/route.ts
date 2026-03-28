@@ -23,21 +23,46 @@ export async function GET(
   }
 
   try {
-    // Generate from template
-    const reportDate = new Date().toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const formatJaDate = (d: Date) =>
+      `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+
+    const reportDate = formatJaDate(new Date());
+
+    // 実施期間: 契約開始日～契約終了日
+    const period = report.deal.contractStartDate && report.deal.contractEndDate
+      ? `${formatJaDate(report.deal.contractStartDate)}～${formatJaDate(report.deal.contractEndDate)}`
+      : report.period;
+
+    // 実施業務内容: contractSummaryとworkDescriptionから構成
+    const workItems: string[] = ["契約に基づき、以下の業務を完了しました。"];
+    const summary = report.deal.contractSummary || report.workDescription;
+    if (summary) {
+      for (const line of summary.split("\n").filter(Boolean)) {
+        workItems.push(line.startsWith("・") ? line : `・${line}`);
+      }
+    }
+
+    // 成果物: workDescriptionに「成果物」「納品」キーワードがあれば抽出、なければ案件名ベースで生成
+    const deliverables: string[] = [];
+    const desc = report.deal.description || "";
+    for (const line of desc.split("\n").filter(Boolean)) {
+      if (line.includes("成果物") || line.includes("納品") || line.includes("資料")) {
+        deliverables.push(line.startsWith("・") ? line : `・${line}`);
+      }
+    }
+    if (deliverables.length === 0) {
+      deliverables.push("・定例会議資料");
+      deliverables.push("・業務報告書");
+    }
 
     const buffer = await buildReportDocx({
       clientName: report.deal.client.name,
       dealTitle: report.deal.title,
       reportDate,
-      period: report.period,
-      workDescriptionItems: report.workDescription.split("\n").filter(Boolean),
-      deliverables: ["・成果物は別途納品"],
-      nextActions: ["・次期対応は別途協議"],
+      period,
+      workDescriptionItems: workItems,
+      deliverables,
+      nextActions: ["・次期対応については別途協議"],
     });
 
     // Try to save to blob (non-blocking — download works even if blob fails)
