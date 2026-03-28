@@ -11,7 +11,16 @@ import {
 
 Font.register({
   family: "NotoSansJP",
-  src: "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFJEk757Y0rw_qMHVdbR2L8Y9QTJ1LwkRmR5GprQAe-TuQ.ttf",
+  fonts: [
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@5.1.2/files/noto-sans-jp-japanese-400-normal.woff",
+      fontWeight: 400,
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@5.1.2/files/noto-sans-jp-japanese-700-normal.woff",
+      fontWeight: 700,
+    },
+  ],
 });
 
 const styles = StyleSheet.create({
