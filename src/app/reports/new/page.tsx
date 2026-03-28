@@ -120,8 +120,13 @@ export default function ReportNewPage() {
       // Generate and download docx
       const res = await fetch(`/api/reports/${reportId}/docx`);
       if (!res.ok) {
-        const err = await res.json();
-        alert(`Word生成に失敗しました: ${err.error}`);
+        const text = await res.text();
+        try {
+          const err = JSON.parse(text);
+          alert(`Word生成に失敗しました: ${err.error}`);
+        } catch {
+          alert(`Word生成に失敗しました`);
+        }
         return;
       }
       const blob = await res.blob();
@@ -225,7 +230,9 @@ export default function ReportNewPage() {
             <CardContent>
               <Select value={selectedDealId} onValueChange={handleDealChange}>
                 <SelectTrigger className="w-full rounded-lg border-slate-200">
-                  <SelectValue placeholder="案件を選択" />
+                  <SelectValue placeholder="案件を選択">
+                    {selectedDeal ? `${selectedDeal.client.name} - ${selectedDeal.title}` : "案件を選択"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {deals.map((deal) => (

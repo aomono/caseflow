@@ -21,11 +21,6 @@ export async function GET(
     return NextResponse.json({ error: "Report not found" }, { status: 404 });
   }
 
-  // If already has a docx stored, redirect to it
-  if (report.docxUrl) {
-    return NextResponse.redirect(report.docxUrl);
-  }
-
   // Generate from template
   const reportDate = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
@@ -43,23 +38,26 @@ export async function GET(
     nextActions: ["・次期対応は別途協議"],
   });
 
-  // Save to blob
-  const filename = `reports/${report.id}_${report.year}-${report.month}.docx`;
-  const blob = await put(filename, buffer, {
-    access: "public",
-    contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  });
+  // Try to save to blob (non-blocking — download works even if blob fails)
+  try {
+    const filename = `reports/${report.id}_${report.year}-${report.month}.docx`;
+    const blob = await put(filename, buffer, {
+      access: "public",
+      contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+    await prisma.report.update({
+      where: { id },
+      data: { docxUrl: blob.url },
+    });
+  } catch {
+    // Blob storage may not be configured — continue with direct download
+  }
 
-  // Update DB
-  await prisma.report.update({
-    where: { id },
-    data: { docxUrl: blob.url },
-  });
-
+  const clientName = encodeURIComponent(report.deal.client.name);
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": `attachment; filename="${encodeURIComponent(report.deal.client.name)}_ASP業務完了報告書_${report.year}-${report.month}.docx"`,
+      "Content-Disposition": `attachment; filename="${clientName}_ASP業務完了報告書_${report.year}-${report.month}.docx"`,
     },
   });
 }
