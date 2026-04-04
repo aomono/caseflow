@@ -1,3 +1,4 @@
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import DealEditForm from "./deal-edit-form";
@@ -21,6 +22,7 @@ export default async function EditDealPage({
 
   return (
     <div className="max-w-2xl">
+      <Breadcrumb items={[{ label: "案件", href: "/deals" }, { label: deal.title, href: `/deals/${id}` }, { label: "編集" }]} />
       <DealEditForm
         initialData={{
           id: deal.id,

@@ -82,8 +82,14 @@ const bottomItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
   const closeMobile = () => setMobileOpen(false);
+
+  const closeAll = () => {
+    setQuickCreateOpen(false);
+    closeMobile();
+  };
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -143,6 +149,22 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 px-3 pt-5 space-y-0.5">
           <p className="px-3 pb-2 text-[10px] font-semibold tracking-widest text-slate-500 uppercase">Main</p>
+
+          {/* Quick Create */}
+          <div className="relative px-3 mb-2">
+            <button onClick={() => setQuickCreateOpen(!quickCreateOpen)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-400 hover:bg-white/[0.04] hover:text-white transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新規作成
+            </button>
+            {quickCreateOpen && (
+              <div className="mt-1 rounded-lg bg-slate-800 py-1">
+                <Link href="/deals/new" onClick={closeAll} className="block px-5 py-2 text-[12px] text-slate-300 hover:bg-white/[0.04] hover:text-white">新規案件</Link>
+                <Link href="/clients/new" onClick={closeAll} className="block px-5 py-2 text-[12px] text-slate-300 hover:bg-white/[0.04] hover:text-white">新規クライアント</Link>
+                <Link href="/reports/new" onClick={closeAll} className="block px-5 py-2 text-[12px] text-slate-300 hover:bg-white/[0.04] hover:text-white">報告書作成</Link>
+              </div>
+            )}
+          </div>
+
           {navItems.map((item) => (
             <Link
               key={item.href}

@@ -1,3 +1,4 @@
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ClientEditForm from "./client-edit-form";
@@ -21,6 +22,7 @@ export default async function EditClientPage({
 
   return (
     <div className="max-w-2xl">
+      <Breadcrumb items={[{ label: "クライアント", href: "/clients" }, { label: client.name, href: `/clients/${id}` }, { label: "編集" }]} />
       <ClientEditForm
         initialData={{
           id: client.id,

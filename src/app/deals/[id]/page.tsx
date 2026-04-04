@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { DealDeleteButton } from "@/components/deals/deal-delete-button";
 import {
   Card,
   CardHeader,
@@ -117,8 +119,12 @@ export default async function DealDetailPage({
     notFound();
   }
 
+  const unpaidCount = deal.invoices.filter((inv) => inv.status !== "paid").length;
+  const pendingReminderCount = deal.reminders.filter((r) => r.status === "pending").length;
+
   return (
     <div className="space-y-6 animate-fade-in">
+      <Breadcrumb items={[{ label: "案件", href: "/deals" }, { label: deal.title }]} />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-2">
@@ -146,8 +152,21 @@ export default async function DealDetailPage({
             ) : null}
           </div>
         </div>
-        <Link href={`/deals/${id}/edit`}>
-          <Button variant="outline" className="rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50">編集</Button>
+        <div className="flex gap-2">
+          <Link href={`/deals/${id}/edit`}>
+            <Button variant="outline" className="rounded-lg border-slate-200 text-slate-700 hover:bg-slate-50">編集</Button>
+          </Link>
+          <DealDeleteButton dealId={id} />
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex flex-wrap items-center gap-2 mt-4">
+        <Link href={`/reports/new?dealId=${deal.id}`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-[12px] font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
+          報告書作成
+        </Link>
+        <Link href="/invoices" className="rounded-lg border border-slate-200 px-4 py-1.5 text-[12px] font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          請求管理
         </Link>
       </div>
 
@@ -157,9 +176,9 @@ export default async function DealDetailPage({
           <TabsTrigger value="info" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">基本情報</TabsTrigger>
           <TabsTrigger value="contacts" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">関係者</TabsTrigger>
           <TabsTrigger value="activities" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">やりとり</TabsTrigger>
-          <TabsTrigger value="invoices" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">請求・入金</TabsTrigger>
+          <TabsTrigger value="invoices" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none"><span>請求・入金{unpaidCount > 0 && <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-100 px-1 text-[10px] font-bold text-rose-700">{unpaidCount}</span>}</span></TabsTrigger>
           <TabsTrigger value="reports" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">報告書</TabsTrigger>
-          <TabsTrigger value="reminders" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none">リマインド</TabsTrigger>
+          <TabsTrigger value="reminders" className="rounded-none border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-slate-500 data-[state=active]:border-indigo-600 data-[state=active]:text-indigo-600 data-[state=active]:shadow-none"><span>リマインド{pendingReminderCount > 0 && <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-100 px-1 text-[10px] font-bold text-amber-700">{pendingReminderCount}</span>}</span></TabsTrigger>
         </TabsList>
 
         {/* 基本情報 */}

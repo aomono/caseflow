@@ -63,6 +63,11 @@ export default function InvoicesPage() {
         const sent: Invoice[] = await sentRes.json();
         const overdue: Invoice[] = await overdueRes.json();
         setInvoices([...sent, ...overdue].sort((a, b) => {
+          // Sort: overdue first, then sent (unpaid)
+          const statusOrder: Record<string, number> = { overdue: 0, sent: 1 };
+          const oa = statusOrder[a.status] ?? 2;
+          const ob = statusOrder[b.status] ?? 2;
+          if (oa !== ob) return oa - ob;
           if (a.year !== b.year) return b.year - a.year;
           return b.month - a.month;
         }));
@@ -72,6 +77,15 @@ export default function InvoicesPage() {
           : `/api/invoices`;
         const res = await fetch(url);
         const data: Invoice[] = await res.json();
+        // Sort: overdue first, then sent (unpaid), then others
+        const statusOrder: Record<string, number> = { overdue: 0, sent: 1 };
+        data.sort((a, b) => {
+          const oa = statusOrder[a.status] ?? 2;
+          const ob = statusOrder[b.status] ?? 2;
+          if (oa !== ob) return oa - ob;
+          if (a.year !== b.year) return b.year - a.year;
+          return b.month - a.month;
+        });
         setInvoices(data);
       }
     } catch (err) {
@@ -112,6 +126,9 @@ export default function InvoicesPage() {
   };
 
   const handleGenerateMonthly = async () => {
+    const confirmed = window.confirm(`${currentYear}年${currentMonth}月の請求書を一括生成しますか？\n対象: 稼働中の全案件`);
+    if (!confirmed) return;
+
     setGenerating(true);
     try {
       const now = new Date();
@@ -260,7 +277,7 @@ export default function InvoicesPage() {
             <TableBody>
               {invoices.map((invoice) => {
                 return (
-                  <TableRow key={invoice.id} className="border-slate-50 hover:bg-slate-50/50">
+                  <TableRow key={invoice.id} className={`border-slate-50 hover:bg-slate-50/50 ${invoice.status === "overdue" ? "bg-rose-50/30" : ""}`}>
                     <TableCell className="text-[13px] font-medium text-slate-900">
                       {invoice.deal.client.name}
                     </TableCell>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -190,6 +190,11 @@ export default function DashboardPage() {
   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   const maxClientRevenue = clientRevenue.length > 0 ? clientRevenue[0].revenue : 1;
+
+  // Split reminders into overdue vs upcoming
+  const today = new Date().toISOString().split('T')[0];
+  const overdueReminders = useMemo(() => reminders.filter(r => r.dueDate.split('T')[0] < today), [reminders, today]);
+  const upcomingReminders = useMemo(() => reminders.filter(r => r.dueDate.split('T')[0] >= today), [reminders, today]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -579,7 +584,11 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">直近のリマインド</CardTitle>
                   {reminders.length > 0 && (
-                    <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-100 px-1.5 text-[10px] font-bold text-amber-700">
+                    <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
+                      overdueReminders.length > 0
+                        ? "bg-rose-100 text-rose-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}>
                       {reminders.length}
                     </span>
                   )}
@@ -587,7 +596,50 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pt-3">
                 <div className="divide-y divide-slate-100">
-                  {reminders.map((reminder) => {
+                  {/* Overdue reminders section */}
+                  {overdueReminders.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 pb-2">
+                        <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
+                          期限超過
+                        </span>
+                        <span className="text-[11px] text-rose-500">{overdueReminders.length}件</span>
+                      </div>
+                      {overdueReminders.map((reminder) => {
+                        const style = REMINDER_STATUS_STYLES[reminder.status] ?? {
+                          className: "bg-slate-50 text-slate-700 border border-slate-200",
+                          label: reminder.status,
+                        };
+                        return (
+                          <div key={reminder.id} className="flex items-center gap-3.5 py-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 text-rose-600 shrink-0">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-medium text-slate-800 truncate">{reminder.title}</p>
+                              <p className="text-[11px] text-rose-500">{new Date(reminder.dueDate).toLocaleDateString("ja-JP")}</p>
+                            </div>
+                            <Badge className={`badge-pill shrink-0 ${style.className}`} variant="secondary">
+                              {style.label}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                  {/* Upcoming reminders section */}
+                  {upcomingReminders.length > 0 && overdueReminders.length > 0 && (
+                    <div className="flex items-center gap-2 pt-3 pb-2">
+                      <span className="inline-flex items-center rounded-md bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-600 border border-slate-200">
+                        今後の予定
+                      </span>
+                      <span className="text-[11px] text-slate-400">{upcomingReminders.length}件</span>
+                    </div>
+                  )}
+                  {upcomingReminders.map((reminder) => {
                     const style = REMINDER_STATUS_STYLES[reminder.status] ?? {
                       className: "bg-slate-50 text-slate-700 border border-slate-200",
                       label: reminder.status,
