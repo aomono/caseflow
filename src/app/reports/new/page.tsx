@@ -30,6 +30,8 @@ interface Deal {
 interface ExistingReport {
   id: string;
   dealId: string;
+  amount: number;
+  period: string;
   docxUrl: string | null;
   pdfUrl: string | null;
 }
@@ -60,6 +62,9 @@ function ReportNewContent() {
   const [selectedDealId, setSelectedDealId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [savedReportId, setSavedReportId] = useState<string | null>(editReportId);
+  const [reportAmount, setReportAmount] = useState<number>(0);
+  const [reportPeriod, setReportPeriod] = useState<string>("");
+  const [savingReport, setSavingReport] = useState(false);
   const [generatingDocx, setGeneratingDocx] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -69,7 +74,7 @@ function ReportNewContent() {
   useEffect(() => {
     const init = async () => {
       try {
-        const dealsRes = await fetch("/api/deals?status=active");
+        const dealsRes = await fetch("/api/deals");
         const dealsData: Deal[] = await dealsRes.json();
         setDeals(dealsData);
 
@@ -79,6 +84,8 @@ function ReportNewContent() {
             const report: ExistingReport = await reportRes.json();
             setSelectedDealId(report.dealId);
             setSavedReportId(report.id);
+            setReportAmount(report.amount);
+            setReportPeriod(report.period);
             if (report.pdfUrl) setPdfUrl(report.pdfUrl);
           }
         } else if (dealsData.length > 0) {
@@ -205,6 +212,28 @@ function ReportNewContent() {
     }
   };
 
+  // Save report edits (amount, period)
+  const handleSaveReport = async () => {
+    if (!savedReportId) return;
+    setSavingReport(true);
+    try {
+      const res = await fetch(`/api/reports/${savedReportId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: reportAmount, period: reportPeriod }),
+      });
+      if (res.ok) {
+        alert("報告書を更新しました");
+      } else {
+        alert("更新に失敗しました");
+      }
+    } catch {
+      alert("更新に失敗しました");
+    } finally {
+      setSavingReport(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -296,6 +325,42 @@ function ReportNewContent() {
                     <p className="text-[13px] text-slate-700 mt-0.5 whitespace-pre-line">{selectedDeal.contractSummary}</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Report Edit (edit mode) */}
+          {isEditMode && savedReportId && (
+            <Card className="rounded-xl border-slate-200/60 bg-white shadow-none">
+              <CardHeader className="pb-3">
+                <CardTitle className="font-heading text-[14px] font-semibold text-slate-800">報告書情報</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">対象期間</label>
+                  <input
+                    type="text"
+                    value={reportPeriod}
+                    onChange={(e) => setReportPeriod(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">金額</label>
+                  <input
+                    type="number"
+                    value={reportAmount}
+                    onChange={(e) => setReportAmount(Number(e.target.value))}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-[13px] tabular-nums text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+                <button
+                  onClick={handleSaveReport}
+                  disabled={savingReport}
+                  className="w-full rounded-lg bg-slate-900 px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {savingReport ? "保存中..." : "報告書を更新"}
+                </button>
               </CardContent>
             </Card>
           )}
