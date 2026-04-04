@@ -25,46 +25,14 @@ import {
 } from "@/components/ui/tabs";
 import ContactForm from "@/components/deals/contact-form";
 import ActivityForm from "@/components/deals/activity-form";
+import { DEAL_STATUS_LABELS, DEAL_STATUS_COLORS, CONTACT_ROLE_LABELS, ACTIVITY_TYPE_LABELS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-const statusLabels: Record<string, string> = {
-  lead: "リード",
-  discussion: "協議中",
-  expected: "受注見込み",
-  active: "稼働中",
-  renewal: "更新交渉",
-  closed: "終了",
-  lost: "失注",
-};
-
-const statusColors: Record<string, string> = {
-  lead: "bg-slate-50 text-slate-700 border border-slate-200",
-  discussion: "bg-indigo-50 text-indigo-700 border border-indigo-200",
-  expected: "bg-amber-50 text-amber-700 border border-amber-200",
-  active: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  renewal: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-  closed: "bg-slate-50 text-slate-700 border border-slate-200",
-  lost: "bg-rose-50 text-rose-700 border border-rose-200",
-};
-
-const roleLabels: Record<string, string> = {
-  admin: "管理者",
-  buyer: "決裁者",
-  other: "その他",
-};
 
 const roleColors: Record<string, string> = {
   admin: "bg-indigo-50 text-indigo-700 border border-indigo-200",
   buyer: "bg-violet-50 text-violet-700 border border-violet-200",
   other: "bg-slate-50 text-slate-700 border border-slate-200",
-};
-
-const activityTypeLabels: Record<string, string> = {
-  meeting: "打ち合わせ",
-  email: "メール",
-  phone: "電話",
-  note: "メモ",
 };
 
 const activityTypeColors: Record<string, string> = {
@@ -156,8 +124,8 @@ export default async function DealDetailPage({
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">{deal.title}</h1>
-            <Badge className={`badge-pill text-sm ${statusColors[deal.status]}`}>
-              {statusLabels[deal.status] || deal.status}
+            <Badge className={`badge-pill text-sm ${DEAL_STATUS_COLORS[deal.status]}`}>
+              {DEAL_STATUS_LABELS[deal.status] || deal.status}
             </Badge>
           </div>
           <div className="flex items-center gap-4 text-sm">
@@ -256,7 +224,7 @@ export default async function DealDetailPage({
                           <p className="text-sm text-slate-500">{contact.title ?? ""}</p>
                         </div>
                         <Badge className={`badge-pill ${roleColors[contact.role]}`}>
-                          {roleLabels[contact.role] || contact.role}
+                          {CONTACT_ROLE_LABELS[contact.role] || contact.role}
                         </Badge>
                       </div>
                       <div className="mt-4 space-y-1.5 text-sm text-slate-600">
@@ -309,7 +277,7 @@ export default async function DealDetailPage({
                       <CardContent className="p-4">
                         <div className="flex items-center gap-3">
                           <Badge className={`badge-pill ${activityTypeColors[activity.type]}`}>
-                            {activityTypeLabels[activity.type] || activity.type}
+                            {ACTIVITY_TYPE_LABELS[activity.type] || activity.type}
                           </Badge>
                           <span className="tabular-nums text-sm text-slate-400">
                             {activity.date.toLocaleDateString("ja-JP")}

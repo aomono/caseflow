@@ -4,42 +4,52 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  let settings = await prisma.appSettings.findFirst();
+  try {
+    let settings = await prisma.appSettings.findFirst();
 
-  if (!settings) {
-    settings = await prisma.appSettings.create({
-      data: {
-        companyName: "My Company",
-      },
-    });
+    if (!settings) {
+      settings = await prisma.appSettings.create({
+        data: {
+          companyName: "My Company",
+        },
+      });
+    }
+
+    return NextResponse.json(settings);
+  } catch (error) {
+    console.error("Failed to fetch settings", error);
+    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
   }
-
-  return NextResponse.json(settings);
 }
 
 export async function PUT(request: NextRequest) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  let settings = await prisma.appSettings.findFirst();
+    let settings = await prisma.appSettings.findFirst();
 
-  if (!settings) {
-    settings = await prisma.appSettings.create({
-      data: {
-        companyName: body.companyName ?? "My Company",
-        defaultSlackChannel: body.defaultSlackChannel ?? null,
-        defaultEmailTo: body.defaultEmailTo ?? null,
-      },
-    });
-  } else {
-    settings = await prisma.appSettings.update({
-      where: { id: settings.id },
-      data: {
-        ...(body.companyName !== undefined && { companyName: body.companyName }),
-        ...(body.defaultSlackChannel !== undefined && { defaultSlackChannel: body.defaultSlackChannel }),
-        ...(body.defaultEmailTo !== undefined && { defaultEmailTo: body.defaultEmailTo }),
-      },
-    });
+    if (!settings) {
+      settings = await prisma.appSettings.create({
+        data: {
+          companyName: body.companyName ?? "My Company",
+          defaultSlackChannel: body.defaultSlackChannel ?? null,
+          defaultEmailTo: body.defaultEmailTo ?? null,
+        },
+      });
+    } else {
+      settings = await prisma.appSettings.update({
+        where: { id: settings.id },
+        data: {
+          ...(body.companyName !== undefined && { companyName: body.companyName }),
+          ...(body.defaultSlackChannel !== undefined && { defaultSlackChannel: body.defaultSlackChannel }),
+          ...(body.defaultEmailTo !== undefined && { defaultEmailTo: body.defaultEmailTo }),
+        },
+      });
+    }
+
+    return NextResponse.json(settings);
+  } catch (error) {
+    console.error("Failed to update settings", error);
+    return NextResponse.json({ error: "Failed to update settings" }, { status: 500 });
   }
-
-  return NextResponse.json(settings);
 }

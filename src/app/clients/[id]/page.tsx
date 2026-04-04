@@ -18,28 +18,9 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { DEAL_STATUS_LABELS, DEAL_STATUS_COLORS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-const statusLabels: Record<string, string> = {
-  lead: "リード",
-  discussion: "協議中",
-  expected: "受注見込み",
-  active: "稼働中",
-  renewal: "更新交渉",
-  closed: "終了",
-  lost: "失注",
-};
-
-const statusColors: Record<string, string> = {
-  lead: "bg-gray-100 text-gray-700",
-  discussion: "bg-blue-100 text-blue-700",
-  expected: "bg-amber-100 text-amber-700",
-  active: "bg-emerald-100 text-emerald-700",
-  renewal: "bg-yellow-100 text-yellow-700",
-  closed: "bg-gray-100 text-gray-700",
-  lost: "bg-red-100 text-red-700",
-};
 
 export default async function ClientDetailPage({
   params,
@@ -108,8 +89,8 @@ export default async function ClientDetailPage({
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <Badge className={statusColors[deal.status]}>
-                    {statusLabels[deal.status] || deal.status}
+                  <Badge className={DEAL_STATUS_COLORS[deal.status]}>
+                    {DEAL_STATUS_LABELS[deal.status] || deal.status}
                   </Badge>
                 </TableCell>
                 <TableCell>

@@ -15,36 +15,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-const statusLabels: Record<string, string> = {
-  lead: "リード",
-  discussion: "協議中",
-  expected: "受注見込み",
-  active: "稼働中",
-  renewal: "更新交渉",
-  closed: "終了",
-  lost: "失注",
-};
-
-const statusColors: Record<string, string> = {
-  lead: "bg-slate-50 text-slate-700 border border-slate-200",
-  discussion: "bg-indigo-50 text-indigo-700 border border-indigo-200",
-  expected: "bg-amber-50 text-amber-700 border border-amber-200",
-  active: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  renewal: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-  closed: "bg-slate-50 text-slate-700 border border-slate-200",
-  lost: "bg-rose-50 text-rose-700 border border-rose-200",
-};
-
-const filterOptions = [
-  { value: "all", label: "全て" },
-  { value: "lead", label: "リード" },
-  { value: "discussion", label: "協議中" },
-  { value: "expected", label: "受注見込み" },
-  { value: "active", label: "稼働中" },
-  { value: "renewal", label: "更新交渉" },
-  { value: "closed", label: "終了" },
-  { value: "lost", label: "失注" },
-];
+import { DEAL_STATUS_LABELS, DEAL_STATUS_COLORS, DEAL_STATUS_OPTIONS } from "@/lib/constants";
 
 type Deal = {
   id: string;
@@ -118,7 +89,7 @@ export default function DealsPage() {
       <div className="space-y-2">
         {/* Status filter */}
         <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-          {filterOptions.map((opt) => (
+          {DEAL_STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setStatusFilter(opt.value)}
@@ -185,8 +156,8 @@ export default function DealsPage() {
                   </TableCell>
                   <TableCell className="text-slate-600">{deal.client.name}</TableCell>
                   <TableCell>
-                    <Badge className={`badge-pill ${statusColors[deal.status]}`}>
-                      {statusLabels[deal.status] || deal.status}
+                    <Badge className={`badge-pill ${DEAL_STATUS_COLORS[deal.status]}`}>
+                      {DEAL_STATUS_LABELS[deal.status] || deal.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="tabular-nums text-slate-700">

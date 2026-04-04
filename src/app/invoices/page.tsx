@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { INVOICE_STATUS_LABELS, INVOICE_STATUS_COLORS } from "@/lib/constants";
 
 type Filter = "all" | "unpaid" | "paid";
 
@@ -34,13 +35,6 @@ interface Invoice {
   };
 }
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  draft: { label: "下書き", className: "bg-slate-50 text-slate-700 border border-slate-200" },
-  sent: { label: "送付済", className: "bg-indigo-50 text-indigo-700 border border-indigo-200" },
-  paid: { label: "入金済", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-  overdue: { label: "延滞", className: "bg-rose-50 text-rose-700 border border-rose-200" },
-};
-
 function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString()}`;
 }
@@ -56,17 +50,11 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filter === "unpaid") {
-        // Fetch sent and overdue separately, then combine
-      } else if (filter === "paid") {
-        params.set("status", "paid");
-      }
-
       if (filter === "unpaid") {
         const [sentRes, overdueRes] = await Promise.all([
           fetch(`/api/invoices?status=sent`),
@@ -97,6 +85,13 @@ export default function InvoicesPage() {
     fetchInvoices();
   }, [fetchInvoices]);
 
+  // Clear message after a delay
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(null), 4000);
+    return () => clearTimeout(timer);
+  }, [message]);
+
   const handleMarkPaid = async (id: string) => {
     try {
       const res = await fetch(`/api/invoices/${id}`, {
@@ -106,9 +101,13 @@ export default function InvoicesPage() {
       });
       if (res.ok) {
         await fetchInvoices();
+      } else {
+        console.error("Failed to mark invoice as paid:", res.statusText);
+        setMessage({ text: "入金登録に失敗しました", type: "error" });
       }
     } catch (err) {
       console.error("Failed to mark invoice as paid:", err);
+      setMessage({ text: "入金登録に失敗しました", type: "error" });
     }
   };
 
@@ -123,44 +122,41 @@ export default function InvoicesPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        alert(`${data.createdCount}件の請求書を生成しました`);
+        setMessage({ text: `${data.createdCount}件の請求書を生成しました`, type: "success" });
         await fetchInvoices();
+      } else {
+        console.error("Failed to generate monthly invoices:", res.statusText);
+        setMessage({ text: "請求書の生成に失敗しました", type: "error" });
       }
     } catch (err) {
       console.error("Failed to generate monthly invoices:", err);
+      setMessage({ text: "請求書の生成に失敗しました", type: "error" });
     } finally {
       setGenerating(false);
     }
   };
 
-  // Summary for current month
+  // Summary computed from the main invoices list (filtered to current month when viewing all)
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
+  const currentMonthInvoices = useMemo(() => {
+    // When filter is "all", invoices contains everything, so we can derive current month stats
+    // For filtered views, we still compute from what we have
+    return invoices.filter(
+      (inv) => inv.year === currentYear && inv.month === currentMonth
+    );
+  }, [invoices, currentYear, currentMonth]);
 
-  useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const res = await fetch(`/api/invoices?year=${currentYear}&month=${currentMonth}`);
-        const data: Invoice[] = await res.json();
-        setAllInvoices(data);
-      } catch (err) {
-        console.error("Failed to fetch summary invoices:", err);
-      }
-    };
-    fetchAll();
-  }, [currentYear, currentMonth]);
-
-  const totalAmount = allInvoices.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidAmount = allInvoices
+  const totalAmount = currentMonthInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+  const paidAmount = currentMonthInvoices
     .filter((inv) => inv.status === "paid")
     .reduce((sum, inv) => sum + inv.amount, 0);
-  const unpaidAmount = allInvoices
+  const unpaidAmount = currentMonthInvoices
     .filter((inv) => inv.status === "sent")
     .reduce((sum, inv) => sum + inv.amount, 0);
-  const overdueAmount = allInvoices
+  const overdueAmount = currentMonthInvoices
     .filter((inv) => inv.status === "overdue")
     .reduce((sum, inv) => sum + inv.amount, 0);
 
@@ -175,8 +171,8 @@ export default function InvoicesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">請求書一覧</h1>
-          <p className="mt-1 text-sm text-slate-500">請求と入金の管理</p>
+          <h1 className="font-heading text-[22px] font-bold tracking-tight text-slate-900">請求書一覧</h1>
+          <p className="mt-1 text-[13px] text-slate-500">請求と入金の管理</p>
         </div>
         <Button
           onClick={handleGenerateMonthly}
@@ -186,6 +182,19 @@ export default function InvoicesPage() {
           {generating ? "生成中..." : "月次一括生成"}
         </Button>
       </div>
+
+      {/* Status Message */}
+      {message && (
+        <div
+          className={`rounded-lg border px-4 py-3 text-[13px] font-medium ${
+            message.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-rose-200 bg-rose-50 text-rose-700"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -215,7 +224,7 @@ export default function InvoicesPage() {
           <button
             key={opt.value}
             onClick={() => setFilter(opt.value)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+            className={`rounded-lg px-4 py-1.5 text-[13px] font-medium transition-all duration-150 ${
               filter === opt.value
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
@@ -234,48 +243,44 @@ export default function InvoicesPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-200/60 bg-white">
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="border-slate-100 hover:bg-transparent">
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">案件</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">年月</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">支払期限</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">入金日</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">操作</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">案件</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">年月</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">支払期限</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">入金日</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoices.map((invoice) => {
-                const config = statusConfig[invoice.status] ?? {
-                  label: invoice.status,
-                  className: "bg-slate-50 text-slate-700 border border-slate-200",
-                };
                 return (
                   <TableRow key={invoice.id} className="border-slate-50 hover:bg-slate-50/50">
-                    <TableCell className="font-medium text-slate-900">
+                    <TableCell className="text-[13px] font-medium text-slate-900">
                       {invoice.deal.client.name}
                     </TableCell>
-                    <TableCell className="text-slate-600">{invoice.deal.title}</TableCell>
-                    <TableCell className="tabular-nums text-slate-600">
+                    <TableCell className="text-[13px] text-slate-600">{invoice.deal.title}</TableCell>
+                    <TableCell className="text-[13px] tabular-nums text-slate-600">
                       {invoice.year}年{invoice.month}月
                     </TableCell>
-                    <TableCell className="tabular-nums font-medium text-slate-900">
+                    <TableCell className="text-[13px] tabular-nums font-medium text-slate-900">
                       {formatAmount(invoice.amount)}
                       {invoice.workingDays != null && invoice.baseDays != null && (
                         <span className="ml-1 text-xs text-slate-400">({invoice.workingDays}/{invoice.baseDays}日)</span>
                       )}
                     </TableCell>
-                    <TableCell className="tabular-nums text-slate-600">{formatDate(invoice.dueDate)}</TableCell>
+                    <TableCell className="text-[13px] tabular-nums text-slate-600">{formatDate(invoice.dueDate)}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={`badge-pill ${config.className}`}>
-                        {config.label}
+                      <Badge variant="secondary" className={`badge-pill ${INVOICE_STATUS_COLORS[invoice.status] ?? "bg-slate-50 text-slate-700 border border-slate-200"}`}>
+                        {INVOICE_STATUS_LABELS[invoice.status] ?? invoice.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="tabular-nums text-slate-600">{formatDate(invoice.paidAt)}</TableCell>
+                    <TableCell className="text-[13px] tabular-nums text-slate-600">{formatDate(invoice.paidAt)}</TableCell>
                     <TableCell>
                       {(invoice.status === "sent" || invoice.status === "overdue") && (
                         <button
@@ -291,11 +296,8 @@ export default function InvoicesPage() {
               })}
               {invoices.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-slate-400">
-                    <div className="flex flex-col items-center gap-2">
-                      <span className="text-3xl">🧾</span>
-                      <p>請求書がありません</p>
-                    </div>
+                  <TableCell colSpan={8} className="py-12 text-center">
+                    <p className="text-[13px] text-slate-400">請求書がありません</p>
                   </TableCell>
                 </TableRow>
               )}

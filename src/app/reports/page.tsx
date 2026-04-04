@@ -9,13 +9,9 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
+import { REPORT_STATUS_LABELS, REPORT_STATUS_COLORS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-  draft: { label: "下書き", className: "bg-amber-50 text-amber-700 border border-amber-200" },
-  finalized: { label: "確定", className: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
-};
 
 function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString()}`;
@@ -56,10 +52,6 @@ export default async function ReportsPage() {
           </TableHeader>
           <TableBody>
             {reports.map((report) => {
-              const config = statusConfig[report.status] ?? {
-                label: report.status,
-                className: "bg-slate-50 text-slate-700 border border-slate-200",
-              };
               return (
                 <TableRow key={report.id} className="border-slate-50 hover:bg-slate-50/50">
                   <TableCell className="text-[13px] font-medium text-slate-800">
@@ -68,8 +60,8 @@ export default async function ReportsPage() {
                   <TableCell className="text-[13px] text-slate-600">{report.period}</TableCell>
                   <TableCell className="text-[13px] tabular-nums text-slate-700">{formatAmount(report.amount)}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className={`badge-pill ${config.className}`}>
-                      {config.label}
+                    <Badge variant="secondary" className={`badge-pill ${REPORT_STATUS_COLORS[report.status] ?? "bg-slate-50 text-slate-700 border border-slate-200"}`}>
+                      {REPORT_STATUS_LABELS[report.status] ?? report.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
