@@ -53,6 +53,20 @@ export async function PUT(
       include: { client: true },
     });
 
+    // 金額変更時、draft状態の請求書を連動更新
+    if (body.monthlyAmount !== undefined || body.contractAmount !== undefined) {
+      const newAmount = deal.billingType === "lumpsum"
+        ? deal.contractAmount
+        : deal.monthlyAmount;
+
+      if (newAmount != null) {
+        await prisma.invoice.updateMany({
+          where: { dealId: id, status: "draft" },
+          data: { amount: newAmount },
+        });
+      }
+    }
+
     return NextResponse.json(deal);
   } catch (error) {
     console.error("Failed to update deal:", error);
