@@ -61,19 +61,27 @@ type Deal = {
   };
 };
 
+type Client = { id: string; name: string };
+
 export default function DealsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
+  const [clientFilter, setClientFilter] = useState("all");
+  const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/clients").then(r => r.json()).then((data: Client[]) => setClients(data));
+  }, []);
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);
     try {
-      const url =
-        statusFilter === "all"
-          ? "/api/deals"
-          : `/api/deals?status=${statusFilter}`;
-      const res = await fetch(url);
+      const params = new URLSearchParams();
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (clientFilter !== "all") params.set("clientId", clientFilter);
+      const qs = params.toString();
+      const res = await fetch(`/api/deals${qs ? `?${qs}` : ""}`);
       if (res.ok) {
         const data = await res.json();
         setDeals(data);
@@ -83,7 +91,7 @@ export default function DealsPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, clientFilter]);
 
   useEffect(() => {
     fetchDeals();
@@ -106,21 +114,50 @@ export default function DealsPage() {
         </Link>
       </div>
 
-      {/* Pill toggle group */}
-      <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-        {filterOptions.map((opt) => (
+      {/* Filters */}
+      <div className="space-y-2">
+        {/* Status filter */}
+        <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
+          {filterOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setStatusFilter(opt.value)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+                statusFilter === opt.value
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {/* Client filter */}
+        <div className="flex flex-wrap items-center gap-1 rounded-xl bg-slate-100 p-1">
           <button
-            key={opt.value}
-            onClick={() => setStatusFilter(opt.value)}
+            onClick={() => setClientFilter("all")}
             className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
-              statusFilter === opt.value
+              clientFilter === "all"
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {opt.label}
+            全クライアント
           </button>
-        ))}
+          {clients.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setClientFilter(c.id)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+                clientFilter === c.id
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
