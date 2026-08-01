@@ -23,6 +23,7 @@ import {
   QuickNote,
 } from "@/components/deals/inline-fields";
 import { PipelineBoard } from "@/components/deals/pipeline-board";
+import { BulkUpdatePanel } from "@/components/deals/bulk-update-panel";
 import type { Probability } from "@/lib/pipeline";
 
 type Deal = {
@@ -104,6 +105,8 @@ export default function DealsPage() {
           <Button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700">新規作成</Button>
         </Link>
       </div>
+
+      <BulkUpdatePanel onApplied={fetchDeals} />
 
       {/* View switch */}
       <div className="flex w-fit gap-1 rounded-xl bg-slate-100 p-1">
