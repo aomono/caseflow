@@ -52,6 +52,11 @@ export type DealMinAggregateOutputType = {
   renewalReminderDays: number | null
   description: string | null
   contractSummary: string | null
+  probability: $Enums.Probability | null
+  nextAction: string | null
+  nextActionDate: Date | null
+  source: string | null
+  lastActivityAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +75,11 @@ export type DealMaxAggregateOutputType = {
   renewalReminderDays: number | null
   description: string | null
   contractSummary: string | null
+  probability: $Enums.Probability | null
+  nextAction: string | null
+  nextActionDate: Date | null
+  source: string | null
+  lastActivityAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -88,6 +98,11 @@ export type DealCountAggregateOutputType = {
   renewalReminderDays: number
   description: number
   contractSummary: number
+  probability: number
+  nextAction: number
+  nextActionDate: number
+  source: number
+  lastActivityAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -120,6 +135,11 @@ export type DealMinAggregateInputType = {
   renewalReminderDays?: true
   description?: true
   contractSummary?: true
+  probability?: true
+  nextAction?: true
+  nextActionDate?: true
+  source?: true
+  lastActivityAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -138,6 +158,11 @@ export type DealMaxAggregateInputType = {
   renewalReminderDays?: true
   description?: true
   contractSummary?: true
+  probability?: true
+  nextAction?: true
+  nextActionDate?: true
+  source?: true
+  lastActivityAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -156,6 +181,11 @@ export type DealCountAggregateInputType = {
   renewalReminderDays?: true
   description?: true
   contractSummary?: true
+  probability?: true
+  nextAction?: true
+  nextActionDate?: true
+  source?: true
+  lastActivityAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -261,6 +291,11 @@ export type DealGroupByOutputType = {
   renewalReminderDays: number
   description: string | null
   contractSummary: string | null
+  probability: $Enums.Probability | null
+  nextAction: string | null
+  nextActionDate: Date | null
+  source: string | null
+  lastActivityAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: DealCountAggregateOutputType | null
@@ -302,6 +337,11 @@ export type DealWhereInput = {
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
   description?: Prisma.StringNullableFilter<"Deal"> | string | null
   contractSummary?: Prisma.StringNullableFilter<"Deal"> | string | null
+  probability?: Prisma.EnumProbabilityNullableFilter<"Deal"> | $Enums.Probability | null
+  nextAction?: Prisma.StringNullableFilter<"Deal"> | string | null
+  nextActionDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Deal"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
@@ -326,6 +366,11 @@ export type DealOrderByWithRelationInput = {
   renewalReminderDays?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   contractSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  probability?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextAction?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextActionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   client?: Prisma.ClientOrderByWithRelationInput
@@ -353,6 +398,11 @@ export type DealWhereUniqueInput = Prisma.AtLeast<{
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
   description?: Prisma.StringNullableFilter<"Deal"> | string | null
   contractSummary?: Prisma.StringNullableFilter<"Deal"> | string | null
+  probability?: Prisma.EnumProbabilityNullableFilter<"Deal"> | $Enums.Probability | null
+  nextAction?: Prisma.StringNullableFilter<"Deal"> | string | null
+  nextActionDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Deal"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
@@ -377,6 +427,11 @@ export type DealOrderByWithAggregationInput = {
   renewalReminderDays?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   contractSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  probability?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextAction?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextActionDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DealCountOrderByAggregateInput
@@ -403,6 +458,11 @@ export type DealScalarWhereWithAggregatesInput = {
   renewalReminderDays?: Prisma.IntWithAggregatesFilter<"Deal"> | number
   description?: Prisma.StringNullableWithAggregatesFilter<"Deal"> | string | null
   contractSummary?: Prisma.StringNullableWithAggregatesFilter<"Deal"> | string | null
+  probability?: Prisma.EnumProbabilityNullableWithAggregatesFilter<"Deal"> | $Enums.Probability | null
+  nextAction?: Prisma.StringNullableWithAggregatesFilter<"Deal"> | string | null
+  nextActionDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Deal"> | Date | string | null
+  source?: Prisma.StringNullableWithAggregatesFilter<"Deal"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Deal"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Deal"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Deal"> | Date | string
 }
@@ -420,6 +480,11 @@ export type DealCreateInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -444,6 +509,11 @@ export type DealUncheckedCreateInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -466,6 +536,11 @@ export type DealUpdateInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -490,6 +565,11 @@ export type DealUncheckedUpdateInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -513,6 +593,11 @@ export type DealCreateManyInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -530,6 +615,11 @@ export type DealUpdateManyMutationInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -548,6 +638,11 @@ export type DealUncheckedUpdateManyInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -576,6 +671,11 @@ export type DealCountOrderByAggregateInput = {
   renewalReminderDays?: Prisma.SortOrder
   description?: Prisma.SortOrder
   contractSummary?: Prisma.SortOrder
+  probability?: Prisma.SortOrder
+  nextAction?: Prisma.SortOrder
+  nextActionDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -600,6 +700,11 @@ export type DealMaxOrderByAggregateInput = {
   renewalReminderDays?: Prisma.SortOrder
   description?: Prisma.SortOrder
   contractSummary?: Prisma.SortOrder
+  probability?: Prisma.SortOrder
+  nextAction?: Prisma.SortOrder
+  nextActionDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -618,6 +723,11 @@ export type DealMinOrderByAggregateInput = {
   renewalReminderDays?: Prisma.SortOrder
   description?: Prisma.SortOrder
   contractSummary?: Prisma.SortOrder
+  probability?: Prisma.SortOrder
+  nextAction?: Prisma.SortOrder
+  nextActionDate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  lastActivityAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -712,6 +822,10 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NullableEnumProbabilityFieldUpdateOperationsInput = {
+  set?: $Enums.Probability | null
+}
+
 export type DealCreateNestedOneWithoutContactsInput = {
   create?: Prisma.XOR<Prisma.DealCreateWithoutContactsInput, Prisma.DealUncheckedCreateWithoutContactsInput>
   connectOrCreate?: Prisma.DealCreateOrConnectWithoutContactsInput
@@ -797,6 +911,11 @@ export type DealCreateWithoutClientInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactCreateNestedManyWithoutDealInput
@@ -819,6 +938,11 @@ export type DealUncheckedCreateWithoutClientInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -871,6 +995,11 @@ export type DealScalarWhereInput = {
   renewalReminderDays?: Prisma.IntFilter<"Deal"> | number
   description?: Prisma.StringNullableFilter<"Deal"> | string | null
   contractSummary?: Prisma.StringNullableFilter<"Deal"> | string | null
+  probability?: Prisma.EnumProbabilityNullableFilter<"Deal"> | $Enums.Probability | null
+  nextAction?: Prisma.StringNullableFilter<"Deal"> | string | null
+  nextActionDate?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
+  source?: Prisma.StringNullableFilter<"Deal"> | string | null
+  lastActivityAt?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deal"> | Date | string
 }
@@ -888,6 +1017,11 @@ export type DealCreateWithoutContactsInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -911,6 +1045,11 @@ export type DealUncheckedCreateWithoutContactsInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
@@ -948,6 +1087,11 @@ export type DealUpdateWithoutContactsInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -971,6 +1115,11 @@ export type DealUncheckedUpdateWithoutContactsInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
@@ -992,6 +1141,11 @@ export type DealCreateWithoutActivitiesInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -1015,6 +1169,11 @@ export type DealUncheckedCreateWithoutActivitiesInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -1052,6 +1211,11 @@ export type DealUpdateWithoutActivitiesInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -1075,6 +1239,11 @@ export type DealUncheckedUpdateWithoutActivitiesInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -1096,6 +1265,11 @@ export type DealCreateWithoutInvoicesInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -1119,6 +1293,11 @@ export type DealUncheckedCreateWithoutInvoicesInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -1156,6 +1335,11 @@ export type DealUpdateWithoutInvoicesInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -1179,6 +1363,11 @@ export type DealUncheckedUpdateWithoutInvoicesInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -1200,6 +1389,11 @@ export type DealCreateWithoutReportsInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -1223,6 +1417,11 @@ export type DealUncheckedCreateWithoutReportsInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -1260,6 +1459,11 @@ export type DealUpdateWithoutReportsInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -1283,6 +1487,11 @@ export type DealUncheckedUpdateWithoutReportsInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -1304,6 +1513,11 @@ export type DealCreateWithoutRemindersInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutDealsInput
@@ -1327,6 +1541,11 @@ export type DealUncheckedCreateWithoutRemindersInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
@@ -1364,6 +1583,11 @@ export type DealUpdateWithoutRemindersInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
@@ -1387,6 +1611,11 @@ export type DealUncheckedUpdateWithoutRemindersInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -1408,6 +1637,11 @@ export type DealCreateManyClientInput = {
   renewalReminderDays?: number
   description?: string | null
   contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1425,6 +1659,11 @@ export type DealUpdateWithoutClientInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUpdateManyWithoutDealNestedInput
@@ -1447,6 +1686,11 @@ export type DealUncheckedUpdateWithoutClientInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
@@ -1469,6 +1713,11 @@ export type DealUncheckedUpdateManyWithoutClientInput = {
   renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1554,6 +1803,11 @@ export type DealSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   renewalReminderDays?: boolean
   description?: boolean
   contractSummary?: boolean
+  probability?: boolean
+  nextAction?: boolean
+  nextActionDate?: boolean
+  source?: boolean
+  lastActivityAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1579,6 +1833,11 @@ export type DealSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   renewalReminderDays?: boolean
   description?: boolean
   contractSummary?: boolean
+  probability?: boolean
+  nextAction?: boolean
+  nextActionDate?: boolean
+  source?: boolean
+  lastActivityAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1598,6 +1857,11 @@ export type DealSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   renewalReminderDays?: boolean
   description?: boolean
   contractSummary?: boolean
+  probability?: boolean
+  nextAction?: boolean
+  nextActionDate?: boolean
+  source?: boolean
+  lastActivityAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
@@ -1617,11 +1881,16 @@ export type DealSelectScalar = {
   renewalReminderDays?: boolean
   description?: boolean
   contractSummary?: boolean
+  probability?: boolean
+  nextAction?: boolean
+  nextActionDate?: boolean
+  source?: boolean
+  lastActivityAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DealOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "title" | "status" | "monthlyAmount" | "billingType" | "contractAmount" | "prorateBase" | "contractStartDate" | "contractEndDate" | "renewalReminderDays" | "description" | "contractSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["deal"]>
+export type DealOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "title" | "status" | "monthlyAmount" | "billingType" | "contractAmount" | "prorateBase" | "contractStartDate" | "contractEndDate" | "renewalReminderDays" | "description" | "contractSummary" | "probability" | "nextAction" | "nextActionDate" | "source" | "lastActivityAt" | "createdAt" | "updatedAt", ExtArgs["result"]["deal"]>
 export type DealInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   contacts?: boolean | Prisma.Deal$contactsArgs<ExtArgs>
@@ -1662,6 +1931,11 @@ export type $DealPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     renewalReminderDays: number
     description: string | null
     contractSummary: string | null
+    probability: $Enums.Probability | null
+    nextAction: string | null
+    nextActionDate: Date | null
+    source: string | null
+    lastActivityAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["deal"]>
@@ -2106,6 +2380,11 @@ export interface DealFieldRefs {
   readonly renewalReminderDays: Prisma.FieldRef<"Deal", 'Int'>
   readonly description: Prisma.FieldRef<"Deal", 'String'>
   readonly contractSummary: Prisma.FieldRef<"Deal", 'String'>
+  readonly probability: Prisma.FieldRef<"Deal", 'Probability'>
+  readonly nextAction: Prisma.FieldRef<"Deal", 'String'>
+  readonly nextActionDate: Prisma.FieldRef<"Deal", 'DateTime'>
+  readonly source: Prisma.FieldRef<"Deal", 'String'>
+  readonly lastActivityAt: Prisma.FieldRef<"Deal", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Deal", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Deal", 'DateTime'>
 }

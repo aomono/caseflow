@@ -105,6 +105,11 @@ export const DealScalarFieldEnum = {
   renewalReminderDays: 'renewalReminderDays',
   description: 'description',
   contractSummary: 'contractSummary',
+  probability: 'probability',
+  nextAction: 'nextAction',
+  nextActionDate: 'nextActionDate',
+  source: 'source',
+  lastActivityAt: 'lastActivityAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -208,6 +213,12 @@ export const AppSettingsScalarFieldEnum = {
   companyName: 'companyName',
   defaultSlackChannel: 'defaultSlackChannel',
   defaultEmailTo: 'defaultEmailTo',
+  probabilityHighRate: 'probabilityHighRate',
+  probabilityMidRate: 'probabilityMidRate',
+  probabilityLowRate: 'probabilityLowRate',
+  dealSources: 'dealSources',
+  freshnessWarnDays: 'freshnessWarnDays',
+  freshnessAlertDays: 'freshnessAlertDays',
   updatedAt: 'updatedAt'
 } as const
 

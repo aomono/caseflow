@@ -20,8 +20,26 @@ export type AppSettingsModel = runtime.Types.Result.DefaultSelection<Prisma.$App
 
 export type AggregateAppSettings = {
   _count: AppSettingsCountAggregateOutputType | null
+  _avg: AppSettingsAvgAggregateOutputType | null
+  _sum: AppSettingsSumAggregateOutputType | null
   _min: AppSettingsMinAggregateOutputType | null
   _max: AppSettingsMaxAggregateOutputType | null
+}
+
+export type AppSettingsAvgAggregateOutputType = {
+  probabilityHighRate: number | null
+  probabilityMidRate: number | null
+  probabilityLowRate: number | null
+  freshnessWarnDays: number | null
+  freshnessAlertDays: number | null
+}
+
+export type AppSettingsSumAggregateOutputType = {
+  probabilityHighRate: number | null
+  probabilityMidRate: number | null
+  probabilityLowRate: number | null
+  freshnessWarnDays: number | null
+  freshnessAlertDays: number | null
 }
 
 export type AppSettingsMinAggregateOutputType = {
@@ -29,6 +47,12 @@ export type AppSettingsMinAggregateOutputType = {
   companyName: string | null
   defaultSlackChannel: string | null
   defaultEmailTo: string | null
+  probabilityHighRate: number | null
+  probabilityMidRate: number | null
+  probabilityLowRate: number | null
+  dealSources: string | null
+  freshnessWarnDays: number | null
+  freshnessAlertDays: number | null
   updatedAt: Date | null
 }
 
@@ -37,6 +61,12 @@ export type AppSettingsMaxAggregateOutputType = {
   companyName: string | null
   defaultSlackChannel: string | null
   defaultEmailTo: string | null
+  probabilityHighRate: number | null
+  probabilityMidRate: number | null
+  probabilityLowRate: number | null
+  dealSources: string | null
+  freshnessWarnDays: number | null
+  freshnessAlertDays: number | null
   updatedAt: Date | null
 }
 
@@ -45,16 +75,44 @@ export type AppSettingsCountAggregateOutputType = {
   companyName: number
   defaultSlackChannel: number
   defaultEmailTo: number
+  probabilityHighRate: number
+  probabilityMidRate: number
+  probabilityLowRate: number
+  dealSources: number
+  freshnessWarnDays: number
+  freshnessAlertDays: number
   updatedAt: number
   _all: number
 }
 
+
+export type AppSettingsAvgAggregateInputType = {
+  probabilityHighRate?: true
+  probabilityMidRate?: true
+  probabilityLowRate?: true
+  freshnessWarnDays?: true
+  freshnessAlertDays?: true
+}
+
+export type AppSettingsSumAggregateInputType = {
+  probabilityHighRate?: true
+  probabilityMidRate?: true
+  probabilityLowRate?: true
+  freshnessWarnDays?: true
+  freshnessAlertDays?: true
+}
 
 export type AppSettingsMinAggregateInputType = {
   id?: true
   companyName?: true
   defaultSlackChannel?: true
   defaultEmailTo?: true
+  probabilityHighRate?: true
+  probabilityMidRate?: true
+  probabilityLowRate?: true
+  dealSources?: true
+  freshnessWarnDays?: true
+  freshnessAlertDays?: true
   updatedAt?: true
 }
 
@@ -63,6 +121,12 @@ export type AppSettingsMaxAggregateInputType = {
   companyName?: true
   defaultSlackChannel?: true
   defaultEmailTo?: true
+  probabilityHighRate?: true
+  probabilityMidRate?: true
+  probabilityLowRate?: true
+  dealSources?: true
+  freshnessWarnDays?: true
+  freshnessAlertDays?: true
   updatedAt?: true
 }
 
@@ -71,6 +135,12 @@ export type AppSettingsCountAggregateInputType = {
   companyName?: true
   defaultSlackChannel?: true
   defaultEmailTo?: true
+  probabilityHighRate?: true
+  probabilityMidRate?: true
+  probabilityLowRate?: true
+  dealSources?: true
+  freshnessWarnDays?: true
+  freshnessAlertDays?: true
   updatedAt?: true
   _all?: true
 }
@@ -113,6 +183,18 @@ export type AppSettingsAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AppSettingsAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AppSettingsSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AppSettingsMinAggregateInputType
@@ -143,6 +225,8 @@ export type AppSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: AppSettingsCountAggregateInputType | true
+  _avg?: AppSettingsAvgAggregateInputType
+  _sum?: AppSettingsSumAggregateInputType
   _min?: AppSettingsMinAggregateInputType
   _max?: AppSettingsMaxAggregateInputType
 }
@@ -152,8 +236,16 @@ export type AppSettingsGroupByOutputType = {
   companyName: string
   defaultSlackChannel: string | null
   defaultEmailTo: string | null
+  probabilityHighRate: number
+  probabilityMidRate: number
+  probabilityLowRate: number
+  dealSources: string
+  freshnessWarnDays: number
+  freshnessAlertDays: number
   updatedAt: Date
   _count: AppSettingsCountAggregateOutputType | null
+  _avg: AppSettingsAvgAggregateOutputType | null
+  _sum: AppSettingsSumAggregateOutputType | null
   _min: AppSettingsMinAggregateOutputType | null
   _max: AppSettingsMaxAggregateOutputType | null
 }
@@ -181,6 +273,12 @@ export type AppSettingsWhereInput = {
   companyName?: Prisma.StringFilter<"AppSettings"> | string
   defaultSlackChannel?: Prisma.StringNullableFilter<"AppSettings"> | string | null
   defaultEmailTo?: Prisma.StringNullableFilter<"AppSettings"> | string | null
+  probabilityHighRate?: Prisma.FloatFilter<"AppSettings"> | number
+  probabilityMidRate?: Prisma.FloatFilter<"AppSettings"> | number
+  probabilityLowRate?: Prisma.FloatFilter<"AppSettings"> | number
+  dealSources?: Prisma.StringFilter<"AppSettings"> | string
+  freshnessWarnDays?: Prisma.IntFilter<"AppSettings"> | number
+  freshnessAlertDays?: Prisma.IntFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }
 
@@ -189,6 +287,12 @@ export type AppSettingsOrderByWithRelationInput = {
   companyName?: Prisma.SortOrder
   defaultSlackChannel?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultEmailTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  dealSources?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -200,6 +304,12 @@ export type AppSettingsWhereUniqueInput = Prisma.AtLeast<{
   companyName?: Prisma.StringFilter<"AppSettings"> | string
   defaultSlackChannel?: Prisma.StringNullableFilter<"AppSettings"> | string | null
   defaultEmailTo?: Prisma.StringNullableFilter<"AppSettings"> | string | null
+  probabilityHighRate?: Prisma.FloatFilter<"AppSettings"> | number
+  probabilityMidRate?: Prisma.FloatFilter<"AppSettings"> | number
+  probabilityLowRate?: Prisma.FloatFilter<"AppSettings"> | number
+  dealSources?: Prisma.StringFilter<"AppSettings"> | string
+  freshnessWarnDays?: Prisma.IntFilter<"AppSettings"> | number
+  freshnessAlertDays?: Prisma.IntFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }, "id">
 
@@ -208,10 +318,18 @@ export type AppSettingsOrderByWithAggregationInput = {
   companyName?: Prisma.SortOrder
   defaultSlackChannel?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultEmailTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  dealSources?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppSettingsCountOrderByAggregateInput
+  _avg?: Prisma.AppSettingsAvgOrderByAggregateInput
   _max?: Prisma.AppSettingsMaxOrderByAggregateInput
   _min?: Prisma.AppSettingsMinOrderByAggregateInput
+  _sum?: Prisma.AppSettingsSumOrderByAggregateInput
 }
 
 export type AppSettingsScalarWhereWithAggregatesInput = {
@@ -222,6 +340,12 @@ export type AppSettingsScalarWhereWithAggregatesInput = {
   companyName?: Prisma.StringWithAggregatesFilter<"AppSettings"> | string
   defaultSlackChannel?: Prisma.StringNullableWithAggregatesFilter<"AppSettings"> | string | null
   defaultEmailTo?: Prisma.StringNullableWithAggregatesFilter<"AppSettings"> | string | null
+  probabilityHighRate?: Prisma.FloatWithAggregatesFilter<"AppSettings"> | number
+  probabilityMidRate?: Prisma.FloatWithAggregatesFilter<"AppSettings"> | number
+  probabilityLowRate?: Prisma.FloatWithAggregatesFilter<"AppSettings"> | number
+  dealSources?: Prisma.StringWithAggregatesFilter<"AppSettings"> | string
+  freshnessWarnDays?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  freshnessAlertDays?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
 }
 
@@ -230,6 +354,12 @@ export type AppSettingsCreateInput = {
   companyName: string
   defaultSlackChannel?: string | null
   defaultEmailTo?: string | null
+  probabilityHighRate?: number
+  probabilityMidRate?: number
+  probabilityLowRate?: number
+  dealSources?: string
+  freshnessWarnDays?: number
+  freshnessAlertDays?: number
   updatedAt?: Date | string
 }
 
@@ -238,6 +368,12 @@ export type AppSettingsUncheckedCreateInput = {
   companyName: string
   defaultSlackChannel?: string | null
   defaultEmailTo?: string | null
+  probabilityHighRate?: number
+  probabilityMidRate?: number
+  probabilityLowRate?: number
+  dealSources?: string
+  freshnessWarnDays?: number
+  freshnessAlertDays?: number
   updatedAt?: Date | string
 }
 
@@ -246,6 +382,12 @@ export type AppSettingsUpdateInput = {
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultSlackChannel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultEmailTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probabilityHighRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityMidRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityLowRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  dealSources?: Prisma.StringFieldUpdateOperationsInput | string
+  freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
+  freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -254,6 +396,12 @@ export type AppSettingsUncheckedUpdateInput = {
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultSlackChannel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultEmailTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probabilityHighRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityMidRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityLowRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  dealSources?: Prisma.StringFieldUpdateOperationsInput | string
+  freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
+  freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -262,6 +410,12 @@ export type AppSettingsCreateManyInput = {
   companyName: string
   defaultSlackChannel?: string | null
   defaultEmailTo?: string | null
+  probabilityHighRate?: number
+  probabilityMidRate?: number
+  probabilityLowRate?: number
+  dealSources?: string
+  freshnessWarnDays?: number
+  freshnessAlertDays?: number
   updatedAt?: Date | string
 }
 
@@ -270,6 +424,12 @@ export type AppSettingsUpdateManyMutationInput = {
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultSlackChannel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultEmailTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probabilityHighRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityMidRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityLowRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  dealSources?: Prisma.StringFieldUpdateOperationsInput | string
+  freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
+  freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -278,6 +438,12 @@ export type AppSettingsUncheckedUpdateManyInput = {
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
   defaultSlackChannel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultEmailTo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probabilityHighRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityMidRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  probabilityLowRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  dealSources?: Prisma.StringFieldUpdateOperationsInput | string
+  freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
+  freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -286,7 +452,21 @@ export type AppSettingsCountOrderByAggregateInput = {
   companyName?: Prisma.SortOrder
   defaultSlackChannel?: Prisma.SortOrder
   defaultEmailTo?: Prisma.SortOrder
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  dealSources?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AppSettingsAvgOrderByAggregateInput = {
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
 }
 
 export type AppSettingsMaxOrderByAggregateInput = {
@@ -294,6 +474,12 @@ export type AppSettingsMaxOrderByAggregateInput = {
   companyName?: Prisma.SortOrder
   defaultSlackChannel?: Prisma.SortOrder
   defaultEmailTo?: Prisma.SortOrder
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  dealSources?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -302,7 +488,29 @@ export type AppSettingsMinOrderByAggregateInput = {
   companyName?: Prisma.SortOrder
   defaultSlackChannel?: Prisma.SortOrder
   defaultEmailTo?: Prisma.SortOrder
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  dealSources?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AppSettingsSumOrderByAggregateInput = {
+  probabilityHighRate?: Prisma.SortOrder
+  probabilityMidRate?: Prisma.SortOrder
+  probabilityLowRate?: Prisma.SortOrder
+  freshnessWarnDays?: Prisma.SortOrder
+  freshnessAlertDays?: Prisma.SortOrder
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 
@@ -312,6 +520,12 @@ export type AppSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   companyName?: boolean
   defaultSlackChannel?: boolean
   defaultEmailTo?: boolean
+  probabilityHighRate?: boolean
+  probabilityMidRate?: boolean
+  probabilityLowRate?: boolean
+  dealSources?: boolean
+  freshnessWarnDays?: boolean
+  freshnessAlertDays?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -320,6 +534,12 @@ export type AppSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   companyName?: boolean
   defaultSlackChannel?: boolean
   defaultEmailTo?: boolean
+  probabilityHighRate?: boolean
+  probabilityMidRate?: boolean
+  probabilityLowRate?: boolean
+  dealSources?: boolean
+  freshnessWarnDays?: boolean
+  freshnessAlertDays?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -328,6 +548,12 @@ export type AppSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   companyName?: boolean
   defaultSlackChannel?: boolean
   defaultEmailTo?: boolean
+  probabilityHighRate?: boolean
+  probabilityMidRate?: boolean
+  probabilityLowRate?: boolean
+  dealSources?: boolean
+  freshnessWarnDays?: boolean
+  freshnessAlertDays?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -336,10 +562,16 @@ export type AppSettingsSelectScalar = {
   companyName?: boolean
   defaultSlackChannel?: boolean
   defaultEmailTo?: boolean
+  probabilityHighRate?: boolean
+  probabilityMidRate?: boolean
+  probabilityLowRate?: boolean
+  dealSources?: boolean
+  freshnessWarnDays?: boolean
+  freshnessAlertDays?: boolean
   updatedAt?: boolean
 }
 
-export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "defaultSlackChannel" | "defaultEmailTo" | "updatedAt", ExtArgs["result"]["appSettings"]>
+export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "defaultSlackChannel" | "defaultEmailTo" | "probabilityHighRate" | "probabilityMidRate" | "probabilityLowRate" | "dealSources" | "freshnessWarnDays" | "freshnessAlertDays" | "updatedAt", ExtArgs["result"]["appSettings"]>
 
 export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AppSettings"
@@ -349,6 +581,12 @@ export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.Interna
     companyName: string
     defaultSlackChannel: string | null
     defaultEmailTo: string | null
+    probabilityHighRate: number
+    probabilityMidRate: number
+    probabilityLowRate: number
+    dealSources: string
+    freshnessWarnDays: number
+    freshnessAlertDays: number
     updatedAt: Date
   }, ExtArgs["result"]["appSettings"]>
   composites: {}
@@ -777,6 +1015,12 @@ export interface AppSettingsFieldRefs {
   readonly companyName: Prisma.FieldRef<"AppSettings", 'String'>
   readonly defaultSlackChannel: Prisma.FieldRef<"AppSettings", 'String'>
   readonly defaultEmailTo: Prisma.FieldRef<"AppSettings", 'String'>
+  readonly probabilityHighRate: Prisma.FieldRef<"AppSettings", 'Float'>
+  readonly probabilityMidRate: Prisma.FieldRef<"AppSettings", 'Float'>
+  readonly probabilityLowRate: Prisma.FieldRef<"AppSettings", 'Float'>
+  readonly dealSources: Prisma.FieldRef<"AppSettings", 'String'>
+  readonly freshnessWarnDays: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly freshnessAlertDays: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly updatedAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
 }
     

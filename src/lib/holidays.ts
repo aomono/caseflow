@@ -57,7 +57,7 @@ function getHolidaysForYear(year: number): Set<string> {
     const d = new Date(h + "T00:00:00");
     if (d.getDay() === 0) { // 日曜日
       // 翌日が既に祝日なら更にその翌日
-      let substitute = new Date(d);
+      const substitute = new Date(d);
       substitute.setDate(substitute.getDate() + 1);
       while (holidays.has(toKey(substitute.getFullYear(), substitute.getMonth() + 1, substitute.getDate()))) {
         substitute.setDate(substitute.getDate() + 1);

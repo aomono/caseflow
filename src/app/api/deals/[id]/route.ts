@@ -77,6 +77,108 @@ export async function PUT(
   }
 }
 
+/**
+ * 部分更新（インライン編集・外部API用）。
+ *
+ * PUT は body をそのまま data に渡すので、任意の列を書き換えられる。一覧や
+ * ボードから叩く経路では**触れる列を絞る**（誤ったペイロードで契約金額や
+ * 請求連動の値が飛ぶのを防ぐ）。
+ */
+const PATCHABLE_FIELDS = [
+  "status",
+  "probability",
+  "nextAction",
+  "nextActionDate",
+  "source",
+] as const;
+
+const DEAL_STATUSES = [
+  "lead",
+  "discussion",
+  "expected",
+  "active",
+  "renewal",
+  "closed",
+  "lost",
+];
+const PROBABILITIES = ["high", "mid", "low"];
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+
+    const data: Record<string, unknown> = {};
+    for (const key of PATCHABLE_FIELDS) {
+      if (!(key in body)) continue;
+      const value = body[key];
+
+      if (key === "status") {
+        if (!DEAL_STATUSES.includes(value)) {
+          return NextResponse.json(
+            { error: `invalid status: ${value}` },
+            { status: 400 },
+          );
+        }
+        data.status = value;
+      } else if (key === "probability") {
+        // 空文字・null は「未設定に戻す」。確度は入れ直せる必要がある
+        if (value === null || value === "") {
+          data.probability = null;
+        } else if (!PROBABILITIES.includes(value)) {
+          return NextResponse.json(
+            { error: `invalid probability: ${value}` },
+            { status: 400 },
+          );
+        } else {
+          data.probability = value;
+        }
+      } else if (key === "nextActionDate") {
+        if (value === null || value === "") {
+          data.nextActionDate = null;
+        } else {
+          const d = new Date(value);
+          if (Number.isNaN(d.getTime())) {
+            return NextResponse.json(
+              { error: `invalid nextActionDate: ${value}` },
+              { status: 400 },
+            );
+          }
+          data.nextActionDate = d;
+        }
+      } else {
+        // nextAction / source は自由入力。空文字は未設定に戻す
+        const t = typeof value === "string" ? value.trim() : value;
+        data[key] = t === "" || t === undefined ? null : t;
+      }
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json(
+        { error: "no updatable fields" },
+        { status: 400 },
+      );
+    }
+
+    const deal = await prisma.deal.update({
+      where: { id },
+      data,
+      include: { client: true },
+    });
+
+    return NextResponse.json(deal);
+  } catch (error) {
+    console.error("Failed to patch deal:", error);
+    return NextResponse.json(
+      { error: "Failed to patch deal" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

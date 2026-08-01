@@ -16,6 +16,13 @@ import {
 } from "@/components/ui/table";
 
 import { DEAL_STATUS_LABELS, DEAL_STATUS_COLORS, DEAL_STATUS_OPTIONS } from "@/lib/constants";
+import { FreshnessBadge } from "@/components/deals/freshness-badge";
+import {
+  NextActionCell,
+  ProbabilitySelect,
+  QuickNote,
+} from "@/components/deals/inline-fields";
+import type { Probability } from "@/lib/pipeline";
 
 type Deal = {
   id: string;
@@ -26,6 +33,11 @@ type Deal = {
   contractAmount: number | null;
   contractStartDate: string | null;
   contractEndDate: string | null;
+  probability: Probability | null;
+  nextAction: string | null;
+  nextActionDate: string | null;
+  source: string | null;
+  lastActivityAt: string | null;
   client: {
     id: string;
     name: string;
@@ -67,6 +79,12 @@ export default function DealsPage() {
   useEffect(() => {
     fetchDeals();
   }, [fetchDeals]);
+
+  // 保存済みの値を手元にも反映する。一覧を取り直すと編集中のスクロール位置や
+  // 他の行の編集状態が飛ぶので、成功したぶんだけ差し替える
+  const patchLocal = useCallback((id: string, patch: Partial<Deal>) => {
+    setDeals((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
+  }, []);
 
   function formatDate(dateStr: string | null) {
     if (!dateStr) return null;
@@ -138,8 +156,11 @@ export default function DealsPage() {
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">案件名</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">クライアント</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">ステータス</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">確度</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">次アクション</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">金額</TableHead>
               <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">契約期間</TableHead>
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-400">メモ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,18 +168,38 @@ export default function DealsPage() {
               deals.map((deal) => (
                 <TableRow key={deal.id} className="border-slate-50 hover:bg-slate-50/50">
                   <TableCell>
-                    <Link
-                      href={`/deals/${deal.id}`}
-                      className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                    >
-                      {deal.title}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/deals/${deal.id}`}
+                        className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                      >
+                        {deal.title}
+                      </Link>
+                      <FreshnessBadge lastActivityAt={deal.lastActivityAt} />
+                    </div>
                   </TableCell>
                   <TableCell className="text-slate-600">{deal.client.name}</TableCell>
                   <TableCell>
                     <Badge className={`badge-pill ${DEAL_STATUS_COLORS[deal.status]}`}>
                       {DEAL_STATUS_LABELS[deal.status] || deal.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <ProbabilitySelect
+                      dealId={deal.id}
+                      value={deal.probability}
+                      onSaved={(v) => patchLocal(deal.id, { probability: v })}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <NextActionCell
+                      dealId={deal.id}
+                      action={deal.nextAction}
+                      date={deal.nextActionDate}
+                      onSaved={(a, d) =>
+                        patchLocal(deal.id, { nextAction: a, nextActionDate: d })
+                      }
+                    />
                   </TableCell>
                   <TableCell className="tabular-nums text-slate-700">
                     {deal.billingType === "lumpsum" && deal.contractAmount
@@ -172,12 +213,18 @@ export default function DealsPage() {
                       ? `${formatDate(deal.contractStartDate)} ~ ${formatDate(deal.contractEndDate)}`
                       : "-"}
                   </TableCell>
+                  <TableCell>
+                    <QuickNote
+                      dealId={deal.id}
+                      onSaved={(at) => patchLocal(deal.id, { lastActivityAt: at })}
+                    />
+                  </TableCell>
                 </TableRow>
               ))}
             {!loading && deals.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="py-12 text-center text-slate-400"
                 >
                   <div className="flex flex-col items-center gap-2">
@@ -189,7 +236,7 @@ export default function DealsPage() {
             )}
             {loading && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8">
+                <TableCell colSpan={7} className="py-8">
                   <div className="flex flex-col gap-3">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="skeleton h-8 w-full" />

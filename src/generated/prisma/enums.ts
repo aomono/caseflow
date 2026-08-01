@@ -22,6 +22,15 @@ export const DealStatus = {
 export type DealStatus = (typeof DealStatus)[keyof typeof DealStatus]
 
 
+export const Probability = {
+  high: 'high',
+  mid: 'mid',
+  low: 'low'
+} as const
+
+export type Probability = (typeof Probability)[keyof typeof Probability]
+
+
 export const BillingType = {
   monthly: 'monthly',
   lumpsum: 'lumpsum',

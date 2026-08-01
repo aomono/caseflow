@@ -19,6 +19,12 @@ enum DealStatus {
   lost
 }
 
+enum Probability {
+  high
+  mid
+  low
+}
+
 enum BillingType {
   monthly
   lumpsum
@@ -104,6 +110,16 @@ model Deal {
   renewalReminderDays Int        @default(30)
   description         String?    @db.Text
   contractSummary     String?    @db.Text
+
+  // パイプライン管理（v1.1）。すべて任意なので既存データはそのまま通る
+  probability         Probability?
+  nextAction          String?
+  nextActionDate      DateTime?
+  source              String?
+  // 最新Activityのdateを非正規化して持つ。鮮度バッジと stale 検索で毎回
+  // Activity を集計しないため（一覧・ボードで全件に効くので効きが大きい）
+  lastActivityAt      DateTime?
+
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
@@ -206,5 +222,16 @@ model AppSettings {
   companyName         String
   defaultSlackChannel String?
   defaultEmailTo      String?
+
+  // 見込み金額の加重係数（確度別）。設定画面で変更できる
+  probabilityHighRate Float    @default(0.8)
+  probabilityMidRate  Float    @default(0.5)
+  probabilityLowRate  Float    @default(0.2)
+  // 案件の経路。改行区切りで持つ（選択式＋自由追記なので固定enumにしない）
+  dealSources         String   @default("NTTD\nBCG\nENND\n既存クライアント紹介\n直接") @db.Text
+  // 鮮度バッジの閾値（最終接触からの日数）。これ以上で黄／赤
+  freshnessWarnDays   Int      @default(8)
+  freshnessAlertDays  Int      @default(15)
+
   updatedAt           DateTime @updatedAt
 }
