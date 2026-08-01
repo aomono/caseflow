@@ -13,6 +13,13 @@ vi.mock("@/lib/prisma", () => ({ prisma: mockPrisma }));
 const { GET, POST, DELETE } = await import("@/app/api/settings/tokens/route");
 const { hashToken } = await import("@/lib/api-token");
 
+function del(id: string) {
+  return new Request(`http://localhost/api/settings/tokens?id=${id}`, {
+    method: "DELETE",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any;
+}
+
 function post(body: unknown) {
   return new Request("http://localhost/api/settings/tokens", {
     method: "POST",
@@ -59,12 +66,7 @@ describe("外部APIトークンの管理", () => {
   });
 
   it("失効は削除でなく revokedAt を立てる（誰がいつ使ったかを残す）", async () => {
-    const res = await DELETE(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      new Request("http://localhost/api/settings/tokens?id=t1", {
-        method: "DELETE",
-      }) as any,
-    );
+    const res = await DELETE(del("t1"));
     expect(res.status).toBe(200);
     const call = mockPrisma.apiToken.update.mock.calls[0][0];
     expect(call.where).toEqual({ id: "t1" });
