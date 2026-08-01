@@ -1,0 +1,18 @@
+#!/bin/sh
+# commit前チェック（CLAUDE.md の「commit前チェック」を実際に強制する）。
+#
+# .git/hooks はクローンに含まれないので、リポジトリ内の .githooks を
+# core.hooksPath で指す。設定は package.json の prepare が行うため、
+# pnpm install した人には自動で効く。
+#
+# 急ぎで通したいときは git commit --no-verify ではなく、落ちている原因を
+# 直すこと（--no-verify はCLAUDE.mdで禁止されている）。
+set -e
+
+echo "[pre-commit] lint"
+pnpm lint
+
+echo "[pre-commit] test"
+pnpm test
+
+echo "[pre-commit] OK"
