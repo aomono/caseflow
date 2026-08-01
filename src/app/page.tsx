@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PipelineSummary } from "@/components/dashboard/pipeline-summary";
 import { Badge } from "@/components/ui/badge";
 
 interface MonthlyRevenue {
@@ -268,6 +269,10 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* パイプラインの要約。スクロールなしで「今週動かすべき案件」が見えるよう
+          先頭に置く（受け入れ基準3）。売上グラフより先に目に入る位置 */}
+      <PipelineSummary />
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

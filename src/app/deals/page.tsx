@@ -22,6 +22,7 @@ import {
   ProbabilitySelect,
   QuickNote,
 } from "@/components/deals/inline-fields";
+import { PipelineBoard } from "@/components/deals/pipeline-board";
 import type { Probability } from "@/lib/pipeline";
 
 type Deal = {
@@ -47,6 +48,7 @@ type Deal = {
 type Client = { id: string; name: string };
 
 export default function DealsPage() {
+  const [view, setView] = useState<"list" | "board">("list");
   const [statusFilter, setStatusFilter] = useState("all");
   const [clientFilter, setClientFilter] = useState("all");
   const [clients, setClients] = useState<Client[]>([]);
@@ -103,10 +105,34 @@ export default function DealsPage() {
         </Link>
       </div>
 
+      {/* View switch */}
+      <div className="flex w-fit gap-1 rounded-xl bg-slate-100 p-1">
+        {([
+          { value: "list", label: "一覧" },
+          { value: "board", label: "ボード" },
+        ] as const).map((v) => (
+          <button
+            key={v.value}
+            onClick={() => setView(v.value)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
+              view === v.value
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {v.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filters */}
       <div className="space-y-2">
-        {/* Status filter */}
-        <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
+        {/* ステータス絞り込み（ボードは列がステータスなので出さない） */}
+        <div
+          className={`flex-wrap gap-1 rounded-xl bg-slate-100 p-1 ${
+            view === "board" ? "hidden" : "flex"
+          }`}
+        >
           {DEAL_STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -149,7 +175,18 @@ export default function DealsPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+      {view === "board" && !loading && (
+        <PipelineBoard
+          deals={deals}
+          onChange={(id, patch) => patchLocal(id, patch)}
+        />
+      )}
+
+      <div
+        className={`overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm ${
+          view === "board" ? "hidden" : ""
+        }`}
+      >
         <Table className="min-w-[640px]">
           <TableHeader>
             <TableRow className="border-slate-100 hover:bg-transparent">
