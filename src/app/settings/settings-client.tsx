@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ApiTokens } from "@/components/settings/api-tokens";
 
 interface SettingsClientProps {
   initialCompanyName: string;
@@ -282,6 +283,8 @@ export function SettingsClient({
             )}
           </CardContent>
         </Card>
+
+        <ApiTokens />
       </div>
     </div>
   );
