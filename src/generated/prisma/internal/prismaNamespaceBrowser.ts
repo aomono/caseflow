@@ -59,6 +59,7 @@ export const ModelName = {
   Report: 'Report',
   Reminder: 'Reminder',
   NotificationLog: 'NotificationLog',
+  ApiToken: 'ApiToken',
   AppSettings: 'AppSettings'
 } as const
 
@@ -206,6 +207,18 @@ export const NotificationLogScalarFieldEnum = {
 } as const
 
 export type NotificationLogScalarFieldEnum = (typeof NotificationLogScalarFieldEnum)[keyof typeof NotificationLogScalarFieldEnum]
+
+
+export const ApiTokenScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  tokenHash: 'tokenHash',
+  lastUsedAt: 'lastUsedAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ApiTokenScalarFieldEnum = (typeof ApiTokenScalarFieldEnum)[keyof typeof ApiTokenScalarFieldEnum]
 
 
 export const AppSettingsScalarFieldEnum = {

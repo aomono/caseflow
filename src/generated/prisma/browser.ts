@@ -58,6 +58,13 @@ export type Reminder = Prisma.ReminderModel
  */
 export type NotificationLog = Prisma.NotificationLogModel
 /**
+ * Model ApiToken
+ * 外部API（きおい連携等）のアクセストークン。
+ * 平文は保存しない——DBのダンプが漏れてもトークンが使われないようにする。
+ * 発行時に一度だけ本人へ渡し、以降は照合にハッシュを使う。
+ */
+export type ApiToken = Prisma.ApiTokenModel
+/**
  * Model AppSettings
  * 
  */

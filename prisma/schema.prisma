@@ -217,6 +217,18 @@ model NotificationLog {
   sentAt     DateTime            @default(now())
 }
 
+/// 外部API（きおい連携等）のアクセストークン。
+/// 平文は保存しない——DBのダンプが漏れてもトークンが使われないようにする。
+/// 発行時に一度だけ本人へ渡し、以降は照合にハッシュを使う。
+model ApiToken {
+  id         String    @id @default(cuid())
+  name       String                        // 誰に発行したか（ログの主体）
+  tokenHash  String    @unique             // SHA-256（平文は持たない）
+  lastUsedAt DateTime?
+  revokedAt  DateTime?                     // 失効可能にする（仕様書 C-2）
+  createdAt  DateTime  @default(now())
+}
+
 model AppSettings {
   id                  String   @id @default(cuid())
   companyName         String
