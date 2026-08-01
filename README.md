@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## commit前チェック
+
+`pnpm install`（の `prepare`）で `core.hooksPath` が `.githooks` に設定され、
+commit のたびに lint とテストが走る。落ちたら commit できない。
+
+```
+[pre-commit] lint
+[pre-commit] test
+[pre-commit] OK
+```
+
+hook を迂回するフラグは使わない。落ちている原因を直すこと。
+hook が効いていないときは `git config core.hooksPath .githooks` を1回実行する。
