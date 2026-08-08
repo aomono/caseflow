@@ -37,10 +37,13 @@ export default function RootLayout({
         <SessionProvider>
           <ToastProvider>
             <Sidebar />
-            <div className="flex flex-1 flex-col lg:ml-[260px]">
+            {/* min-w-0 が無いと flex アイテムの既定 min-width:auto で縮まず、
+                中身（表の min-w-[800px] 等）がページ全体を押し広げる。
+                overflow-x-auto は親に幅の制約があって初めて効く */}
+            <div className="flex min-w-0 flex-1 flex-col lg:ml-[260px]">
               <Header />
-              <main className="flex-1 overflow-auto p-4 pt-16 sm:p-6 sm:pt-16 lg:p-8 lg:pt-4 animate-fade-in">
-                <div className="mx-auto max-w-[1360px]">{children}</div>
+              <main className="min-w-0 flex-1 overflow-auto p-4 pt-16 sm:p-6 sm:pt-16 lg:p-8 lg:pt-4 animate-fade-in">
+                <div className="mx-auto min-w-0 max-w-[1360px]">{children}</div>
               </main>
             </div>
           </ToastProvider>
