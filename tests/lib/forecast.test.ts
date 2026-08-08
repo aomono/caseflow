@@ -89,9 +89,29 @@ describe("セルの種別", () => {
     expect(row.cells["2026-08"]).toBeDefined(); // 当月以降は予測
   });
 
-  it("見込み案件は過去月の制限を受けない（計画値なので）", () => {
+  it("見込み案件も過去月には出さない（過ぎた月の見込みは存在しない）", () => {
+    // 契約開始日が過去のままの見込み案件が、過去月の合計を汚していた
+    // （2026-08-08 実測: 7月合計に660万が乗った）
     const got = buildForecast([deal({ status: "lead" })], [], OPTS);
-    expect(got.groups[0].rows[0].cells["2026-06"]).toBeDefined();
+    const cells = got.groups[0].rows[0].cells;
+    expect(cells["2026-06"]).toBeUndefined();
+    expect(cells["2026-07"]).toBeUndefined();
+    expect(cells["2026-09"]).toBeDefined(); // 将来月は計画値として出す
+  });
+
+  it("過去月の合計に見込みが混ざらない", () => {
+    const got = buildForecast(
+      [
+        deal({ id: "won", status: "active" }),
+        deal({ id: "maybe", status: "discussion", monthlyAmount: 6_600_000 }),
+      ],
+      [invoice({ dealId: "won", month: 7, amount: 14_200_000 })],
+      OPTS,
+    );
+    // 7月は請求済みの1,420万だけ。見込みの660万は乗らない
+    expect(got.monthTotals["2026-07"]).toBe(14_200_000);
+    // 将来月には両方乗る
+    expect(got.monthTotals["2026-09"]).toBe(7_600_000);
   });
 });
 

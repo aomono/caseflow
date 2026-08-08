@@ -19,6 +19,10 @@ import {
  * 出す**こと。Excelの計画表と同じ思想で、「取れたらこうなる」を並べる。
  * ただし実績・受注済みとは視覚的に区別する（kind を返す）。
  *
+ * **カットオーバー以降の過去月には予測を一切載せない**（受注済みも見込みも）。
+ * 過ぎた月に「見込み」は定義上ありえず、契約日が古いままの案件があると合計を
+ * 汚す。過去は Invoice だけが真実で、予測は将来月のもの。
+ *
  * 売上は**請求書発行基準**。入金タイミングのズレ（売掛サイト）は反映しない。
  */
 
@@ -162,14 +166,11 @@ export function buildForecast(
     for (const { month, amount } of expanded) {
       if (!monthSet.has(month)) continue;
       if (invoiceAmount.has(`${deal.id} ${month}`)) continue; // Invoice が真実
-      // カットオーバー以降の過去月で請求が無い＝実績にしない（請求書発行基準）。
-      // 見込み案件は将来の計画値なのでこの制限を受けない
-      if (
-        !isProspect &&
-        cutoverMonth &&
-        month >= cutoverMonth &&
-        month < currentMonth
-      ) {
+      // カットオーバー以降の過去月は Invoice だけが実績。予測は載せない。
+      // **見込み案件も同じ**——過ぎた月の「見込み」は定義上ありえない数字で、
+      // 合計を汚す（2026-08-08 実測: 契約開始が過去のままの見込み案件が
+      // 7月合計に660万を足していた）。将来月の計画値としてだけ出す
+      if (cutoverMonth && month >= cutoverMonth && month < currentMonth) {
         continue;
       }
       const value =
