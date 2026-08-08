@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { calculateProrate, type ProrateBaseType } from "@/lib/prorate";
+import {
+  buildRevenue,
+  generateMonthRange,
+  type RevenueDeal,
+  type RevenueInvoice,
+} from "@/lib/revenue";
 
 export const dynamic = "force-dynamic";
 
@@ -48,23 +53,6 @@ function getDateRange(
   }
 }
 
-function formatMonth(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
-
-function generateMonthRange(start: Date, end: Date): string[] {
-  const months: string[] = [];
-  const current = new Date(start.getFullYear(), start.getMonth(), 1);
-  const last = new Date(end.getFullYear(), end.getMonth(), 1);
-  while (current <= last) {
-    months.push(formatMonth(current));
-    current.setMonth(current.getMonth() + 1);
-  }
-  return months;
-}
-
 const STATUS_LABELS: Record<string, string> = {
   lead: "リード",
   discussion: "商談中",
@@ -82,13 +70,11 @@ export async function GET(request: NextRequest) {
   const { start: startDate, end: endDate } = getDateRange(period, fy);
 
   const now = new Date();
-  const currentMonth = formatMonth(now);
   const currentFiscalYear = getCurrentFiscalYear();
 
-  // --- Monthly Revenue (from deals by status) ---
-  // actual = closed + active (past months) — work already done
-  // contracted = active (current & future months) + renewal
-  // prospect = discussion + expected
+  // --- Monthly Revenue（実績=Invoice / 将来=Deal予測のハイブリッド） ---
+  // 実績の真実は Invoice にある。Deal は契約の予定なので、月ごとに変わる実額や
+  // 「lost にしても請求済みの事実は残る」を表現できない。
   const deals = await prisma.deal.findMany({
     where: {
       status: { in: ["active", "closed", "renewal", "discussion", "expected"] },
@@ -99,6 +85,7 @@ export async function GET(request: NextRequest) {
       ],
     },
     select: {
+      id: true,
       status: true,
       monthlyAmount: true,
       billingType: true,
@@ -110,133 +97,29 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const actualByMonth: Record<string, number> = {};
-  const contractedByMonth: Record<string, number> = {};
-  const prospectByMonth: Record<string, number> = {};
-  const revenueByClient: Record<string, number> = {};
-
-  for (const deal of deals) {
-    if (deal.billingType === "lumpsum") {
-      // 一括契約: 終了月にまとめて計上
-      if (!deal.contractAmount || !deal.contractEndDate) continue;
-      const endMonth = formatMonth(deal.contractEndDate);
-      if (startDate && endMonth < formatMonth(startDate)) continue;
-      if (endDate && endMonth > formatMonth(endDate)) continue;
-
-      if (deal.status === "closed") {
-        actualByMonth[endMonth] = (actualByMonth[endMonth] ?? 0) + deal.contractAmount;
-        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.contractAmount;
-      } else if (deal.status === "active" || deal.status === "renewal") {
-        if (endMonth < currentMonth) {
-          actualByMonth[endMonth] = (actualByMonth[endMonth] ?? 0) + deal.contractAmount;
-          revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.contractAmount;
-        } else {
-          contractedByMonth[endMonth] = (contractedByMonth[endMonth] ?? 0) + deal.contractAmount;
-        }
-      } else {
-        // discussion, expected
-        if (deal.contractEndDate) {
-          prospectByMonth[endMonth] = (prospectByMonth[endMonth] ?? 0) + deal.contractAmount;
-        }
-      }
-    } else if (deal.billingType === "prorated") {
-      // 日割り契約: 月ごとに日割り金額を計算
-      if (!deal.monthlyAmount || !deal.contractStartDate || !deal.contractEndDate) continue;
-
-      const dealStart = deal.contractStartDate;
-      const dealEnd = deal.contractEndDate;
-      const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
-      const rangeEnd = endDate && endDate < dealEnd ? endDate : dealEnd;
-      const months = generateMonthRange(rangeStart, rangeEnd);
-      const prorateBase = (deal.prorateBase as ProrateBaseType) ?? "fixed30";
-
-      let clientTotal = 0;
-      for (const m of months) {
-        const [y, mo] = m.split("-").map(Number);
-        const prorate = calculateProrate({
-          monthlyAmount: deal.monthlyAmount,
-          year: y,
-          month: mo,
-          contractStartDate: dealStart,
-          contractEndDate: dealEnd,
-          prorateBase,
-        });
-
-        if (deal.status === "closed") {
-          actualByMonth[m] = (actualByMonth[m] ?? 0) + prorate.amount;
-          clientTotal += prorate.amount;
-        } else if (deal.status === "active" || deal.status === "renewal") {
-          if (m < currentMonth) {
-            actualByMonth[m] = (actualByMonth[m] ?? 0) + prorate.amount;
-            clientTotal += prorate.amount;
-          } else {
-            contractedByMonth[m] = (contractedByMonth[m] ?? 0) + prorate.amount;
-          }
-        } else {
-          prospectByMonth[m] = (prospectByMonth[m] ?? 0) + prorate.amount;
-        }
-      }
-
-      if (clientTotal > 0) {
-        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + clientTotal;
-      }
-    } else {
-      // 月額契約: 既存ロジック
-      if (!deal.monthlyAmount) continue;
-
-      const dealStart = deal.contractStartDate ?? now;
-      const dealEnd = deal.contractEndDate ?? new Date(now.getFullYear(), now.getMonth() + 12, 0);
-      const rangeStart = startDate && startDate > dealStart ? startDate : dealStart;
-      const rangeEnd = endDate && endDate < dealEnd ? endDate : dealEnd;
-      const months = generateMonthRange(rangeStart, rangeEnd);
-
-      for (const m of months) {
-        if (deal.status === "closed") {
-          actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
-        } else if (deal.status === "active" || deal.status === "renewal") {
-          if (m < currentMonth) {
-            actualByMonth[m] = (actualByMonth[m] ?? 0) + deal.monthlyAmount;
-          } else {
-            contractedByMonth[m] = (contractedByMonth[m] ?? 0) + deal.monthlyAmount;
-          }
-        } else {
-          prospectByMonth[m] = (prospectByMonth[m] ?? 0) + deal.monthlyAmount;
-        }
-      }
-
-      // Client revenue: total from actual months (closed + active past)
-      const totalMonths = months.length;
-      if (deal.status === "closed") {
-        revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * totalMonths;
-      } else if (deal.status === "active" || deal.status === "renewal") {
-        const pastMonths = months.filter((m) => m < currentMonth).length;
-        if (pastMonths > 0) {
-          revenueByClient[deal.client.name] = (revenueByClient[deal.client.name] ?? 0) + deal.monthlyAmount * pastMonths;
-        }
-      }
-    }
-  }
-
-  // Override with paid invoice amounts where available (more accurate)
-  const invoiceWhere: Record<string, unknown> = { status: "paid" };
-  const dueDateFilter: Record<string, unknown> = {};
-  if (startDate) dueDateFilter.gte = startDate;
-  if (endDate) dueDateFilter.lte = endDate;
-  if (Object.keys(dueDateFilter).length > 0) {
-    invoiceWhere.dueDate = dueDateFilter;
-  }
-  const paidInvoices = await prisma.invoice.findMany({
-    where: invoiceWhere,
-    select: { year: true, month: true, amount: true, deal: { select: { client: { select: { name: true } } } } },
+  // 請求済み（下書きは実績でない）。**Deal の status で絞らない**——
+  // 案件が lost/closed でも請求の事実は消えない
+  const invoices = await prisma.invoice.findMany({
+    where: { status: { in: ["sent", "paid", "overdue"] } },
+    select: {
+      dealId: true,
+      year: true,
+      month: true,
+      amount: true,
+      deal: { select: { client: { select: { name: true } } } },
+    },
   });
-  for (const inv of paidInvoices) {
-    const key = `${inv.year}-${String(inv.month).padStart(2, "0")}`;
-    // Paid invoices supplement the actual amount (don't double-count — but if invoice exists, it's the authoritative source)
-    // For simplicity, add invoice amounts on top since they may differ from monthlyAmount
-    if (!actualByMonth[key]) {
-      actualByMonth[key] = inv.amount;
-    }
-  }
+
+  const {
+    actualByMonth,
+    contractedByMonth,
+    prospectByMonth,
+    revenueByClient,
+  } = buildRevenue(
+    deals as RevenueDeal[],
+    invoices as RevenueInvoice[],
+    { startDate, endDate, now },
+  );
 
   // Merge all months — when fiscal year mode, ensure all 12 months are present
   const allMonths = new Set([
