@@ -2,9 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockPrisma = vi.hoisted(() => ({
   appSettings: { findFirst: vi.fn() },
-  deal: { findMany: vi.fn() },
-  invoice: { findMany: vi.fn() },
+  deal: { findMany: vi.fn(), findUnique: vi.fn() },
+  invoice: { findMany: vi.fn(), findFirst: vi.fn() },
   monthlyCostOverride: {
+    findMany: vi.fn(),
+    upsert: vi.fn(),
+    deleteMany: vi.fn(),
+  },
+  plannedRevenueOverride: {
     findMany: vi.fn(),
     upsert: vi.fn(),
     deleteMany: vi.fn(),
@@ -40,6 +45,7 @@ describe("GET /api/forecast", () => {
     mockPrisma.deal.findMany.mockResolvedValue([]);
     mockPrisma.invoice.findMany.mockResolvedValue([]);
     mockPrisma.monthlyCostOverride.findMany.mockResolvedValue([]);
+    mockPrisma.plannedRevenueOverride.findMany.mockResolvedValue([]);
   });
 
   it("FYの12ヶ月と資金繰りを返す", async () => {
@@ -137,5 +143,87 @@ describe("費用セルの上書き", () => {
       expect(res.status, JSON.stringify(body)).toBe(400);
     }
     expect(mockPrisma.monthlyCostOverride.upsert).not.toHaveBeenCalled();
+  });
+});
+
+describe("月別計画値の上書き（Phase D）", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPrisma.deal.findUnique.mockResolvedValue({ id: "d1" });
+    mockPrisma.invoice.findFirst.mockResolvedValue(null);
+    mockPrisma.plannedRevenueOverride.upsert.mockResolvedValue({ id: "p1" });
+    mockPrisma.plannedRevenueOverride.deleteMany.mockResolvedValue({ count: 1 });
+  });
+
+  it("将来月の計画値を保存できる", async () => {
+    const { PUT } = await import("@/app/api/forecast/planned/route");
+    const res = await PUT(
+      req("http://localhost/api/forecast/planned", {
+        method: "PUT",
+        body: { dealId: "d1", month: "2026-09", amount: 5_500_000 },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const call = mockPrisma.plannedRevenueOverride.upsert.mock.calls[0][0];
+    expect(call.create).toEqual({
+      dealId: "d1",
+      year: 2026,
+      month: 9,
+      amount: 5_500_000,
+    });
+  });
+
+  it("請求済みの月は409で拒否する（実績は請求が正）", async () => {
+    mockPrisma.invoice.findFirst.mockResolvedValue({ id: "inv1" });
+    const { PUT } = await import("@/app/api/forecast/planned/route");
+    const res = await PUT(
+      req("http://localhost/api/forecast/planned", {
+        method: "PUT",
+        body: { dealId: "d1", month: "2026-06", amount: 1 },
+      }),
+    );
+    expect(res.status).toBe(409);
+    expect(mockPrisma.plannedRevenueOverride.upsert).not.toHaveBeenCalled();
+  });
+
+  it("存在しない案件は404", async () => {
+    mockPrisma.deal.findUnique.mockResolvedValue(null);
+    const { PUT } = await import("@/app/api/forecast/planned/route");
+    const res = await PUT(
+      req("http://localhost/api/forecast/planned", {
+        method: "PUT",
+        body: { dealId: "ghost", month: "2026-09", amount: 1 },
+      }),
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it("不正な値は400（DBに触らない）", async () => {
+    const { PUT } = await import("@/app/api/forecast/planned/route");
+    for (const body of [
+      { dealId: "", month: "2026-09", amount: 1 },
+      { dealId: "d1", month: "2026-9", amount: 1 },
+      { dealId: "d1", month: "2026-09", amount: -1 },
+      { dealId: "d1", month: "2026-09", amount: 1.5 },
+    ]) {
+      const res = await PUT(
+        req("http://localhost/api/forecast/planned", { method: "PUT", body }),
+      );
+      expect(res.status, JSON.stringify(body)).toBe(400);
+    }
+    expect(mockPrisma.plannedRevenueOverride.upsert).not.toHaveBeenCalled();
+  });
+
+  it("削除で契約ベースに戻せる", async () => {
+    const { DELETE: del } = await import("@/app/api/forecast/planned/route");
+    const res = await del(
+      req("http://localhost/api/forecast/planned?dealId=d1&month=2026-09", {
+        method: "DELETE",
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(mockPrisma.plannedRevenueOverride.deleteMany).toHaveBeenCalledWith({
+      where: { dealId: "d1", year: 2026, month: 9 },
+    });
   });
 });

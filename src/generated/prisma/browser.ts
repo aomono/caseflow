@@ -65,6 +65,15 @@ export type NotificationLog = Prisma.NotificationLogModel
  */
 export type ApiToken = Prisma.ApiTokenModel
 /**
+ * Model PlannedRevenueOverride
+ * 売上の月別計画値の上書き（FY月次ビュー）。
+ * 案件は月額を1つしか持てないので、月ごとに変わる計画（初月半額・繁忙期の
+ * 増額など）を表現できない。実契約に合わせた契約期間はそのままに、計画値
+ * だけをここで置く——契約期間を計画に合わせて伸ばすと更新リマインダーが狂う。
+ * **実績（Invoice のある月）は上書きしない**。実績の真実は請求にある。
+ */
+export type PlannedRevenueOverride = Prisma.PlannedRevenueOverrideModel
+/**
  * Model MonthlyCostOverride
  * 資金繰りの費用セルの月別上書き。
  * セルの値＝上書きがあればその金額、無ければ AppSettings の既定値。

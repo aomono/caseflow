@@ -350,6 +350,7 @@ export type DealWhereInput = {
   invoices?: Prisma.InvoiceListRelationFilter
   reports?: Prisma.ReportListRelationFilter
   reminders?: Prisma.ReminderListRelationFilter
+  plannedRevenues?: Prisma.PlannedRevenueOverrideListRelationFilter
 }
 
 export type DealOrderByWithRelationInput = {
@@ -379,6 +380,7 @@ export type DealOrderByWithRelationInput = {
   invoices?: Prisma.InvoiceOrderByRelationAggregateInput
   reports?: Prisma.ReportOrderByRelationAggregateInput
   reminders?: Prisma.ReminderOrderByRelationAggregateInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideOrderByRelationAggregateInput
 }
 
 export type DealWhereUniqueInput = Prisma.AtLeast<{
@@ -411,6 +413,7 @@ export type DealWhereUniqueInput = Prisma.AtLeast<{
   invoices?: Prisma.InvoiceListRelationFilter
   reports?: Prisma.ReportListRelationFilter
   reminders?: Prisma.ReminderListRelationFilter
+  plannedRevenues?: Prisma.PlannedRevenueOverrideListRelationFilter
 }, "id">
 
 export type DealOrderByWithAggregationInput = {
@@ -493,6 +496,7 @@ export type DealCreateInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateInput = {
@@ -521,6 +525,7 @@ export type DealUncheckedCreateInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealUpdateInput = {
@@ -549,6 +554,7 @@ export type DealUpdateInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateInput = {
@@ -577,6 +583,7 @@ export type DealUncheckedUpdateInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateManyInput = {
@@ -898,6 +905,20 @@ export type DealUpdateOneWithoutRemindersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DealUpdateToOneWithWhereWithoutRemindersInput, Prisma.DealUpdateWithoutRemindersInput>, Prisma.DealUncheckedUpdateWithoutRemindersInput>
 }
 
+export type DealCreateNestedOneWithoutPlannedRevenuesInput = {
+  create?: Prisma.XOR<Prisma.DealCreateWithoutPlannedRevenuesInput, Prisma.DealUncheckedCreateWithoutPlannedRevenuesInput>
+  connectOrCreate?: Prisma.DealCreateOrConnectWithoutPlannedRevenuesInput
+  connect?: Prisma.DealWhereUniqueInput
+}
+
+export type DealUpdateOneRequiredWithoutPlannedRevenuesNestedInput = {
+  create?: Prisma.XOR<Prisma.DealCreateWithoutPlannedRevenuesInput, Prisma.DealUncheckedCreateWithoutPlannedRevenuesInput>
+  connectOrCreate?: Prisma.DealCreateOrConnectWithoutPlannedRevenuesInput
+  upsert?: Prisma.DealUpsertWithoutPlannedRevenuesInput
+  connect?: Prisma.DealWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DealUpdateToOneWithWhereWithoutPlannedRevenuesInput, Prisma.DealUpdateWithoutPlannedRevenuesInput>, Prisma.DealUncheckedUpdateWithoutPlannedRevenuesInput>
+}
+
 export type DealCreateWithoutClientInput = {
   id?: string
   title: string
@@ -923,6 +944,7 @@ export type DealCreateWithoutClientInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutClientInput = {
@@ -950,6 +972,7 @@ export type DealUncheckedCreateWithoutClientInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutClientInput = {
@@ -1029,6 +1052,7 @@ export type DealCreateWithoutContactsInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutContactsInput = {
@@ -1056,6 +1080,7 @@ export type DealUncheckedCreateWithoutContactsInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutContactsInput = {
@@ -1099,6 +1124,7 @@ export type DealUpdateWithoutContactsInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutContactsInput = {
@@ -1126,6 +1152,7 @@ export type DealUncheckedUpdateWithoutContactsInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateWithoutActivitiesInput = {
@@ -1153,6 +1180,7 @@ export type DealCreateWithoutActivitiesInput = {
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutActivitiesInput = {
@@ -1180,6 +1208,7 @@ export type DealUncheckedCreateWithoutActivitiesInput = {
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutActivitiesInput = {
@@ -1223,6 +1252,7 @@ export type DealUpdateWithoutActivitiesInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutActivitiesInput = {
@@ -1250,6 +1280,7 @@ export type DealUncheckedUpdateWithoutActivitiesInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateWithoutInvoicesInput = {
@@ -1277,6 +1308,7 @@ export type DealCreateWithoutInvoicesInput = {
   activities?: Prisma.ActivityCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutInvoicesInput = {
@@ -1304,6 +1336,7 @@ export type DealUncheckedCreateWithoutInvoicesInput = {
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutInvoicesInput = {
@@ -1347,6 +1380,7 @@ export type DealUpdateWithoutInvoicesInput = {
   activities?: Prisma.ActivityUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutInvoicesInput = {
@@ -1374,6 +1408,7 @@ export type DealUncheckedUpdateWithoutInvoicesInput = {
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateWithoutReportsInput = {
@@ -1401,6 +1436,7 @@ export type DealCreateWithoutReportsInput = {
   activities?: Prisma.ActivityCreateNestedManyWithoutDealInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutReportsInput = {
@@ -1428,6 +1464,7 @@ export type DealUncheckedCreateWithoutReportsInput = {
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutReportsInput = {
@@ -1471,6 +1508,7 @@ export type DealUpdateWithoutReportsInput = {
   activities?: Prisma.ActivityUpdateManyWithoutDealNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutReportsInput = {
@@ -1498,6 +1536,7 @@ export type DealUncheckedUpdateWithoutReportsInput = {
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateWithoutRemindersInput = {
@@ -1525,6 +1564,7 @@ export type DealCreateWithoutRemindersInput = {
   activities?: Prisma.ActivityCreateNestedManyWithoutDealInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideCreateNestedManyWithoutDealInput
 }
 
 export type DealUncheckedCreateWithoutRemindersInput = {
@@ -1552,6 +1592,7 @@ export type DealUncheckedCreateWithoutRemindersInput = {
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedCreateNestedManyWithoutDealInput
 }
 
 export type DealCreateOrConnectWithoutRemindersInput = {
@@ -1595,6 +1636,7 @@ export type DealUpdateWithoutRemindersInput = {
   activities?: Prisma.ActivityUpdateManyWithoutDealNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutRemindersInput = {
@@ -1622,6 +1664,135 @@ export type DealUncheckedUpdateWithoutRemindersInput = {
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
+}
+
+export type DealCreateWithoutPlannedRevenuesInput = {
+  id?: string
+  title: string
+  status?: $Enums.DealStatus
+  monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
+  prorateBase?: $Enums.ProrateBase | null
+  contractStartDate?: Date | string | null
+  contractEndDate?: Date | string | null
+  renewalReminderDays?: number
+  description?: string | null
+  contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  client: Prisma.ClientCreateNestedOneWithoutDealsInput
+  contacts?: Prisma.DealContactCreateNestedManyWithoutDealInput
+  activities?: Prisma.ActivityCreateNestedManyWithoutDealInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutDealInput
+  reports?: Prisma.ReportCreateNestedManyWithoutDealInput
+  reminders?: Prisma.ReminderCreateNestedManyWithoutDealInput
+}
+
+export type DealUncheckedCreateWithoutPlannedRevenuesInput = {
+  id?: string
+  clientId: string
+  title: string
+  status?: $Enums.DealStatus
+  monthlyAmount?: number | null
+  billingType?: $Enums.BillingType
+  contractAmount?: number | null
+  prorateBase?: $Enums.ProrateBase | null
+  contractStartDate?: Date | string | null
+  contractEndDate?: Date | string | null
+  renewalReminderDays?: number
+  description?: string | null
+  contractSummary?: string | null
+  probability?: $Enums.Probability | null
+  nextAction?: string | null
+  nextActionDate?: Date | string | null
+  source?: string | null
+  lastActivityAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  contacts?: Prisma.DealContactUncheckedCreateNestedManyWithoutDealInput
+  activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutDealInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutDealInput
+  reminders?: Prisma.ReminderUncheckedCreateNestedManyWithoutDealInput
+}
+
+export type DealCreateOrConnectWithoutPlannedRevenuesInput = {
+  where: Prisma.DealWhereUniqueInput
+  create: Prisma.XOR<Prisma.DealCreateWithoutPlannedRevenuesInput, Prisma.DealUncheckedCreateWithoutPlannedRevenuesInput>
+}
+
+export type DealUpsertWithoutPlannedRevenuesInput = {
+  update: Prisma.XOR<Prisma.DealUpdateWithoutPlannedRevenuesInput, Prisma.DealUncheckedUpdateWithoutPlannedRevenuesInput>
+  create: Prisma.XOR<Prisma.DealCreateWithoutPlannedRevenuesInput, Prisma.DealUncheckedCreateWithoutPlannedRevenuesInput>
+  where?: Prisma.DealWhereInput
+}
+
+export type DealUpdateToOneWithWhereWithoutPlannedRevenuesInput = {
+  where?: Prisma.DealWhereInput
+  data: Prisma.XOR<Prisma.DealUpdateWithoutPlannedRevenuesInput, Prisma.DealUncheckedUpdateWithoutPlannedRevenuesInput>
+}
+
+export type DealUpdateWithoutPlannedRevenuesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
+  monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  prorateBase?: Prisma.NullableEnumProrateBaseFieldUpdateOperationsInput | $Enums.ProrateBase | null
+  contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  client?: Prisma.ClientUpdateOneRequiredWithoutDealsNestedInput
+  contacts?: Prisma.DealContactUpdateManyWithoutDealNestedInput
+  activities?: Prisma.ActivityUpdateManyWithoutDealNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
+  reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+}
+
+export type DealUncheckedUpdateWithoutPlannedRevenuesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDealStatusFieldUpdateOperationsInput | $Enums.DealStatus
+  monthlyAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  billingType?: Prisma.EnumBillingTypeFieldUpdateOperationsInput | $Enums.BillingType
+  contractAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  prorateBase?: Prisma.NullableEnumProrateBaseFieldUpdateOperationsInput | $Enums.ProrateBase | null
+  contractStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contractEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  renewalReminderDays?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contractSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  probability?: Prisma.NullableEnumProbabilityFieldUpdateOperationsInput | $Enums.Probability | null
+  nextAction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nextActionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contacts?: Prisma.DealContactUncheckedUpdateManyWithoutDealNestedInput
+  activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
+  reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealCreateManyClientInput = {
@@ -1671,6 +1842,7 @@ export type DealUpdateWithoutClientInput = {
   invoices?: Prisma.InvoiceUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateWithoutClientInput = {
@@ -1698,6 +1870,7 @@ export type DealUncheckedUpdateWithoutClientInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutDealNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutDealNestedInput
   reminders?: Prisma.ReminderUncheckedUpdateManyWithoutDealNestedInput
+  plannedRevenues?: Prisma.PlannedRevenueOverrideUncheckedUpdateManyWithoutDealNestedInput
 }
 
 export type DealUncheckedUpdateManyWithoutClientInput = {
@@ -1733,6 +1906,7 @@ export type DealCountOutputType = {
   invoices: number
   reports: number
   reminders: number
+  plannedRevenues: number
 }
 
 export type DealCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1741,6 +1915,7 @@ export type DealCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   invoices?: boolean | DealCountOutputTypeCountInvoicesArgs
   reports?: boolean | DealCountOutputTypeCountReportsArgs
   reminders?: boolean | DealCountOutputTypeCountRemindersArgs
+  plannedRevenues?: boolean | DealCountOutputTypeCountPlannedRevenuesArgs
 }
 
 /**
@@ -1788,6 +1963,13 @@ export type DealCountOutputTypeCountRemindersArgs<ExtArgs extends runtime.Types.
   where?: Prisma.ReminderWhereInput
 }
 
+/**
+ * DealCountOutputType without action
+ */
+export type DealCountOutputTypeCountPlannedRevenuesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlannedRevenueOverrideWhereInput
+}
+
 
 export type DealSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1816,6 +1998,7 @@ export type DealSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   invoices?: boolean | Prisma.Deal$invoicesArgs<ExtArgs>
   reports?: boolean | Prisma.Deal$reportsArgs<ExtArgs>
   reminders?: boolean | Prisma.Deal$remindersArgs<ExtArgs>
+  plannedRevenues?: boolean | Prisma.Deal$plannedRevenuesArgs<ExtArgs>
   _count?: boolean | Prisma.DealCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deal"]>
 
@@ -1898,6 +2081,7 @@ export type DealInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   invoices?: boolean | Prisma.Deal$invoicesArgs<ExtArgs>
   reports?: boolean | Prisma.Deal$reportsArgs<ExtArgs>
   reminders?: boolean | Prisma.Deal$remindersArgs<ExtArgs>
+  plannedRevenues?: boolean | Prisma.Deal$plannedRevenuesArgs<ExtArgs>
   _count?: boolean | Prisma.DealCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DealIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1916,6 +2100,7 @@ export type $DealPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     invoices: Prisma.$InvoicePayload<ExtArgs>[]
     reports: Prisma.$ReportPayload<ExtArgs>[]
     reminders: Prisma.$ReminderPayload<ExtArgs>[]
+    plannedRevenues: Prisma.$PlannedRevenueOverridePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2338,6 +2523,7 @@ export interface Prisma__DealClient<T, Null = never, ExtArgs extends runtime.Typ
   invoices<T extends Prisma.Deal$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deal$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reports<T extends Prisma.Deal$reportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deal$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reminders<T extends Prisma.Deal$remindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deal$remindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  plannedRevenues<T extends Prisma.Deal$plannedRevenuesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deal$plannedRevenuesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedRevenueOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2905,6 +3091,30 @@ export type Deal$remindersArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.ReminderScalarFieldEnum | Prisma.ReminderScalarFieldEnum[]
+}
+
+/**
+ * Deal.plannedRevenues
+ */
+export type Deal$plannedRevenuesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlannedRevenueOverride
+   */
+  select?: Prisma.PlannedRevenueOverrideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlannedRevenueOverride
+   */
+  omit?: Prisma.PlannedRevenueOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlannedRevenueOverrideInclude<ExtArgs> | null
+  where?: Prisma.PlannedRevenueOverrideWhereInput
+  orderBy?: Prisma.PlannedRevenueOverrideOrderByWithRelationInput | Prisma.PlannedRevenueOverrideOrderByWithRelationInput[]
+  cursor?: Prisma.PlannedRevenueOverrideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlannedRevenueOverrideScalarFieldEnum | Prisma.PlannedRevenueOverrideScalarFieldEnum[]
 }
 
 /**

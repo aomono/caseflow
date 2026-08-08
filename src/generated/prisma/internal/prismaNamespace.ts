@@ -393,6 +393,7 @@ export const ModelName = {
   Reminder: 'Reminder',
   NotificationLog: 'NotificationLog',
   ApiToken: 'ApiToken',
+  PlannedRevenueOverride: 'PlannedRevenueOverride',
   MonthlyCostOverride: 'MonthlyCostOverride',
   AppSettings: 'AppSettings'
 } as const
@@ -410,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "client" | "deal" | "dealContact" | "activity" | "invoice" | "report" | "reminder" | "notificationLog" | "apiToken" | "monthlyCostOverride" | "appSettings"
+    modelProps: "client" | "deal" | "dealContact" | "activity" | "invoice" | "report" | "reminder" | "notificationLog" | "apiToken" | "plannedRevenueOverride" | "monthlyCostOverride" | "appSettings"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1080,6 +1081,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlannedRevenueOverride: {
+      payload: Prisma.$PlannedRevenueOverridePayload<ExtArgs>
+      fields: Prisma.PlannedRevenueOverrideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlannedRevenueOverrideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlannedRevenueOverrideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        findFirst: {
+          args: Prisma.PlannedRevenueOverrideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlannedRevenueOverrideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        findMany: {
+          args: Prisma.PlannedRevenueOverrideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>[]
+        }
+        create: {
+          args: Prisma.PlannedRevenueOverrideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        createMany: {
+          args: Prisma.PlannedRevenueOverrideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlannedRevenueOverrideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>[]
+        }
+        delete: {
+          args: Prisma.PlannedRevenueOverrideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        update: {
+          args: Prisma.PlannedRevenueOverrideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlannedRevenueOverrideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlannedRevenueOverrideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlannedRevenueOverrideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlannedRevenueOverrideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlannedRevenueOverridePayload>
+        }
+        aggregate: {
+          args: Prisma.PlannedRevenueOverrideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlannedRevenueOverride>
+        }
+        groupBy: {
+          args: Prisma.PlannedRevenueOverrideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlannedRevenueOverrideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlannedRevenueOverrideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlannedRevenueOverrideCountAggregateOutputType> | number
+        }
+      }
+    }
     MonthlyCostOverride: {
       payload: Prisma.$MonthlyCostOverridePayload<ExtArgs>
       fields: Prisma.MonthlyCostOverrideFieldRefs
@@ -1407,6 +1482,18 @@ export const ApiTokenScalarFieldEnum = {
 } as const
 
 export type ApiTokenScalarFieldEnum = (typeof ApiTokenScalarFieldEnum)[keyof typeof ApiTokenScalarFieldEnum]
+
+
+export const PlannedRevenueOverrideScalarFieldEnum = {
+  id: 'id',
+  dealId: 'dealId',
+  year: 'year',
+  month: 'month',
+  amount: 'amount',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlannedRevenueOverrideScalarFieldEnum = (typeof PlannedRevenueOverrideScalarFieldEnum)[keyof typeof PlannedRevenueOverrideScalarFieldEnum]
 
 
 export const MonthlyCostOverrideScalarFieldEnum = {
@@ -1786,6 +1873,7 @@ export type GlobalOmitConfig = {
   reminder?: Prisma.ReminderOmit
   notificationLog?: Prisma.NotificationLogOmit
   apiToken?: Prisma.ApiTokenOmit
+  plannedRevenueOverride?: Prisma.PlannedRevenueOverrideOmit
   monthlyCostOverride?: Prisma.MonthlyCostOverrideOmit
   appSettings?: Prisma.AppSettingsOmit
 }

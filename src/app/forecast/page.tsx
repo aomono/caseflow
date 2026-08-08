@@ -91,6 +91,43 @@ export default function ForecastPage() {
     }
   }
 
+  async function savePlanned(dealId: string, month: string, raw: string) {
+    const amount = Number(raw.replace(/[^\d]/g, ""));
+    if (!Number.isInteger(amount) || amount < 0) {
+      toast("金額の形式が正しくありません", "error");
+      return;
+    }
+    try {
+      const res = await fetch("/api/forecast/planned", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dealId, month, amount }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error);
+      }
+      setEditing(null);
+      load();
+    } catch (e) {
+      toast(e instanceof Error && e.message ? e.message : "保存できませんでした", "error");
+    }
+  }
+
+  async function resetPlanned(dealId: string, month: string) {
+    try {
+      const res = await fetch(
+        `/api/forecast/planned?dealId=${dealId}&month=${month}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error();
+      setEditing(null);
+      load();
+    } catch {
+      toast("戻せませんでした", "error");
+    }
+  }
+
   async function resetOverride(month: string, category: CostCategory) {
     try {
       const res = await fetch(
@@ -107,6 +144,8 @@ export default function ForecastPage() {
 
   const matrix = data?.matrix;
   const months = matrix?.months ?? [];
+  // 過去月には計画値を置けない（過ぎた月の計画は存在しない）
+  const currentMonth = new Date().toISOString().slice(0, 7);
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -207,13 +246,56 @@ export default function ForecastPage() {
                         </td>
                         {months.map((m) => {
                           const cell = r.cells[m];
+                          const id = `plan:${r.dealId}:${m}`;
+                          const isActual = cell?.kind === "actual";
+                          // 実績は編集不可（請求が正）。将来の計画値だけ編集できる
+                          const editable = !isActual && m >= currentMonth;
+
+                          if (editing === id) {
+                            return (
+                              <td key={m} className="px-1 py-1">
+                                <input
+                                  autoFocus
+                                  value={draft}
+                                  onChange={(e) => setDraft(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter")
+                                      savePlanned(r.dealId, m, draft);
+                                    if (e.key === "Escape") setEditing(null);
+                                  }}
+                                  onBlur={() => savePlanned(r.dealId, m, draft)}
+                                  className="w-full rounded border border-indigo-300 px-1 py-0.5 text-right text-[12px] tabular-nums focus:outline-none"
+                                />
+                              </td>
+                            );
+                          }
                           return (
                             <td
                               key={m}
-                              className={`px-2 py-1.5 text-right tabular-nums ${
+                              onClick={
+                                editable
+                                  ? () => {
+                                      setEditing(id);
+                                      setDraft(String(cell?.amount ?? 0));
+                                    }
+                                  : undefined
+                              }
+                              title={
+                                isActual
+                                  ? "請求済みの実績です（編集は請求側で）"
+                                  : editable
+                                    ? "クリックで計画値を編集"
+                                    : undefined
+                              }
+                              className={`relative px-2 py-1.5 text-right tabular-nums ${
                                 cell ? CELL_STYLE[cell.kind] : "text-slate-200"
-                              } ${cell?.kind === "actual" ? "bg-emerald-50/40" : ""}`}
+                              } ${isActual ? "bg-emerald-50/40" : ""} ${
+                                editable ? "cursor-pointer hover:bg-indigo-50/50" : ""
+                              } ${cell?.overridden ? "text-indigo-700" : ""}`}
                             >
+                              {cell?.overridden && (
+                                <span className="absolute left-1 top-1 h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                              )}
                               {cell ? YEN(cell.amount) : "-"}
                             </td>
                           );
@@ -252,7 +334,27 @@ export default function ForecastPage() {
             </span>
             <span className="text-slate-700">受注済みの予測</span>
             <span className="italic text-slate-400">見込みの予測</span>
+            <span className="text-indigo-700">
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-indigo-400 align-middle" />
+              月別に上書きした計画値
+            </span>
           </div>
+
+          <p className="text-[11px] text-slate-400">
+            将来月の売上セルはクリックで編集できます（月ごとに変わる計画を、
+            契約期間を動かさずに置けます）。請求済みの月は編集できません。
+            {editing?.startsWith("plan:") && (
+              <button
+                onClick={() => {
+                  const [, dealId, m] = editing.split(":");
+                  resetPlanned(dealId, m);
+                }}
+                className="ml-2 text-indigo-600 hover:underline"
+              >
+                このセルを契約ベースに戻す
+              </button>
+            )}
+          </p>
 
           {/* 資金繰り */}
           <div className="min-w-0 overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">

@@ -287,3 +287,89 @@ describe("資金繰り", () => {
     expect(got[2].balance).toBeLessThan(0);
   });
 });
+
+describe("月別計画値の上書き（Phase D）", () => {
+  const OVER = (over = {}) => ({
+    dealId: "d1",
+    month: "2026-09",
+    amount: 5_500_000,
+    ...over,
+  });
+
+  it("将来月の予測を上書きできる", () => {
+    // 案件は月額を1つしか持てないので、月ごとに変わる計画をここで置く
+    const got = buildForecast([deal()], [], {
+      ...OPTS,
+      plannedOverrides: [OVER()],
+    });
+    const cells = got.groups[0].rows[0].cells;
+    expect(cells["2026-09"]).toMatchObject({
+      amount: 5_500_000,
+      overridden: true,
+    });
+    expect(cells["2026-10"]).toMatchObject({ amount: 1_000_000 }); // 他の月は既定
+    expect(cells["2026-10"].overridden).toBeUndefined();
+  });
+
+  it("実績（Invoice）は上書きしない", () => {
+    // 実績の真実は請求にある。計画値で上書きできてしまうと台帳が嘘をつく
+    const got = buildForecast([deal()], [invoice({ month: 8 })], {
+      ...OPTS,
+      plannedOverrides: [OVER({ month: "2026-08", amount: 1 })],
+    });
+    const cell = got.groups[0].rows[0].cells["2026-08"];
+    expect(cell).toEqual({ amount: 12_000_000, kind: "actual" });
+  });
+
+  it("契約期間外の月にも計画値を置ける", () => {
+    // 実契約は9月までだが計画は11月まで、を契約期間を伸ばさずに表現する
+    // （期間を伸ばすと更新リマインダーが狂う）
+    const got = buildForecast(
+      [deal({ contractEndDate: new Date("2026-09-30") })],
+      [],
+      { ...OPTS, plannedOverrides: [OVER({ month: "2026-11", amount: 2_200_000 })] },
+    );
+    const cells = got.groups[0].rows[0].cells;
+    expect(cells["2026-11"]).toMatchObject({
+      amount: 2_200_000,
+      overridden: true,
+    });
+    expect(cells["2026-10"]).toBeUndefined(); // 上書きの無い期間外の月は空のまま
+  });
+
+  it("0円で上書きできる（その月は売上を立てない）", () => {
+    const got = buildForecast([deal()], [], {
+      ...OPTS,
+      plannedOverrides: [OVER({ amount: 0 })],
+    });
+    expect(got.groups[0].rows[0].cells["2026-09"]).toMatchObject({
+      amount: 0,
+      overridden: true,
+    });
+  });
+
+  it("過去月には上書きも効かない（過ぎた月の計画は無い）", () => {
+    const got = buildForecast([deal()], [], {
+      ...OPTS,
+      plannedOverrides: [OVER({ month: "2026-07", amount: 9_990_000 })],
+    });
+    expect(got.groups[0].rows[0].cells["2026-07"]).toBeUndefined();
+  });
+
+  it("加重見込みは上書き値にも掛かる", () => {
+    const got = buildForecast(
+      [deal({ status: "expected", probability: "mid" })],
+      [],
+      { ...OPTS, weighted: true, plannedOverrides: [OVER()] },
+    );
+    expect(got.groups[0].rows[0].cells["2026-09"].amount).toBe(2_750_000);
+  });
+
+  it("月別合計に上書きが反映される", () => {
+    const got = buildForecast([deal()], [], {
+      ...OPTS,
+      plannedOverrides: [OVER()],
+    });
+    expect(got.monthTotals["2026-09"]).toBe(5_500_000);
+  });
+});

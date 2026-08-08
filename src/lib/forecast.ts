@@ -30,7 +30,19 @@ export const FISCAL_START_MONTH = 6; // 6月始まり
 
 export type CellKind = "actual" | "contracted" | "prospect";
 
-export type ForecastCell = { amount: number; kind: CellKind };
+export type ForecastCell = {
+  amount: number;
+  kind: CellKind;
+  /** 月別計画値で上書きされているセル（画面で印を付ける・編集可） */
+  overridden?: boolean;
+};
+
+/** 売上の月別計画値の上書き。実績（Invoice）には効かない */
+export type PlannedOverride = {
+  dealId: string;
+  month: string;
+  amount: number;
+};
 
 export type ForecastRow = {
   dealId: string;
@@ -122,6 +134,7 @@ export function buildForecast(
     cutoverDate = null,
     weighted = false,
     rates = DEFAULT_RATES,
+    plannedOverrides = [],
   }: {
     fy: number;
     now: Date;
@@ -129,6 +142,8 @@ export function buildForecast(
     /** 見込み案件に確度係数を掛ける（既定OFF＝Excelと同じ非加重の計画値） */
     weighted?: boolean;
     rates?: Record<string, number>;
+    /** 月別計画値の上書き。契約期間外の月にも置ける（実契約と計画を分けるため） */
+    plannedOverrides?: PlannedOverride[];
   },
 ): ForecastMatrix {
   const { start, end } = fiscalYearRange(fy);
@@ -144,6 +159,13 @@ export function buildForecast(
     if (!monthSet.has(m)) continue;
     const k = `${inv.dealId} ${m}`;
     invoiceAmount.set(k, (invoiceAmount.get(k) ?? 0) + inv.amount);
+  }
+
+  // Deal×月 → 計画値の上書き
+  const planned = new Map<string, number>();
+  for (const o of plannedOverrides) {
+    if (!monthSet.has(o.month)) continue;
+    planned.set(`${o.dealId} ${o.month}`, o.amount);
   }
 
   const groupMap = new Map<string, ForecastRow[]>();
@@ -162,8 +184,16 @@ export function buildForecast(
     const cells: Record<string, ForecastCell> = {};
     let total = 0;
 
-    // 予測（Invoice が無い月）
-    for (const { month, amount } of expanded) {
+    // 予測（Invoice が無い月）。契約期間の展開に、計画値の上書きだけがある月を
+    // 足す——実契約は9月まででも計画は11月まで、を表現できるようにするため
+    const base = new Map<string, number>();
+    for (const { month, amount } of expanded) base.set(month, amount);
+    for (const [k, amount] of planned) {
+      const [dealId, month] = k.split(" ");
+      if (dealId === deal.id && !base.has(month)) base.set(month, amount);
+    }
+
+    for (const [month, rawAmount] of base) {
       if (!monthSet.has(month)) continue;
       if (invoiceAmount.has(`${deal.id} ${month}`)) continue; // Invoice が真実
       // カットオーバー以降の過去月は Invoice だけが実績。予測は載せない。
@@ -173,14 +203,17 @@ export function buildForecast(
       if (cutoverMonth && month >= cutoverMonth && month < currentMonth) {
         continue;
       }
+      const override = planned.get(`${deal.id} ${month}`);
+      const amount = override ?? rawAmount;
       const value =
         isProspect && weighted
           ? Math.round(amount * (rates[deal.probability ?? ""] ?? 0))
           : amount;
-      if (value === 0) continue;
+      if (value === 0 && override === undefined) continue;
       cells[month] = {
         amount: value,
         kind: isProspect ? "prospect" : "contracted",
+        ...(override !== undefined ? { overridden: true } : {}),
       };
       total += value;
     }

@@ -67,6 +67,8 @@ export async function GET(request: NextRequest) {
       prisma.monthlyCostOverride.findMany(),
     ]);
 
+    const plannedRows = await prisma.plannedRevenueOverride.findMany();
+
     const matrix = buildForecast(deals as ForecastDeal[], invoices as RevenueInvoice[], {
       fy,
       now,
@@ -77,6 +79,11 @@ export async function GET(request: NextRequest) {
         mid: settings?.probabilityMidRate ?? DEFAULT_PROBABILITY_RATES.mid,
         low: settings?.probabilityLowRate ?? DEFAULT_PROBABILITY_RATES.low,
       },
+      plannedOverrides: plannedRows.map((p) => ({
+        dealId: p.dealId,
+        month: `${p.year}-${String(p.month).padStart(2, "0")}`,
+        amount: p.amount,
+      })),
     });
 
     const overrides: CostOverride[] = overrideRows.map((o) => ({

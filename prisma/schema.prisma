@@ -128,6 +128,7 @@ model Deal {
   invoices  Invoice[]
   reports   Report[]
   reminders Reminder[]
+  plannedRevenues PlannedRevenueOverride[]
 }
 
 model DealContact {
@@ -227,6 +228,23 @@ model ApiToken {
   lastUsedAt DateTime?
   revokedAt  DateTime?                     // 失効可能にする（仕様書 C-2）
   createdAt  DateTime  @default(now())
+}
+
+/// 売上の月別計画値の上書き（FY月次ビュー）。
+/// 案件は月額を1つしか持てないので、月ごとに変わる計画（初月半額・繁忙期の
+/// 増額など）を表現できない。実契約に合わせた契約期間はそのままに、計画値
+/// だけをここで置く——契約期間を計画に合わせて伸ばすと更新リマインダーが狂う。
+/// **実績（Invoice のある月）は上書きしない**。実績の真実は請求にある。
+model PlannedRevenueOverride {
+  id        String   @id @default(cuid())
+  dealId    String
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  year      Int
+  month     Int
+  amount    Int
+  updatedAt DateTime @updatedAt
+
+  @@unique([dealId, year, month])
 }
 
 /// 資金繰りの費用セルの月別上書き。
