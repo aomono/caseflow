@@ -43,6 +43,18 @@ const navItems = [
     ),
   },
   {
+    href: "/forecast",
+    label: "年度計画",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="3" y1="20" x2="21" y2="20" />
+        <rect x="5" y="12" width="3.5" height="8" />
+        <rect x="10.25" y="7" width="3.5" height="13" />
+        <rect x="15.5" y="9.5" width="3.5" height="10.5" />
+      </svg>
+    ),
+  },
+  {
     href: "/invoices",
     label: "請求管理",
     icon: (

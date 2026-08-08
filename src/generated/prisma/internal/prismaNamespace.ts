@@ -393,6 +393,7 @@ export const ModelName = {
   Reminder: 'Reminder',
   NotificationLog: 'NotificationLog',
   ApiToken: 'ApiToken',
+  MonthlyCostOverride: 'MonthlyCostOverride',
   AppSettings: 'AppSettings'
 } as const
 
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "client" | "deal" | "dealContact" | "activity" | "invoice" | "report" | "reminder" | "notificationLog" | "apiToken" | "appSettings"
+    modelProps: "client" | "deal" | "dealContact" | "activity" | "invoice" | "report" | "reminder" | "notificationLog" | "apiToken" | "monthlyCostOverride" | "appSettings"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1079,6 +1080,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MonthlyCostOverride: {
+      payload: Prisma.$MonthlyCostOverridePayload<ExtArgs>
+      fields: Prisma.MonthlyCostOverrideFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MonthlyCostOverrideFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MonthlyCostOverrideFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        findFirst: {
+          args: Prisma.MonthlyCostOverrideFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MonthlyCostOverrideFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        findMany: {
+          args: Prisma.MonthlyCostOverrideFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>[]
+        }
+        create: {
+          args: Prisma.MonthlyCostOverrideCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        createMany: {
+          args: Prisma.MonthlyCostOverrideCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MonthlyCostOverrideCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>[]
+        }
+        delete: {
+          args: Prisma.MonthlyCostOverrideDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        update: {
+          args: Prisma.MonthlyCostOverrideUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        deleteMany: {
+          args: Prisma.MonthlyCostOverrideDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MonthlyCostOverrideUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MonthlyCostOverrideUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>[]
+        }
+        upsert: {
+          args: Prisma.MonthlyCostOverrideUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyCostOverridePayload>
+        }
+        aggregate: {
+          args: Prisma.MonthlyCostOverrideAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMonthlyCostOverride>
+        }
+        groupBy: {
+          args: Prisma.MonthlyCostOverrideGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyCostOverrideGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MonthlyCostOverrideCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyCostOverrideCountAggregateOutputType> | number
+        }
+      }
+    }
     AppSettings: {
       payload: Prisma.$AppSettingsPayload<ExtArgs>
       fields: Prisma.AppSettingsFieldRefs
@@ -1334,6 +1409,18 @@ export const ApiTokenScalarFieldEnum = {
 export type ApiTokenScalarFieldEnum = (typeof ApiTokenScalarFieldEnum)[keyof typeof ApiTokenScalarFieldEnum]
 
 
+export const MonthlyCostOverrideScalarFieldEnum = {
+  id: 'id',
+  year: 'year',
+  month: 'month',
+  category: 'category',
+  amount: 'amount',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MonthlyCostOverrideScalarFieldEnum = (typeof MonthlyCostOverrideScalarFieldEnum)[keyof typeof MonthlyCostOverrideScalarFieldEnum]
+
+
 export const AppSettingsScalarFieldEnum = {
   id: 'id',
   companyName: 'companyName',
@@ -1346,6 +1433,10 @@ export const AppSettingsScalarFieldEnum = {
   freshnessWarnDays: 'freshnessWarnDays',
   freshnessAlertDays: 'freshnessAlertDays',
   revenueCutoverDate: 'revenueCutoverDate',
+  monthlyPayment: 'monthlyPayment',
+  monthlyExecComp: 'monthlyExecComp',
+  monthlyExpense: 'monthlyExpense',
+  openingBalance: 'openingBalance',
   updatedAt: 'updatedAt'
 } as const
 
@@ -1695,6 +1786,7 @@ export type GlobalOmitConfig = {
   reminder?: Prisma.ReminderOmit
   notificationLog?: Prisma.NotificationLogOmit
   apiToken?: Prisma.ApiTokenOmit
+  monthlyCostOverride?: Prisma.MonthlyCostOverrideOmit
   appSettings?: Prisma.AppSettingsOmit
 }
 

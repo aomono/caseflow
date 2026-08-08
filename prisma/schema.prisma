@@ -229,6 +229,21 @@ model ApiToken {
   createdAt  DateTime  @default(now())
 }
 
+/// 資金繰りの費用セルの月別上書き。
+/// セルの値＝上書きがあればその金額、無ければ AppSettings の既定値。
+/// 「既定値に戻す」は行の削除で表す（0 で上書きするのと区別が要る——
+/// 0円と未設定は違う）。
+model MonthlyCostOverride {
+  id        String   @id @default(cuid())
+  year      Int
+  month     Int
+  category  String                  // payment | execComp | expense
+  amount    Int
+  updatedAt DateTime @updatedAt
+
+  @@unique([year, month, category])
+}
+
 model AppSettings {
   id                  String   @id @default(cuid())
   companyName         String
@@ -249,6 +264,13 @@ model AppSettings {
   /// この日以降の過去月は「Invoiceがあるものだけ実績」＝請求書発行基準。
   /// これ以前は Deal ベースのフォールバックを残す（過去履歴の移行を強制しない）。
   revenueCutoverDate  DateTime @default(dbgenerated("'2026-06-01'::timestamp"))
+
+  // 資金繰りシミュレーションの月次既定値（FY月次ビュー）。
+  // 月ごとの上書きは MonthlyCostOverride が持つ
+  monthlyPayment      Int      @default(0)   // 支払い
+  monthlyExecComp     Int      @default(0)   // 役員報酬
+  monthlyExpense      Int      @default(0)   // 経費
+  openingBalance      Int      @default(0)   // 期首繰越
 
   updatedAt           DateTime @updatedAt
 }

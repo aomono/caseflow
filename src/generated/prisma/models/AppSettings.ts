@@ -32,6 +32,10 @@ export type AppSettingsAvgAggregateOutputType = {
   probabilityLowRate: number | null
   freshnessWarnDays: number | null
   freshnessAlertDays: number | null
+  monthlyPayment: number | null
+  monthlyExecComp: number | null
+  monthlyExpense: number | null
+  openingBalance: number | null
 }
 
 export type AppSettingsSumAggregateOutputType = {
@@ -40,6 +44,10 @@ export type AppSettingsSumAggregateOutputType = {
   probabilityLowRate: number | null
   freshnessWarnDays: number | null
   freshnessAlertDays: number | null
+  monthlyPayment: number | null
+  monthlyExecComp: number | null
+  monthlyExpense: number | null
+  openingBalance: number | null
 }
 
 export type AppSettingsMinAggregateOutputType = {
@@ -54,6 +62,10 @@ export type AppSettingsMinAggregateOutputType = {
   freshnessWarnDays: number | null
   freshnessAlertDays: number | null
   revenueCutoverDate: Date | null
+  monthlyPayment: number | null
+  monthlyExecComp: number | null
+  monthlyExpense: number | null
+  openingBalance: number | null
   updatedAt: Date | null
 }
 
@@ -69,6 +81,10 @@ export type AppSettingsMaxAggregateOutputType = {
   freshnessWarnDays: number | null
   freshnessAlertDays: number | null
   revenueCutoverDate: Date | null
+  monthlyPayment: number | null
+  monthlyExecComp: number | null
+  monthlyExpense: number | null
+  openingBalance: number | null
   updatedAt: Date | null
 }
 
@@ -84,6 +100,10 @@ export type AppSettingsCountAggregateOutputType = {
   freshnessWarnDays: number
   freshnessAlertDays: number
   revenueCutoverDate: number
+  monthlyPayment: number
+  monthlyExecComp: number
+  monthlyExpense: number
+  openingBalance: number
   updatedAt: number
   _all: number
 }
@@ -95,6 +115,10 @@ export type AppSettingsAvgAggregateInputType = {
   probabilityLowRate?: true
   freshnessWarnDays?: true
   freshnessAlertDays?: true
+  monthlyPayment?: true
+  monthlyExecComp?: true
+  monthlyExpense?: true
+  openingBalance?: true
 }
 
 export type AppSettingsSumAggregateInputType = {
@@ -103,6 +127,10 @@ export type AppSettingsSumAggregateInputType = {
   probabilityLowRate?: true
   freshnessWarnDays?: true
   freshnessAlertDays?: true
+  monthlyPayment?: true
+  monthlyExecComp?: true
+  monthlyExpense?: true
+  openingBalance?: true
 }
 
 export type AppSettingsMinAggregateInputType = {
@@ -117,6 +145,10 @@ export type AppSettingsMinAggregateInputType = {
   freshnessWarnDays?: true
   freshnessAlertDays?: true
   revenueCutoverDate?: true
+  monthlyPayment?: true
+  monthlyExecComp?: true
+  monthlyExpense?: true
+  openingBalance?: true
   updatedAt?: true
 }
 
@@ -132,6 +164,10 @@ export type AppSettingsMaxAggregateInputType = {
   freshnessWarnDays?: true
   freshnessAlertDays?: true
   revenueCutoverDate?: true
+  monthlyPayment?: true
+  monthlyExecComp?: true
+  monthlyExpense?: true
+  openingBalance?: true
   updatedAt?: true
 }
 
@@ -147,6 +183,10 @@ export type AppSettingsCountAggregateInputType = {
   freshnessWarnDays?: true
   freshnessAlertDays?: true
   revenueCutoverDate?: true
+  monthlyPayment?: true
+  monthlyExecComp?: true
+  monthlyExpense?: true
+  openingBalance?: true
   updatedAt?: true
   _all?: true
 }
@@ -249,6 +289,10 @@ export type AppSettingsGroupByOutputType = {
   freshnessWarnDays: number
   freshnessAlertDays: number
   revenueCutoverDate: Date
+  monthlyPayment: number
+  monthlyExecComp: number
+  monthlyExpense: number
+  openingBalance: number
   updatedAt: Date
   _count: AppSettingsCountAggregateOutputType | null
   _avg: AppSettingsAvgAggregateOutputType | null
@@ -287,6 +331,10 @@ export type AppSettingsWhereInput = {
   freshnessWarnDays?: Prisma.IntFilter<"AppSettings"> | number
   freshnessAlertDays?: Prisma.IntFilter<"AppSettings"> | number
   revenueCutoverDate?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
+  monthlyPayment?: Prisma.IntFilter<"AppSettings"> | number
+  monthlyExecComp?: Prisma.IntFilter<"AppSettings"> | number
+  monthlyExpense?: Prisma.IntFilter<"AppSettings"> | number
+  openingBalance?: Prisma.IntFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }
 
@@ -302,6 +350,10 @@ export type AppSettingsOrderByWithRelationInput = {
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
   revenueCutoverDate?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -320,6 +372,10 @@ export type AppSettingsWhereUniqueInput = Prisma.AtLeast<{
   freshnessWarnDays?: Prisma.IntFilter<"AppSettings"> | number
   freshnessAlertDays?: Prisma.IntFilter<"AppSettings"> | number
   revenueCutoverDate?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
+  monthlyPayment?: Prisma.IntFilter<"AppSettings"> | number
+  monthlyExecComp?: Prisma.IntFilter<"AppSettings"> | number
+  monthlyExpense?: Prisma.IntFilter<"AppSettings"> | number
+  openingBalance?: Prisma.IntFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }, "id">
 
@@ -335,6 +391,10 @@ export type AppSettingsOrderByWithAggregationInput = {
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
   revenueCutoverDate?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppSettingsCountOrderByAggregateInput
   _avg?: Prisma.AppSettingsAvgOrderByAggregateInput
@@ -358,6 +418,10 @@ export type AppSettingsScalarWhereWithAggregatesInput = {
   freshnessWarnDays?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   freshnessAlertDays?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   revenueCutoverDate?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
+  monthlyPayment?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  monthlyExecComp?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  monthlyExpense?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  openingBalance?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
 }
 
@@ -373,6 +437,10 @@ export type AppSettingsCreateInput = {
   freshnessWarnDays?: number
   freshnessAlertDays?: number
   revenueCutoverDate?: Date | string
+  monthlyPayment?: number
+  monthlyExecComp?: number
+  monthlyExpense?: number
+  openingBalance?: number
   updatedAt?: Date | string
 }
 
@@ -388,6 +456,10 @@ export type AppSettingsUncheckedCreateInput = {
   freshnessWarnDays?: number
   freshnessAlertDays?: number
   revenueCutoverDate?: Date | string
+  monthlyPayment?: number
+  monthlyExecComp?: number
+  monthlyExpense?: number
+  openingBalance?: number
   updatedAt?: Date | string
 }
 
@@ -403,6 +475,10 @@ export type AppSettingsUpdateInput = {
   freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
   freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   revenueCutoverDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  monthlyPayment?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExecComp?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExpense?: Prisma.IntFieldUpdateOperationsInput | number
+  openingBalance?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -418,6 +494,10 @@ export type AppSettingsUncheckedUpdateInput = {
   freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
   freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   revenueCutoverDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  monthlyPayment?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExecComp?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExpense?: Prisma.IntFieldUpdateOperationsInput | number
+  openingBalance?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -433,6 +513,10 @@ export type AppSettingsCreateManyInput = {
   freshnessWarnDays?: number
   freshnessAlertDays?: number
   revenueCutoverDate?: Date | string
+  monthlyPayment?: number
+  monthlyExecComp?: number
+  monthlyExpense?: number
+  openingBalance?: number
   updatedAt?: Date | string
 }
 
@@ -448,6 +532,10 @@ export type AppSettingsUpdateManyMutationInput = {
   freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
   freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   revenueCutoverDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  monthlyPayment?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExecComp?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExpense?: Prisma.IntFieldUpdateOperationsInput | number
+  openingBalance?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -463,6 +551,10 @@ export type AppSettingsUncheckedUpdateManyInput = {
   freshnessWarnDays?: Prisma.IntFieldUpdateOperationsInput | number
   freshnessAlertDays?: Prisma.IntFieldUpdateOperationsInput | number
   revenueCutoverDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  monthlyPayment?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExecComp?: Prisma.IntFieldUpdateOperationsInput | number
+  monthlyExpense?: Prisma.IntFieldUpdateOperationsInput | number
+  openingBalance?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -478,6 +570,10 @@ export type AppSettingsCountOrderByAggregateInput = {
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
   revenueCutoverDate?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -487,6 +583,10 @@ export type AppSettingsAvgOrderByAggregateInput = {
   probabilityLowRate?: Prisma.SortOrder
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
 }
 
 export type AppSettingsMaxOrderByAggregateInput = {
@@ -501,6 +601,10 @@ export type AppSettingsMaxOrderByAggregateInput = {
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
   revenueCutoverDate?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -516,6 +620,10 @@ export type AppSettingsMinOrderByAggregateInput = {
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
   revenueCutoverDate?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -525,6 +633,10 @@ export type AppSettingsSumOrderByAggregateInput = {
   probabilityLowRate?: Prisma.SortOrder
   freshnessWarnDays?: Prisma.SortOrder
   freshnessAlertDays?: Prisma.SortOrder
+  monthlyPayment?: Prisma.SortOrder
+  monthlyExecComp?: Prisma.SortOrder
+  monthlyExpense?: Prisma.SortOrder
+  openingBalance?: Prisma.SortOrder
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -549,6 +661,10 @@ export type AppSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   freshnessWarnDays?: boolean
   freshnessAlertDays?: boolean
   revenueCutoverDate?: boolean
+  monthlyPayment?: boolean
+  monthlyExecComp?: boolean
+  monthlyExpense?: boolean
+  openingBalance?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -564,6 +680,10 @@ export type AppSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   freshnessWarnDays?: boolean
   freshnessAlertDays?: boolean
   revenueCutoverDate?: boolean
+  monthlyPayment?: boolean
+  monthlyExecComp?: boolean
+  monthlyExpense?: boolean
+  openingBalance?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -579,6 +699,10 @@ export type AppSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   freshnessWarnDays?: boolean
   freshnessAlertDays?: boolean
   revenueCutoverDate?: boolean
+  monthlyPayment?: boolean
+  monthlyExecComp?: boolean
+  monthlyExpense?: boolean
+  openingBalance?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
 
@@ -594,10 +718,14 @@ export type AppSettingsSelectScalar = {
   freshnessWarnDays?: boolean
   freshnessAlertDays?: boolean
   revenueCutoverDate?: boolean
+  monthlyPayment?: boolean
+  monthlyExecComp?: boolean
+  monthlyExpense?: boolean
+  openingBalance?: boolean
   updatedAt?: boolean
 }
 
-export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "defaultSlackChannel" | "defaultEmailTo" | "probabilityHighRate" | "probabilityMidRate" | "probabilityLowRate" | "dealSources" | "freshnessWarnDays" | "freshnessAlertDays" | "revenueCutoverDate" | "updatedAt", ExtArgs["result"]["appSettings"]>
+export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "defaultSlackChannel" | "defaultEmailTo" | "probabilityHighRate" | "probabilityMidRate" | "probabilityLowRate" | "dealSources" | "freshnessWarnDays" | "freshnessAlertDays" | "revenueCutoverDate" | "monthlyPayment" | "monthlyExecComp" | "monthlyExpense" | "openingBalance" | "updatedAt", ExtArgs["result"]["appSettings"]>
 
 export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AppSettings"
@@ -619,6 +747,10 @@ export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.Interna
      * これ以前は Deal ベースのフォールバックを残す（過去履歴の移行を強制しない）。
      */
     revenueCutoverDate: Date
+    monthlyPayment: number
+    monthlyExecComp: number
+    monthlyExpense: number
+    openingBalance: number
     updatedAt: Date
   }, ExtArgs["result"]["appSettings"]>
   composites: {}
@@ -1054,6 +1186,10 @@ export interface AppSettingsFieldRefs {
   readonly freshnessWarnDays: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly freshnessAlertDays: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly revenueCutoverDate: Prisma.FieldRef<"AppSettings", 'DateTime'>
+  readonly monthlyPayment: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly monthlyExecComp: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly monthlyExpense: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly openingBalance: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly updatedAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
 }
     

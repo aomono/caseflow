@@ -65,6 +65,14 @@ export type NotificationLog = Prisma.NotificationLogModel
  */
 export type ApiToken = Prisma.ApiTokenModel
 /**
+ * Model MonthlyCostOverride
+ * 資金繰りの費用セルの月別上書き。
+ * セルの値＝上書きがあればその金額、無ければ AppSettings の既定値。
+ * 「既定値に戻す」は行の削除で表す（0 で上書きするのと区別が要る——
+ * 0円と未設定は違う）。
+ */
+export type MonthlyCostOverride = Prisma.MonthlyCostOverrideModel
+/**
  * Model AppSettings
  * 
  */

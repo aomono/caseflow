@@ -60,6 +60,7 @@ export const ModelName = {
   Reminder: 'Reminder',
   NotificationLog: 'NotificationLog',
   ApiToken: 'ApiToken',
+  MonthlyCostOverride: 'MonthlyCostOverride',
   AppSettings: 'AppSettings'
 } as const
 
@@ -221,6 +222,18 @@ export const ApiTokenScalarFieldEnum = {
 export type ApiTokenScalarFieldEnum = (typeof ApiTokenScalarFieldEnum)[keyof typeof ApiTokenScalarFieldEnum]
 
 
+export const MonthlyCostOverrideScalarFieldEnum = {
+  id: 'id',
+  year: 'year',
+  month: 'month',
+  category: 'category',
+  amount: 'amount',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MonthlyCostOverrideScalarFieldEnum = (typeof MonthlyCostOverrideScalarFieldEnum)[keyof typeof MonthlyCostOverrideScalarFieldEnum]
+
+
 export const AppSettingsScalarFieldEnum = {
   id: 'id',
   companyName: 'companyName',
@@ -233,6 +246,10 @@ export const AppSettingsScalarFieldEnum = {
   freshnessWarnDays: 'freshnessWarnDays',
   freshnessAlertDays: 'freshnessAlertDays',
   revenueCutoverDate: 'revenueCutoverDate',
+  monthlyPayment: 'monthlyPayment',
+  monthlyExecComp: 'monthlyExecComp',
+  monthlyExpense: 'monthlyExpense',
+  openingBalance: 'openingBalance',
   updatedAt: 'updatedAt'
 } as const
 
