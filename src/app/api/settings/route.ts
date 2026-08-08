@@ -3,6 +3,15 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+/** 金額の項目。整数で0以上のときだけ更新する（空欄・不正値は無視） */
+function numeric(body: Record<string, unknown>, key: string) {
+  const v = body?.[key];
+  if (v === undefined || v === null || v === "") return {};
+  const n = typeof v === "number" ? v : Number(String(v).replace(/[^\d-]/g, ""));
+  if (!Number.isInteger(n) || n < 0) return {};
+  return { [key]: n };
+}
+
 export async function GET() {
   try {
     let settings = await prisma.appSettings.findFirst();
@@ -43,6 +52,12 @@ export async function PUT(request: NextRequest) {
           ...(body.companyName !== undefined && { companyName: body.companyName }),
           ...(body.defaultSlackChannel !== undefined && { defaultSlackChannel: body.defaultSlackChannel }),
           ...(body.defaultEmailTo !== undefined && { defaultEmailTo: body.defaultEmailTo }),
+          // 資金繰りの月次既定値と期首繰越（FY月次ビュー）。
+          // 数値以外・負値は無視する（画面から空欄で送られても壊さない）
+          ...numeric(body, "monthlyPayment"),
+          ...numeric(body, "monthlyExecComp"),
+          ...numeric(body, "monthlyExpense"),
+          ...numeric(body, "openingBalance"),
         },
       });
     }

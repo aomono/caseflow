@@ -73,3 +73,33 @@ describe("外部APIトークンの管理", () => {
     expect(call.data.revokedAt).toBeInstanceOf(Date);
   });
 });
+
+describe("資金繰りの既定値（設定API）", () => {
+  it("金額を保存でき、不正値は無視される", async () => {
+    const prismaMock = mockPrisma as unknown as {
+      appSettings: { findFirst: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+    };
+    prismaMock.appSettings = {
+      findFirst: vi.fn().mockResolvedValue({ id: "s1" }),
+      update: vi.fn().mockResolvedValue({ id: "s1" }),
+    };
+    const { PUT: putSettings } = await import("@/app/api/settings/route");
+    await putSettings(
+      new Request("http://localhost/api/settings", {
+        method: "PUT",
+        body: JSON.stringify({
+          monthlyPayment: 1_000_000,
+          monthlyExecComp: "",       // 空欄は無視
+          monthlyExpense: -5,        // 負値は無視
+          openingBalance: 3_000_000,
+        }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any,
+    );
+    const data = prismaMock.appSettings.update.mock.calls[0][0].data;
+    expect(data.monthlyPayment).toBe(1_000_000);
+    expect(data.openingBalance).toBe(3_000_000);
+    expect(data).not.toHaveProperty("monthlyExecComp");
+    expect(data).not.toHaveProperty("monthlyExpense");
+  });
+});
