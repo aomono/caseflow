@@ -13,6 +13,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { INVOICE_STATUS_LABELS, INVOICE_STATUS_COLORS } from "@/lib/constants";
+import { MissingInvoices } from "@/components/invoices/missing-invoices";
 
 type Filter = "all" | "unpaid" | "paid";
 
@@ -199,6 +200,8 @@ export default function InvoicesPage() {
           {generating ? "生成中..." : "月次一括生成"}
         </Button>
       </div>
+
+      <MissingInvoices />
 
       {/* Status Message */}
       {message && (

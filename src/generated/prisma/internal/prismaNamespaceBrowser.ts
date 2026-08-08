@@ -232,6 +232,7 @@ export const AppSettingsScalarFieldEnum = {
   dealSources: 'dealSources',
   freshnessWarnDays: 'freshnessWarnDays',
   freshnessAlertDays: 'freshnessAlertDays',
+  revenueCutoverDate: 'revenueCutoverDate',
   updatedAt: 'updatedAt'
 } as const
 

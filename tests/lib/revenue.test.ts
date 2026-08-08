@@ -15,6 +15,7 @@ const NOW = new Date("2026-08-08T00:00:00+09:00");
 function deal(over: Partial<RevenueDeal> = {}): RevenueDeal {
   return {
     id: "d1",
+    title: "案件A",
     status: "active",
     monthlyAmount: 1_000_000,
     billingType: "monthly",
@@ -166,5 +167,94 @@ describe("複数の案件", () => {
     expect(got.actualByMonth["2026-06"]).toBe(13_000_000);
     expect(got.revenueByClient["A社"]).toBe(13_000_000); // 6月請求 + 7月予測
     expect(got.revenueByClient["B社"]).toBe(2_000_000); // 6月・7月の予測
+  });
+});
+
+describe("カットオーバー日（請求書発行基準への移行）", () => {
+  const CUTOVER = new Date("2026-06-01");
+  const withCutover = { ...RANGE, cutoverDate: CUTOVER };
+
+  it("以降の過去月は Invoice が無ければ実績に計上しない", () => {
+    // 会計が請求書発行基準なら、請求していないものは売上でない
+    const got = buildRevenue([deal()], [], withCutover);
+    expect(got.actualByMonth["2026-06"]).toBeUndefined();
+    expect(got.actualByMonth["2026-07"]).toBeUndefined();
+    expect(got.revenueByClient["A社"]).toBeUndefined();
+  });
+
+  it("計上しなかった分を請求漏れの疑いとして拾う", () => {
+    const got = buildRevenue([deal()], [], withCutover);
+    expect(got.missingInvoices).toHaveLength(2);
+    expect(got.missingInvoices[0]).toMatchObject({
+      dealId: "d1",
+      dealTitle: "案件A",
+      clientName: "A社",
+      month: "2026-06",
+      expectedAmount: 1_000_000,
+      beforeCutover: false,
+    });
+  });
+
+  it("Invoice がある月は請求漏れに入らない", () => {
+    const got = buildRevenue([deal()], [invoice()], withCutover);
+    expect(got.actualByMonth["2026-06"]).toBe(12_000_000);
+    expect(got.missingInvoices.map((m) => m.month)).toEqual(["2026-07"]);
+  });
+
+  it("以前の過去月はフォールバックが効く（消える数字を作らない）", () => {
+    const old = deal({
+      contractStartDate: new Date("2026-04-01"),
+      contractEndDate: new Date("2026-05-31"),
+    });
+    const got = buildRevenue([old], [], withCutover);
+    expect(got.actualByMonth["2026-04"]).toBe(1_000_000);
+    expect(got.actualByMonth["2026-05"]).toBe(1_000_000);
+    // 数字には影響しないが、漸進移行のリストには出す
+    expect(got.missingInvoices.every((m) => m.beforeCutover)).toBe(true);
+    expect(got.missingInvoices).toHaveLength(2);
+  });
+
+  it("未来月は影響を受けない（contracted のまま）", () => {
+    const future = deal({
+      contractStartDate: new Date("2026-09-01"),
+      contractEndDate: new Date("2026-10-31"),
+    });
+    const got = buildRevenue([future], [], withCutover);
+    expect(got.contractedByMonth["2026-09"]).toBe(1_000_000);
+    expect(got.missingInvoices).toEqual([]);
+  });
+
+  it("見込み段階の案件は請求漏れに入れない", () => {
+    // discussion / expected に「請求し忘れ」は無い
+    const got = buildRevenue([deal({ status: "discussion" })], [], withCutover);
+    expect(got.missingInvoices).toEqual([]);
+    expect(got.prospectByMonth["2026-06"]).toBe(1_000_000);
+  });
+
+  it("カットオーバーを指定しなければ現行どおり（後方互換）", () => {
+    const got = buildRevenue([deal()], [], RANGE);
+    expect(got.actualByMonth["2026-06"]).toBe(1_000_000);
+    expect(got.missingInvoices).toEqual([]);
+  });
+
+  it("実地の例: 契約終了日が先のままの案件が幻計上されない", () => {
+    // J社PTO: 6月で請求完了なのに契約終了日が7/3のまま。7月に按分が乗っていた
+    const got = buildRevenue(
+      [
+        deal({
+          id: "pto",
+          title: "PTO AI導入",
+          billingType: "prorated",
+          contractStartDate: new Date("2026-06-01"),
+          contractEndDate: new Date("2026-07-03"),
+        }),
+      ],
+      [invoice({ dealId: "pto", month: 6, amount: 13_200_000 })],
+      withCutover,
+    );
+    expect(got.actualByMonth["2026-06"]).toBe(13_200_000);
+    expect(got.actualByMonth["2026-07"]).toBeUndefined(); // 幻計上が消える
+    // 代わりに請求漏れの疑いとして見えるので、契約終了日の誤りに気づける
+    expect(got.missingInvoices.map((m) => m.month)).toEqual(["2026-07"]);
   });
 });

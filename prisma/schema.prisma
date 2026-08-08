@@ -245,5 +245,10 @@ model AppSettings {
   freshnessWarnDays   Int      @default(8)
   freshnessAlertDays  Int      @default(15)
 
+  /// 売上実績のカットオーバー日（既定 FY26期首）。
+  /// この日以降の過去月は「Invoiceがあるものだけ実績」＝請求書発行基準。
+  /// これ以前は Deal ベースのフォールバックを残す（過去履歴の移行を強制しない）。
+  revenueCutoverDate  DateTime @default(dbgenerated("'2026-06-01'::timestamp"))
+
   updatedAt           DateTime @updatedAt
 }

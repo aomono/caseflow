@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
     },
     select: {
       id: true,
+      title: true,
       status: true,
       monthlyAmount: true,
       billingType: true,
@@ -110,16 +111,24 @@ export async function GET(request: NextRequest) {
     },
   });
 
+  // カットオーバー以降は請求書発行基準（Invoice が無ければ実績にしない）。
+  // 設定が無い環境では現行どおりのフォールバックになる
+  const settings = await prisma.appSettings.findFirst({
+    select: { revenueCutoverDate: true },
+  });
+
   const {
     actualByMonth,
     contractedByMonth,
     prospectByMonth,
     revenueByClient,
-  } = buildRevenue(
-    deals as RevenueDeal[],
-    invoices as RevenueInvoice[],
-    { startDate, endDate, now },
-  );
+    missingInvoices,
+  } = buildRevenue(deals as RevenueDeal[], invoices as RevenueInvoice[], {
+    startDate,
+    endDate,
+    now,
+    cutoverDate: settings?.revenueCutoverDate ?? null,
+  });
 
   // Merge all months — when fiscal year mode, ensure all 12 months are present
   const allMonths = new Set([
@@ -250,5 +259,7 @@ export async function GET(request: NextRequest) {
     recentActivities,
     currentFiscalYear,
     fiscalYears,
+    // 請求漏れの疑い（カットオーバー以降）と移行の残り（以前）
+    missingInvoices,
   });
 }
